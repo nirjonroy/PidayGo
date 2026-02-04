@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Admin - {{ config('app.name') }}</title>
+    <title>Admin - {{ $siteName ?? 'PidayGo' }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
     <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content="#007bff" media="(prefers-color-scheme: light)" />
@@ -86,11 +86,11 @@
         <div class="sidebar-brand">
           <a href="{{ route('admin.dashboard') }}" class="brand-link">
             <img
-              src="{{ asset('adminlte/assets/img/AdminLTELogo.png') }}"
-              alt="AdminLTE Logo"
+              src="{{ !empty($siteLogo) ? asset('storage/' . $siteLogo) : asset('adminlte/assets/img/AdminLTELogo.png') }}"
+              alt="Logo"
               class="brand-image opacity-75 shadow"
             />
-            <span class="brand-text fw-light">Admin Panel</span>
+            <span class="brand-text fw-light">{{ $siteName ?? 'PidayGo' }}</span>
           </a>
         </div>
         <div class="sidebar-wrapper">
@@ -106,6 +106,42 @@
                 <a href="{{ route('admin.kyc.index') }}" class="nav-link {{ request()->routeIs('admin.kyc.*') ? 'active' : '' }}">
                   <i class="nav-icon bi bi-person-check"></i>
                   <p>KYC Requests</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{{ route('admin.site-settings.index') }}" class="nav-link {{ request()->routeIs('admin.site-settings.*') ? 'active' : '' }}">
+                  <i class="nav-icon bi bi-gear"></i>
+                  <p>Site Settings</p>
+                </a>
+              </li>
+              @if (auth('admin')->user()?->can('user.manage'))
+                <li class="nav-item">
+                  <a href="{{ route('admin.users.index') }}" class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+                    <i class="nav-icon bi bi-people"></i>
+                    <p>Users</p>
+                  </a>
+                </li>
+              @endif
+              @if (auth('admin')->user()?->can('role.manage'))
+                <li class="nav-item">
+                  <a href="{{ route('admin.roles.index') }}" class="nav-link {{ request()->routeIs('admin.roles.*') ? 'active' : '' }}">
+                    <i class="nav-icon bi bi-shield-lock"></i>
+                    <p>Roles</p>
+                  </a>
+                </li>
+              @endif
+              @if (auth('admin')->user()?->can('permission.manage'))
+                <li class="nav-item">
+                  <a href="{{ route('admin.permissions.index') }}" class="nav-link {{ request()->routeIs('admin.permissions.*') ? 'active' : '' }}">
+                    <i class="nav-icon bi bi-key"></i>
+                    <p>Permissions</p>
+                  </a>
+                </li>
+              @endif
+              <li class="nav-item">
+                <a href="{{ route('admin.profile.edit') }}" class="nav-link {{ request()->routeIs('admin.profile.*') ? 'active' : '' }}">
+                  <i class="nav-icon bi bi-person-gear"></i>
+                  <p>Profile</p>
                 </a>
               </li>
             </ul>
@@ -137,10 +173,10 @@
       </main>
 
       <footer class="app-footer">
-        <div class="float-end d-none d-sm-inline">PidayGo Admin</div>
+        <div class="float-end d-none d-sm-inline">{{ ($siteName ?? 'PidayGo') }} Admin</div>
         <strong>
           Copyright &copy; 2024-{{ now()->year }}
-          <span class="text-decoration-none">{{ config('app.name') }}</span>.
+          <span class="text-decoration-none">{{ $siteName ?? 'PidayGo' }}</span>.
         </strong>
         All rights reserved.
       </footer>

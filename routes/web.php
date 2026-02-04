@@ -2,6 +2,11 @@
 
 use App\Http\Controllers\Admin\Auth\AuthenticatedSessionController as AdminAuthenticatedSessionController;
 use App\Http\Controllers\Admin\KycReviewController;
+use App\Http\Controllers\Admin\PermissionController;
+use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\SiteSettingController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
@@ -81,5 +86,38 @@ Route::prefix('admin')->name('admin.')->middleware('admin.ip')->group(function (
             Route::post('/kyc/{kycRequest}/approve', [KycReviewController::class, 'approve'])->name('kyc.approve');
             Route::post('/kyc/{kycRequest}/reject', [KycReviewController::class, 'reject'])->name('kyc.reject');
         });
+
+        Route::middleware('permission:site.manage')->group(function () {
+            Route::get('/site-settings', [SiteSettingController::class, 'index'])->name('site-settings.index');
+            Route::get('/site-settings/create', [SiteSettingController::class, 'create'])->name('site-settings.create');
+            Route::post('/site-settings', [SiteSettingController::class, 'store'])->name('site-settings.store');
+            Route::get('/site-settings/edit', [SiteSettingController::class, 'edit'])->name('site-settings.edit');
+            Route::post('/site-settings/update', [SiteSettingController::class, 'update'])->name('site-settings.update');
+        });
+
+        Route::middleware('permission:role.manage')->group(function () {
+            Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
+            Route::get('/roles/create', [RoleController::class, 'create'])->name('roles.create');
+            Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
+            Route::get('/roles/{role}/edit', [RoleController::class, 'edit'])->name('roles.edit');
+            Route::post('/roles/{role}/update', [RoleController::class, 'update'])->name('roles.update');
+            Route::post('/roles/{role}/delete', [RoleController::class, 'destroy'])->name('roles.delete');
+        });
+
+        Route::middleware('permission:permission.manage')->group(function () {
+            Route::get('/permissions', [PermissionController::class, 'index'])->name('permissions.index');
+            Route::get('/permissions/create', [PermissionController::class, 'create'])->name('permissions.create');
+            Route::post('/permissions', [PermissionController::class, 'store'])->name('permissions.store');
+            Route::get('/permissions/{permission}/edit', [PermissionController::class, 'edit'])->name('permissions.edit');
+            Route::post('/permissions/{permission}/update', [PermissionController::class, 'update'])->name('permissions.update');
+            Route::post('/permissions/{permission}/delete', [PermissionController::class, 'destroy'])->name('permissions.delete');
+        });
+
+        Route::middleware('permission:user.manage')->group(function () {
+            Route::get('/users', [UserController::class, 'index'])->name('users.index');
+        });
+
+        Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
     });
 });

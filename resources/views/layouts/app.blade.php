@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ config('app.name') }}</title>
+    <title>{{ $siteName ?? 'PidayGo' }}</title>
     <style>
         body { font-family: Arial, sans-serif; background: #f7f7fb; color: #1f2937; margin: 0; }
         .container { max-width: 720px; margin: 40px auto; background: #fff; padding: 24px; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.06); }
@@ -22,7 +22,12 @@
 <body>
     <div class="container">
         <div class="header">
-            <strong>{{ config('app.name') }}</strong>
+            <div style="display:flex; align-items:center; gap:10px;">
+                @if (!empty($siteLogo))
+                    <img src="{{ asset('storage/' . $siteLogo) }}" alt="Logo" style="height:32px;">
+                @endif
+                <strong>{{ $siteName ?? 'PidayGo' }}</strong>
+            </div>
             <div class="nav">
                 @auth
                     <a href="{{ route('dashboard') }}">Dashboard</a>

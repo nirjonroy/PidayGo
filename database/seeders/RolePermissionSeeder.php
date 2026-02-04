@@ -11,6 +11,8 @@ class RolePermissionSeeder extends Seeder
 {
     public function run()
     {
+        app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+
         $role = Role::firstOrCreate([
             'name' => 'super-admin',
             'guard_name' => 'admin',
@@ -21,11 +23,36 @@ class RolePermissionSeeder extends Seeder
             'guard_name' => 'admin',
         ]);
 
-        $role->givePermissionTo($permission);
+        $sitePermission = Permission::firstOrCreate([
+            'name' => 'site.manage',
+            'guard_name' => 'admin',
+        ]);
 
-        $admin = Admin::first();
-        if ($admin) {
-            $admin->assignRole($role);
-        }
+        $rolePermission = Permission::firstOrCreate([
+            'name' => 'role.manage',
+            'guard_name' => 'admin',
+        ]);
+
+        $permPermission = Permission::firstOrCreate([
+            'name' => 'permission.manage',
+            'guard_name' => 'admin',
+        ]);
+
+        $userPermission = Permission::firstOrCreate([
+            'name' => 'user.manage',
+            'guard_name' => 'admin',
+        ]);
+
+        $role->givePermissionTo($permission);
+        $role->givePermissionTo($sitePermission);
+        $role->givePermissionTo($rolePermission);
+        $role->givePermissionTo($permPermission);
+        $role->givePermissionTo($userPermission);
+
+        Admin::query()->each(function (Admin $admin) use ($role) {
+            if (!$admin->hasRole($role)) {
+                $admin->assignRole($role);
+            }
+        });
     }
 }

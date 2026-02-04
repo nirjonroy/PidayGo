@@ -1,4 +1,4 @@
-@extends('layouts.adminlte')
+@extends('layouts.admin-panel')
 
 @section('content')
     @section('page-title', 'KYC Review')
