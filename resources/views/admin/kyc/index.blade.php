@@ -1,12 +1,12 @@
-@extends('layouts.admin')
+@extends('layouts.adminlte')
 
 @section('content')
-    <h1>Pending KYC</h1>
+    @section('page-title', 'KYC Requests')
 
     @if ($pending->isEmpty())
-        <p class="muted">No pending requests.</p>
+        <p class="text-secondary">No pending requests.</p>
     @else
-        <table>
+        <table class="table table-striped align-middle">
             <thead>
                 <tr>
                     <th>User</th>
