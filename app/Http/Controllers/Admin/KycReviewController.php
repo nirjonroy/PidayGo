@@ -7,18 +7,34 @@ use App\Models\ActivityLog;
 use App\Models\KycRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class KycReviewController extends Controller
 {
     public function index()
     {
-        $pending = KycRequest::where('status', 'pending')
-            ->with('user')
-            ->orderByDesc('submitted_at')
-            ->paginate(20);
+        $status = request('status', 'pending');
+
+        $query = KycRequest::query()->with('user')->orderByDesc('submitted_at');
+
+        if ($status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        $pending = (clone $query)->where('status', 'pending')->count();
+        $approved = (clone $query)->where('status', 'approved')->count();
+        $rejected = (clone $query)->where('status', 'rejected')->count();
+
+        $requests = $query->paginate(20)->withQueryString();
 
         return view('admin.kyc.index', [
-            'pending' => $pending,
+            'requests' => $requests,
+            'status' => $status,
+            'counts' => [
+                'pending' => $pending,
+                'approved' => $approved,
+                'rejected' => $rejected,
+            ],
         ]);
     }
 
@@ -62,5 +78,27 @@ class KycReviewController extends Controller
         ]);
 
         return redirect()->route('admin.kyc.index')->with('status', 'KYC rejected.');
+    }
+
+    public function file(Request $request, KycRequest $kycRequest, string $type)
+    {
+        $fieldMap = [
+            'front' => 'document_front_path',
+            'back' => 'document_back_path',
+            'selfie' => 'selfie_path',
+        ];
+
+        if (!isset($fieldMap[$type])) {
+            abort(404);
+        }
+
+        $path = $kycRequest->{$fieldMap[$type]};
+        if (!$path || !Storage::disk('local')->exists($path)) {
+            abort(404);
+        }
+
+        $filePath = Storage::disk('local')->path($path);
+
+        return response()->file($filePath);
     }
 }

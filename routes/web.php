@@ -83,6 +83,7 @@ Route::prefix('admin')->name('admin.')->middleware('admin.ip')->group(function (
         Route::middleware('permission:kyc.review')->group(function () {
             Route::get('/kyc', [KycReviewController::class, 'index'])->name('kyc.index');
             Route::get('/kyc/{kycRequest}', [KycReviewController::class, 'show'])->name('kyc.show');
+            Route::get('/kyc/{kycRequest}/file/{type}', [KycReviewController::class, 'file'])->name('kyc.file');
             Route::post('/kyc/{kycRequest}/approve', [KycReviewController::class, 'approve'])->name('kyc.approve');
             Route::post('/kyc/{kycRequest}/reject', [KycReviewController::class, 'reject'])->name('kyc.reject');
         });
