@@ -138,6 +138,14 @@
                   </a>
                 </li>
               @endif
+              @if (auth('admin')->user()?->can('admin.manage'))
+                <li class="nav-item">
+                  <a href="{{ route('admin.admins.index') }}" class="nav-link {{ request()->routeIs('admin.admins.*') ? 'active' : '' }}">
+                    <i class="nav-icon bi bi-people-fill"></i>
+                    <p>Admins</p>
+                  </a>
+                </li>
+              @endif
               <li class="nav-item">
                 <a href="{{ route('admin.profile.edit') }}" class="nav-link {{ request()->routeIs('admin.profile.*') ? 'active' : '' }}">
                   <i class="nav-icon bi bi-person-gear"></i>

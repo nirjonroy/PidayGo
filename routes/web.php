@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\Auth\AuthenticatedSessionController as AdminAuthenticatedSessionController;
+use App\Http\Controllers\Admin\AdminAccountController;
 use App\Http\Controllers\Admin\KycReviewController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProfileController;
@@ -116,6 +117,15 @@ Route::prefix('admin')->name('admin.')->middleware('admin.ip')->group(function (
 
         Route::middleware('permission:user.manage')->group(function () {
             Route::get('/users', [UserController::class, 'index'])->name('users.index');
+        });
+
+        Route::middleware('permission:admin.manage')->group(function () {
+            Route::get('/admins', [AdminAccountController::class, 'index'])->name('admins.index');
+            Route::get('/admins/create', [AdminAccountController::class, 'create'])->name('admins.create');
+            Route::post('/admins', [AdminAccountController::class, 'store'])->name('admins.store');
+            Route::get('/admins/{admin}/edit', [AdminAccountController::class, 'edit'])->name('admins.edit');
+            Route::post('/admins/{admin}/update', [AdminAccountController::class, 'update'])->name('admins.update');
+            Route::post('/admins/{admin}/delete', [AdminAccountController::class, 'destroy'])->name('admins.delete');
         });
 
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
