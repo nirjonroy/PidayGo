@@ -66,4 +66,14 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->latestKycRequest?->status === 'approved';
     }
+
+    public function stakes()
+    {
+        return $this->hasMany(Stake::class);
+    }
+
+    public function walletLedgers()
+    {
+        return $this->hasMany(WalletLedger::class);
+    }
 }

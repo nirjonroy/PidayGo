@@ -34,4 +34,14 @@ class Admin extends Authenticatable
     {
         return $this->hasMany(KycRequest::class, 'reviewed_by');
     }
+
+    public function createdWalletLedgers()
+    {
+        return $this->hasMany(WalletLedger::class, 'created_by_admin_id');
+    }
+
+    public function createdReserveLedgers()
+    {
+        return $this->hasMany(ReserveLedger::class, 'created_by_admin_id');
+    }
 }

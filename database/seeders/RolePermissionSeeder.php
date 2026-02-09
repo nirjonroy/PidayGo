@@ -53,6 +53,16 @@ class RolePermissionSeeder extends Seeder
             'guard_name' => 'admin',
         ]);
 
+        $stakingPermission = Permission::firstOrCreate([
+            'name' => 'staking.manage',
+            'guard_name' => 'admin',
+        ]);
+
+        $withdrawalPermission = Permission::firstOrCreate([
+            'name' => 'withdrawal.review',
+            'guard_name' => 'admin',
+        ]);
+
         $role->givePermissionTo($permission);
         $role->givePermissionTo($sitePermission);
         $role->givePermissionTo($rolePermission);
@@ -60,6 +70,8 @@ class RolePermissionSeeder extends Seeder
         $role->givePermissionTo($userPermission);
         $role->givePermissionTo($adminPermission);
         $role->givePermissionTo($activityPermission);
+        $role->givePermissionTo($stakingPermission);
+        $role->givePermissionTo($withdrawalPermission);
 
         Admin::query()->each(function (Admin $admin) use ($role) {
             if (!$admin->hasRole($role)) {

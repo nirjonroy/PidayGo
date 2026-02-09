@@ -146,6 +146,22 @@
                   </a>
                 </li>
               @endif
+              @if (auth('admin')->user()?->can('staking.manage'))
+                <li class="nav-item">
+                  <a href="{{ route('admin.staking-plans.index') }}" class="nav-link {{ request()->routeIs('admin.staking-plans.*') ? 'active' : '' }}">
+                    <i class="nav-icon bi bi-bank"></i>
+                    <p>Staking Plans</p>
+                  </a>
+                </li>
+              @endif
+              @if (auth('admin')->user()?->can('withdrawal.review'))
+                <li class="nav-item">
+                  <a href="{{ route('admin.withdrawals.index') }}" class="nav-link {{ request()->routeIs('admin.withdrawals.*') ? 'active' : '' }}">
+                    <i class="nav-icon bi bi-cash-coin"></i>
+                    <p>Withdrawals</p>
+                  </a>
+                </li>
+              @endif
               @if (auth('admin')->user()?->can('activity.view'))
                 <li class="nav-item">
                   <a href="{{ route('admin.activity.index') }}" class="nav-link {{ request()->routeIs('admin.activity.*') ? 'active' : '' }}">

@@ -8,6 +8,8 @@ use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SiteSettingController;
+use App\Http\Controllers\Admin\StakingPlanController;
+use App\Http\Controllers\Admin\WithdrawalReviewController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
@@ -19,6 +21,9 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\TwoFactorController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\KycController;
+use App\Http\Controllers\User\StakingController as UserStakingController;
+use App\Http\Controllers\User\WalletController;
+use App\Http\Controllers\User\WithdrawalController as UserWithdrawalController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -68,6 +73,11 @@ Route::middleware(['auth', 'verified', '2fa.enabled', '2fa.passed', 'kyc.approve
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
+
+    Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
+    Route::post('/staking', [UserStakingController::class, 'store'])->name('staking.store');
+    Route::post('/staking/{stake}/unstake', [UserStakingController::class, 'unstake'])->name('staking.unstake');
+    Route::post('/withdrawals', [UserWithdrawalController::class, 'store'])->name('withdrawals.store');
 });
 
 Route::prefix('admin')->name('admin.')->middleware('admin.ip')->group(function () {
@@ -131,6 +141,21 @@ Route::prefix('admin')->name('admin.')->middleware('admin.ip')->group(function (
 
         Route::middleware('permission:activity.view')->group(function () {
             Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity.index');
+        });
+
+        Route::middleware('permission:staking.manage')->group(function () {
+            Route::get('/staking-plans', [StakingPlanController::class, 'index'])->name('staking-plans.index');
+            Route::get('/staking-plans/create', [StakingPlanController::class, 'create'])->name('staking-plans.create');
+            Route::post('/staking-plans', [StakingPlanController::class, 'store'])->name('staking-plans.store');
+            Route::get('/staking-plans/{stakingPlan}/edit', [StakingPlanController::class, 'edit'])->name('staking-plans.edit');
+            Route::post('/staking-plans/{stakingPlan}/update', [StakingPlanController::class, 'update'])->name('staking-plans.update');
+            Route::post('/staking-plans/{stakingPlan}/delete', [StakingPlanController::class, 'destroy'])->name('staking-plans.delete');
+        });
+
+        Route::middleware('permission:withdrawal.review')->group(function () {
+            Route::get('/withdrawals', [WithdrawalReviewController::class, 'index'])->name('withdrawals.index');
+            Route::post('/withdrawals/{withdrawal}/approve', [WithdrawalReviewController::class, 'approve'])->name('withdrawals.approve');
+            Route::post('/withdrawals/{withdrawal}/reject', [WithdrawalReviewController::class, 'reject'])->name('withdrawals.reject');
         });
 
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
