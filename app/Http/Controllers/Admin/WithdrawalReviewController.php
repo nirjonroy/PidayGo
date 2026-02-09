@@ -4,10 +4,13 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
+use App\Models\ReserveAccount;
+use App\Models\ReserveLedger;
 use App\Models\WithdrawalRequest;
 use App\Services\WalletService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class WithdrawalReviewController extends Controller
 {
@@ -36,23 +39,68 @@ class WithdrawalReviewController extends Controller
             return back()->withErrors(['withdrawal' => 'Approval allowed after 72 hours.']);
         }
 
-        $withdrawal->update([
-            'status' => 'approved',
-            'reviewed_at' => now(),
-            'reviewed_by' => $request->user('admin')->id,
-        ]);
+        $admin = $request->user('admin');
+        $error = null;
 
-        // Optional ledger entry for audit (no balance change).
-        $walletService->credit(
-            $withdrawal->user,
-            'withdraw_approved',
-            0,
-            [],
-            $withdrawal,
-            $request->user('admin')
-        );
+        DB::transaction(function () use ($withdrawal, $walletService, $admin, &$error) {
+            $lockedWithdrawal = WithdrawalRequest::whereKey($withdrawal->id)->lockForUpdate()->first();
 
-        ActivityLog::record('withdrawal.approved', $request->user('admin'), $withdrawal);
+            if (!$lockedWithdrawal || $lockedWithdrawal->status !== 'pending') {
+                $error = 'Already processed.';
+                return;
+            }
+
+            $reserve = ReserveAccount::where('currency', 'USDT')->lockForUpdate()->first();
+            if (!$reserve) {
+                $reserve = ReserveAccount::create([
+                    'currency' => 'USDT',
+                    'balance' => 0,
+                ]);
+            }
+
+            $amount = (float) $lockedWithdrawal->amount;
+            $reserveBalance = (float) $reserve->balance;
+
+            if ($reserveBalance < $amount) {
+                $error = 'Not enough reserve balance to approve this withdrawal.';
+                return;
+            }
+
+            ReserveLedger::create([
+                'reserve_account_id' => $reserve->id,
+                'amount' => -$amount,
+                'reason' => 'withdrawal_approved',
+                'created_by_admin_id' => $admin->id,
+                'meta' => [
+                    'withdrawal_id' => $lockedWithdrawal->id,
+                    'user_id' => $lockedWithdrawal->user_id,
+                ],
+            ]);
+
+            $reserve->balance = round($reserveBalance - $amount, 8);
+            $reserve->save();
+
+            $walletService->debit(
+                $lockedWithdrawal->user,
+                'withdraw_approved',
+                $amount,
+                [],
+                $lockedWithdrawal,
+                $admin
+            );
+
+            $lockedWithdrawal->update([
+                'status' => 'approved',
+                'reviewed_at' => now(),
+                'reviewed_by' => $admin->id,
+            ]);
+
+            ActivityLog::record('withdrawal.approved', $admin, $lockedWithdrawal);
+        });
+
+        if ($error) {
+            return back()->withErrors(['withdrawal' => $error]);
+        }
 
         return back()->with('status', 'Withdrawal approved.');
     }
