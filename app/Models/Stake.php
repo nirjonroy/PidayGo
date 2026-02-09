@@ -16,7 +16,6 @@ class Stake extends Model
         'status',
         'started_at',
         'ends_at',
-        'closed_at',
         'last_reward_at',
         'total_reward_paid',
     ];
@@ -27,7 +26,6 @@ class Stake extends Model
         'started_at' => 'datetime',
         'ends_at' => 'datetime',
         'last_reward_at' => 'datetime',
-        'closed_at' => 'datetime',
     ];
 
     public function user()
@@ -35,7 +33,7 @@ class Stake extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function plan()
+    public function stakePlan()
     {
         return $this->belongsTo(StakePlan::class, 'stake_plan_id');
     }

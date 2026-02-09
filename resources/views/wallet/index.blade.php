@@ -45,7 +45,7 @@
             <tbody>
                 @foreach ($stakes as $stake)
                     <tr>
-                        <td>{{ $stake->plan->name ?? '-' }}</td>
+                        <td>{{ $stake->stakePlan->name ?? '-' }}</td>
                         <td>{{ $stake->principal_amount }}</td>
                         <td>{{ ucfirst($stake->status) }}</td>
                         <td>{{ $stake->ends_at }}</td>

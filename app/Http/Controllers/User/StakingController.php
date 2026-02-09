@@ -45,13 +45,12 @@ class StakingController extends Controller
             'ends_at' => now()->addDays($plan->duration_days),
         ]);
 
-        $walletService->addLedger(
+        $walletService->debit(
             $user,
             'stake_lock',
-            -$amount,
-            Stake::class,
-            $stake->id,
-            ['plan_id' => $plan->id]
+            $amount,
+            ['plan_id' => $plan->id],
+            $stake
         );
 
         return back()->with('status', 'Stake created.');
@@ -71,7 +70,7 @@ class StakingController extends Controller
             return back()->withErrors(['stake' => 'Stake is still locked.']);
         }
 
-        $plan = $stake->plan;
+        $plan = $stake->stakePlan;
         $principal = (float) $stake->principal_amount;
         $dailyRate = (float) $plan->daily_rate;
         $days = (int) $plan->duration_days;
@@ -81,14 +80,13 @@ class StakingController extends Controller
         $maxReward = max(0, $maxPayout - $principal);
         $reward = min($rawReward, $maxReward);
 
-        $walletService->addLedger($request->user(), 'stake_unlocked', $principal, Stake::class, $stake->id);
+        $walletService->credit($request->user(), 'stake_unlocked', $principal, [], $stake);
         if ($reward > 0) {
-            $walletService->addLedger($request->user(), 'reward_credit', $reward, Stake::class, $stake->id);
+            $walletService->credit($request->user(), 'reward_credit', $reward, [], $stake);
         }
 
         $stake->update([
             'status' => 'completed',
-            'closed_at' => now(),
             'total_reward_paid' => $reward,
         ]);
 

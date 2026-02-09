@@ -32,12 +32,12 @@ class WithdrawalController extends Controller
             'eligible_at' => now()->addHours(72),
         ]);
 
-        $walletService->addLedger(
+        $walletService->debit(
             $user,
             'withdraw_request',
-            -$amount,
-            WithdrawalRequest::class,
-            $withdrawal->id
+            $amount,
+            [],
+            $withdrawal
         );
 
         return back()->with('status', 'Withdrawal requested. Approval takes 72–96 hours.');

@@ -43,14 +43,13 @@ class WithdrawalReviewController extends Controller
         ]);
 
         // Optional ledger entry for audit (no balance change).
-        $walletService->addLedger(
+        $walletService->credit(
             $withdrawal->user,
             'withdraw_approved',
             0,
-            WithdrawalRequest::class,
-            $withdrawal->id,
             [],
-            $request->user('admin')->id
+            $withdrawal,
+            $request->user('admin')
         );
 
         ActivityLog::record('withdrawal.approved', $request->user('admin'), $withdrawal);
@@ -75,14 +74,13 @@ class WithdrawalReviewController extends Controller
             'notes' => $validated['notes'] ?? null,
         ]);
 
-        $walletService->addLedger(
+        $walletService->credit(
             $withdrawal->user,
             'withdraw_rejected',
             (float) $withdrawal->amount,
-            WithdrawalRequest::class,
-            $withdrawal->id,
             ['reason' => 'Rejected'],
-            $request->user('admin')->id
+            $withdrawal,
+            $request->user('admin')
         );
 
         ActivityLog::record('withdrawal.rejected', $request->user('admin'), $withdrawal, [
