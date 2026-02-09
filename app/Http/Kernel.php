@@ -59,6 +59,8 @@ class Kernel extends HttpKernel
         'admin.ip' => \App\Http\Middleware\EnsureAdminIpAllowed::class,
         'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,
         'can' => \Illuminate\Auth\Middleware\Authorize::class,
+        'ensure.kyc' => \App\Http\Middleware\EnsureKycApproved::class,
+        'ensure.user2fa' => \App\Http\Middleware\EnsureUserTwoFactor::class,
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'kyc.approved' => \App\Http\Middleware\EnsureKycApproved::class,
         'password.confirm' => \Illuminate\Auth\Middleware\RequirePassword::class,

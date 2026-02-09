@@ -21,6 +21,7 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\TwoFactorController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\KycController;
+use App\Http\Controllers\User\StakeController;
 use App\Http\Controllers\User\StakingController as UserStakingController;
 use App\Http\Controllers\User\WalletController;
 use App\Http\Controllers\User\WithdrawalController as UserWithdrawalController;
@@ -78,6 +79,11 @@ Route::middleware(['auth', 'verified', '2fa.enabled', '2fa.passed', 'kyc.approve
     Route::post('/staking', [UserStakingController::class, 'store'])->name('staking.store');
     Route::post('/staking/{stake}/unstake', [UserStakingController::class, 'unstake'])->name('staking.unstake');
     Route::post('/withdrawals', [UserWithdrawalController::class, 'store'])->name('withdrawals.store');
+});
+
+Route::middleware(['auth', 'verified', 'ensure.user2fa', 'ensure.kyc'])->group(function () {
+    Route::get('/stake', [StakeController::class, 'index'])->name('stake.index');
+    Route::post('/stake', [StakeController::class, 'store'])->name('stake.store');
 });
 
 Route::prefix('admin')->name('admin.')->middleware('admin.ip')->group(function () {

@@ -32,6 +32,7 @@
                 @auth
                     <a href="{{ route('dashboard') }}">Dashboard</a>
                     <a href="{{ route('wallet.index') }}">Wallet</a>
+                    <a href="{{ route('stake.index') }}">Stake</a>
                     <form method="POST" action="{{ route('logout') }}" style="display:inline;">
                         @csrf
                         <button type="submit">Logout</button>
