@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
 use App\Models\SiteSetting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -41,6 +42,7 @@ class SiteSettingController extends Controller
         }
 
         $setting->save();
+        ActivityLog::record('site.settings.created', $request->user('admin'), $setting);
 
         return redirect()->route('admin.site-settings.index')->with('status', 'Site settings saved.');
     }
@@ -69,6 +71,7 @@ class SiteSettingController extends Controller
         }
 
         $setting->save();
+        ActivityLog::record('site.settings.updated', $request->user('admin'), $setting);
 
         return redirect()->route('admin.site-settings.index')->with('status', 'Site settings updated.');
     }

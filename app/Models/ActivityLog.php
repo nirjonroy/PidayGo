@@ -25,6 +25,16 @@ class ActivityLog extends Model
         'metadata' => 'array',
     ];
 
+    public function actor()
+    {
+        return $this->morphTo();
+    }
+
+    public function subject()
+    {
+        return $this->morphTo();
+    }
+
     public static function record(string $action, ?Model $actor, ?Model $subject = null, array $metadata = []): self
     {
         return static::create([

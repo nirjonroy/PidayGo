@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Permission;
@@ -44,6 +45,10 @@ class RoleController extends Controller
 
         $role->syncPermissions($validated['permissions'] ?? []);
 
+        ActivityLog::record('role.created', $request->user('admin'), $role, [
+            'permissions' => $validated['permissions'] ?? [],
+        ]);
+
         return redirect()->route('admin.roles.index')->with('status', 'Role created.');
     }
 
@@ -78,6 +83,10 @@ class RoleController extends Controller
         ]);
         $role->syncPermissions($validated['permissions'] ?? []);
 
+        ActivityLog::record('role.updated', $request->user('admin'), $role, [
+            'permissions' => $validated['permissions'] ?? [],
+        ]);
+
         return redirect()->route('admin.roles.index')->with('status', 'Role updated.');
     }
 
@@ -87,6 +96,7 @@ class RoleController extends Controller
             abort(404);
         }
 
+        ActivityLog::record('role.deleted', request()->user('admin'), $role);
         $role->delete();
 
         return redirect()->route('admin.roles.index')->with('status', 'Role deleted.');

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -33,6 +34,8 @@ class ProfileController extends Controller
         $admin->forceFill([
             'password' => Hash::make($validated['password']),
         ])->save();
+
+        ActivityLog::record('admin.password.updated', $admin, $admin);
 
         return back()->with('status', 'Password updated.');
     }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Permission;
@@ -36,6 +37,10 @@ class PermissionController extends Controller
             'guard_name' => 'admin',
         ]);
 
+        ActivityLog::record('permission.created', $request->user('admin'), null, [
+            'name' => $validated['name'],
+        ]);
+
         return redirect()->route('admin.permissions.index')->with('status', 'Permission created.');
     }
 
@@ -64,6 +69,8 @@ class PermissionController extends Controller
             'name' => $validated['name'],
         ]);
 
+        ActivityLog::record('permission.updated', $request->user('admin'), $permission);
+
         return redirect()->route('admin.permissions.index')->with('status', 'Permission updated.');
     }
 
@@ -73,6 +80,7 @@ class PermissionController extends Controller
             abort(404);
         }
 
+        ActivityLog::record('permission.deleted', request()->user('admin'), $permission);
         $permission->delete();
 
         return redirect()->route('admin.permissions.index')->with('status', 'Permission deleted.');

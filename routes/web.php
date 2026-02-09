@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\Auth\AuthenticatedSessionController as AdminAuthenticatedSessionController;
 use App\Http\Controllers\Admin\AdminAccountController;
+use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\KycReviewController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProfileController;
@@ -126,6 +127,10 @@ Route::prefix('admin')->name('admin.')->middleware('admin.ip')->group(function (
             Route::get('/admins/{admin}/edit', [AdminAccountController::class, 'edit'])->name('admins.edit');
             Route::post('/admins/{admin}/update', [AdminAccountController::class, 'update'])->name('admins.update');
             Route::post('/admins/{admin}/delete', [AdminAccountController::class, 'destroy'])->name('admins.delete');
+        });
+
+        Route::middleware('permission:activity.view')->group(function () {
+            Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity.index');
         });
 
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
 use App\Models\Admin;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -49,6 +50,10 @@ class AdminAccountController extends Controller
 
         $admin->syncRoles($validated['roles'] ?? []);
 
+        ActivityLog::record('admin.created', $request->user('admin'), $admin, [
+            'roles' => $validated['roles'] ?? [],
+        ]);
+
         return redirect()->route('admin.admins.index')->with('status', 'Admin created.');
     }
 
@@ -84,6 +89,10 @@ class AdminAccountController extends Controller
         $admin->save();
         $admin->syncRoles($validated['roles'] ?? []);
 
+        ActivityLog::record('admin.updated', $request->user('admin'), $admin, [
+            'roles' => $validated['roles'] ?? [],
+        ]);
+
         return redirect()->route('admin.admins.index')->with('status', 'Admin updated.');
     }
 
@@ -93,6 +102,7 @@ class AdminAccountController extends Controller
             return back()->withErrors(['admin' => 'You cannot delete your own account.']);
         }
 
+        ActivityLog::record('admin.deleted', $request->user('admin'), $admin);
         $admin->delete();
 
         return redirect()->route('admin.admins.index')->with('status', 'Admin deleted.');

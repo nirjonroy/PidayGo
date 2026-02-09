@@ -146,6 +146,14 @@
                   </a>
                 </li>
               @endif
+              @if (auth('admin')->user()?->can('activity.view'))
+                <li class="nav-item">
+                  <a href="{{ route('admin.activity.index') }}" class="nav-link {{ request()->routeIs('admin.activity.*') ? 'active' : '' }}">
+                    <i class="nav-icon bi bi-clipboard-data"></i>
+                    <p>Activity Logs</p>
+                  </a>
+                </li>
+              @endif
               <li class="nav-item">
                 <a href="{{ route('admin.profile.edit') }}" class="nav-link {{ request()->routeIs('admin.profile.*') ? 'active' : '' }}">
                   <i class="nav-icon bi bi-person-gear"></i>

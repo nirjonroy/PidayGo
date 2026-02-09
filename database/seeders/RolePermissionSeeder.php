@@ -48,12 +48,18 @@ class RolePermissionSeeder extends Seeder
             'guard_name' => 'admin',
         ]);
 
+        $activityPermission = Permission::firstOrCreate([
+            'name' => 'activity.view',
+            'guard_name' => 'admin',
+        ]);
+
         $role->givePermissionTo($permission);
         $role->givePermissionTo($sitePermission);
         $role->givePermissionTo($rolePermission);
         $role->givePermissionTo($permPermission);
         $role->givePermissionTo($userPermission);
         $role->givePermissionTo($adminPermission);
+        $role->givePermissionTo($activityPermission);
 
         Admin::query()->each(function (Admin $admin) use ($role) {
             if (!$admin->hasRole($role)) {
