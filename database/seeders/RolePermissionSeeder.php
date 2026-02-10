@@ -63,6 +63,11 @@ class RolePermissionSeeder extends Seeder
             'guard_name' => 'admin',
         ]);
 
+        $reservePermission = Permission::firstOrCreate([
+            'name' => 'reserve.manage',
+            'guard_name' => 'admin',
+        ]);
+
         $role->givePermissionTo($permission);
         $role->givePermissionTo($sitePermission);
         $role->givePermissionTo($rolePermission);
@@ -72,6 +77,7 @@ class RolePermissionSeeder extends Seeder
         $role->givePermissionTo($activityPermission);
         $role->givePermissionTo($stakingPermission);
         $role->givePermissionTo($withdrawalPermission);
+        $role->givePermissionTo($reservePermission);
 
         Admin::query()->each(function (Admin $admin) use ($role) {
             if (!$admin->hasRole($role)) {

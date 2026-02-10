@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\KycReviewController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\ReserveController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SiteSettingController;
 use App\Http\Controllers\Admin\StakingPlanController;
@@ -162,6 +163,13 @@ Route::prefix('admin')->name('admin.')->middleware('admin.ip')->group(function (
             Route::get('/withdrawals', [WithdrawalReviewController::class, 'index'])->name('withdrawals.index');
             Route::post('/withdrawals/{withdrawal}/approve', [WithdrawalReviewController::class, 'approve'])->name('withdrawals.approve');
             Route::post('/withdrawals/{withdrawal}/reject', [WithdrawalReviewController::class, 'reject'])->name('withdrawals.reject');
+        });
+
+        Route::middleware('permission:reserve.manage')->group(function () {
+            Route::get('/reserve', [ReserveController::class, 'index'])->name('reserve.index');
+            Route::post('/reserve/add', [ReserveController::class, 'add'])->name('reserve.add');
+            Route::post('/reserve/deduct', [ReserveController::class, 'deduct'])->name('reserve.deduct');
+            Route::get('/reserve/ledger', [ReserveController::class, 'ledger'])->name('reserve.ledger');
         });
 
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

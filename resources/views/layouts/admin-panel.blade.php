@@ -162,6 +162,14 @@
                   </a>
                 </li>
               @endif
+              @if (auth('admin')->user()?->can('reserve.manage'))
+                <li class="nav-item">
+                  <a href="{{ route('admin.reserve.index') }}" class="nav-link {{ request()->routeIs('admin.reserve.*') ? 'active' : '' }}">
+                    <i class="nav-icon bi bi-safe2"></i>
+                    <p>Reserve</p>
+                  </a>
+                </li>
+              @endif
               @if (auth('admin')->user()?->can('activity.view'))
                 <li class="nav-item">
                   <a href="{{ route('admin.activity.index') }}" class="nav-link {{ request()->routeIs('admin.activity.*') ? 'active' : '' }}">
