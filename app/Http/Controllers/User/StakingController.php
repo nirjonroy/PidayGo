@@ -5,13 +5,14 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Models\Stake;
 use App\Models\StakePlan;
+use App\Services\NotificationService;
 use App\Services\WalletService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class StakingController extends Controller
 {
-    public function store(Request $request, WalletService $walletService): RedirectResponse
+    public function store(Request $request, WalletService $walletService, NotificationService $notifications): RedirectResponse
     {
         $validated = $request->validate([
             'plan_id' => ['required', 'exists:stake_plans,id'],
@@ -51,6 +52,15 @@ class StakingController extends Controller
             $amount,
             ['plan_id' => $plan->id],
             $stake
+        );
+
+        $notifications->notifyUser(
+            $user->id,
+            'stake_created',
+            'Stake created',
+            'Your stake has been created successfully.',
+            'success',
+            ['stake_id' => $stake->id]
         );
 
         return back()->with('status', 'Stake created.');

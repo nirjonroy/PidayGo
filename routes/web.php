@@ -10,6 +10,8 @@ use App\Http\Controllers\Admin\ReserveController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\DepositController as AdminDepositController;
 use App\Http\Controllers\Admin\DepositAddressController;
+use App\Http\Controllers\Admin\AdminNotificationController;
+use App\Http\Controllers\Admin\AdminAlertController;
 use App\Http\Controllers\Admin\SiteSettingController;
 use App\Http\Controllers\Admin\StakingPlanController;
 use App\Http\Controllers\Admin\WithdrawalReviewController;
@@ -25,6 +27,7 @@ use App\Http\Controllers\Auth\TwoFactorController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\KycController;
 use App\Http\Controllers\User\DepositController;
+use App\Http\Controllers\User\UserNotificationController;
 use App\Http\Controllers\User\StakeController;
 use App\Http\Controllers\User\StakingController as UserStakingController;
 use App\Http\Controllers\User\WalletController;
@@ -72,6 +75,13 @@ Route::middleware(['auth', 'verified', '2fa.enabled', '2fa.passed'])->group(func
     Route::get('/kyc', [KycController::class, 'create'])->name('kyc.form');
     Route::post('/kyc', [KycController::class, 'store'])->name('kyc.submit');
     Route::get('/kyc/status', [KycController::class, 'status'])->name('kyc.status');
+});
+
+Route::middleware(['auth', 'verified', '2fa.enabled', '2fa.passed'])->group(function () {
+    Route::get('/notifications', [UserNotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{notification}/read', [UserNotificationController::class, 'markRead'])->name('notifications.read');
+    Route::post('/notifications/{notification}/dismiss', [UserNotificationController::class, 'dismiss'])->name('notifications.dismiss');
+    Route::post('/notifications/{notification}/shown', [UserNotificationController::class, 'shown'])->name('notifications.shown');
 });
 
 Route::middleware(['auth', 'verified', '2fa.enabled', '2fa.passed', 'kyc.approved'])->group(function () {
@@ -194,6 +204,16 @@ Route::prefix('admin')->name('admin.')->middleware('admin.ip')->group(function (
             Route::post('/reserve/deduct', [ReserveController::class, 'deduct'])->name('reserve.deduct');
             Route::get('/reserve/ledger', [ReserveController::class, 'ledger'])->name('reserve.ledger');
         });
+
+        Route::middleware('permission:notification.manage')->group(function () {
+            Route::get('/notifications', [AdminNotificationController::class, 'index'])->name('notifications.index');
+            Route::get('/notifications/create', [AdminNotificationController::class, 'create'])->name('notifications.create');
+            Route::post('/notifications', [AdminNotificationController::class, 'store'])->name('notifications.store');
+        });
+
+        Route::get('/alerts', [AdminAlertController::class, 'index'])->name('alerts.index');
+        Route::post('/alerts/{notification}/read', [AdminAlertController::class, 'markRead'])->name('alerts.read');
+        Route::post('/alerts/{notification}/dismiss', [AdminAlertController::class, 'dismiss'])->name('alerts.dismiss');
 
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');

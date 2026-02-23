@@ -7,6 +7,7 @@ use App\Models\ActivityLog;
 use App\Models\ReserveAccount;
 use App\Models\ReserveLedger;
 use App\Models\WithdrawalRequest;
+use App\Services\NotificationService;
 use App\Services\WalletService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -29,7 +30,7 @@ class WithdrawalReviewController extends Controller
         ]);
     }
 
-    public function approve(Request $request, WithdrawalRequest $withdrawal, WalletService $walletService): RedirectResponse
+    public function approve(Request $request, WithdrawalRequest $withdrawal, WalletService $walletService, NotificationService $notifications): RedirectResponse
     {
         if ($withdrawal->status !== 'pending') {
             return back()->withErrors(['withdrawal' => 'Already processed.']);
@@ -102,10 +103,20 @@ class WithdrawalReviewController extends Controller
             return back()->withErrors(['withdrawal' => $error]);
         }
 
+        $notifications->notifyUser(
+            $withdrawal->user_id,
+            'withdraw_approved',
+            'Withdrawal approved',
+            'Your withdrawal has been approved.',
+            'success',
+            ['withdrawal_request_id' => $withdrawal->id],
+            true
+        );
+
         return back()->with('status', 'Withdrawal approved.');
     }
 
-    public function reject(Request $request, WithdrawalRequest $withdrawal, WalletService $walletService): RedirectResponse
+    public function reject(Request $request, WithdrawalRequest $withdrawal, WalletService $walletService, NotificationService $notifications): RedirectResponse
     {
         if ($withdrawal->status !== 'pending') {
             return back()->withErrors(['withdrawal' => 'Already processed.']);
@@ -134,6 +145,15 @@ class WithdrawalReviewController extends Controller
         ActivityLog::record('withdrawal.rejected', $request->user('admin'), $withdrawal, [
             'notes' => $validated['notes'] ?? null,
         ]);
+
+        $notifications->notifyUser(
+            $withdrawal->user_id,
+            'withdraw_rejected',
+            'Withdrawal rejected',
+            $validated['notes'] ?? 'Your withdrawal was rejected.',
+            'error',
+            ['withdrawal_request_id' => $withdrawal->id]
+        );
 
         return back()->with('status', 'Withdrawal rejected.');
     }

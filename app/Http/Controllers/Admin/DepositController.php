@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\DepositRequest;
+use App\Services\NotificationService;
 use App\Services\WalletService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -35,7 +36,7 @@ class DepositController extends Controller
         ]);
     }
 
-    public function approve(Request $request, DepositRequest $deposit, WalletService $walletService): RedirectResponse
+    public function approve(Request $request, DepositRequest $deposit, WalletService $walletService, NotificationService $notifications): RedirectResponse
     {
         $admin = $request->user('admin');
         $error = null;
@@ -93,10 +94,20 @@ class DepositController extends Controller
             return back()->withErrors(['deposit' => $error]);
         }
 
+        $notifications->notifyUser(
+            $deposit->user_id,
+            'deposit_approved',
+            'Deposit approved',
+            'Your deposit has been approved and credited.',
+            'success',
+            ['deposit_request_id' => $deposit->id],
+            true
+        );
+
         return back()->with('status', 'Deposit approved.');
     }
 
-    public function reject(Request $request, DepositRequest $deposit): RedirectResponse
+    public function reject(Request $request, DepositRequest $deposit, NotificationService $notifications): RedirectResponse
     {
         $validated = $request->validate([
             'admin_note' => ['required', 'string', 'max:1000'],
@@ -116,6 +127,15 @@ class DepositController extends Controller
         ActivityLog::record('deposit.rejected', $request->user('admin'), $deposit, [
             'note' => $validated['admin_note'],
         ]);
+
+        $notifications->notifyUser(
+            $deposit->user_id,
+            'deposit_rejected',
+            'Deposit rejected',
+            $validated['admin_note'],
+            'error',
+            ['deposit_request_id' => $deposit->id]
+        );
 
         return back()->with('status', 'Deposit rejected.');
     }

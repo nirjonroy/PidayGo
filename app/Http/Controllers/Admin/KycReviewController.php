@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\KycRequest;
+use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -47,7 +48,7 @@ class KycReviewController extends Controller
         ]);
     }
 
-    public function approve(Request $request, KycRequest $kycRequest): RedirectResponse
+    public function approve(Request $request, KycRequest $kycRequest, NotificationService $notifications): RedirectResponse
     {
         $kycRequest->forceFill([
             'status' => 'approved',
@@ -57,10 +58,20 @@ class KycReviewController extends Controller
 
         ActivityLog::record('kyc.approved', $request->user('admin'), $kycRequest);
 
+        $notifications->notifyUser(
+            $kycRequest->user_id,
+            'kyc_approved',
+            'KYC approved',
+            'Your KYC request has been approved.',
+            'success',
+            ['kyc_request_id' => $kycRequest->id],
+            true
+        );
+
         return redirect()->route('admin.kyc.index')->with('status', 'KYC approved.');
     }
 
-    public function reject(Request $request, KycRequest $kycRequest): RedirectResponse
+    public function reject(Request $request, KycRequest $kycRequest, NotificationService $notifications): RedirectResponse
     {
         $validated = $request->validate([
             'notes' => ['nullable', 'string', 'max:1000'],
@@ -76,6 +87,15 @@ class KycReviewController extends Controller
         ActivityLog::record('kyc.rejected', $request->user('admin'), $kycRequest, [
             'notes' => $validated['notes'] ?? null,
         ]);
+
+        $notifications->notifyUser(
+            $kycRequest->user_id,
+            'kyc_rejected',
+            'KYC rejected',
+            $validated['notes'] ?? 'Your KYC request was rejected.',
+            'error',
+            ['kyc_request_id' => $kycRequest->id]
+        );
 
         return redirect()->route('admin.kyc.index')->with('status', 'KYC rejected.');
     }

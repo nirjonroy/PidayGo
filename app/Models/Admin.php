@@ -44,4 +44,9 @@ class Admin extends Authenticatable
     {
         return $this->hasMany(ReserveLedger::class, 'created_by_admin_id');
     }
+
+    public function notificationRecipients()
+    {
+        return $this->hasMany(NotificationAdmin::class);
+    }
 }

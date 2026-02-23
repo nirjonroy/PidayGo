@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\KycRequest;
+use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -15,7 +16,7 @@ class KycController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, NotificationService $notifications): RedirectResponse
     {
         $validated = $request->validate([
             'document_front' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
@@ -37,6 +38,24 @@ class KycController extends Controller
             'document_back_path' => $validated['document_back']->store('kyc'),
             'selfie_path' => $selfiePath,
         ]);
+
+        $notifications->notifyUser(
+            $user->id,
+            'kyc_submitted',
+            'KYC submitted',
+            'Your KYC submission has been received and is under review.',
+            'info',
+            ['kyc_request_id' => $kyc->id]
+        );
+
+        $notifications->notifyAdminsByRoleOrPermission(
+            'kyc.review',
+            'kyc_submitted',
+            'New KYC request',
+            'A new KYC request was submitted.',
+            'warning',
+            ['kyc_request_id' => $kyc->id]
+        );
 
         return redirect()->route('kyc.status')->with('status', 'KYC submitted.');
     }

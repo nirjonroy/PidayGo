@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\DepositAddress;
 use App\Models\DepositRequest;
 use App\Models\SiteSetting;
+use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -34,7 +35,7 @@ class DepositController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, NotificationService $notifications): RedirectResponse
     {
         $setting = SiteSetting::first();
         $activeAddress = DepositAddress::where('is_active', true)->first();
@@ -50,7 +51,7 @@ class DepositController extends Controller
             'txid' => ['required', 'regex:/^[a-fA-F0-9]{64}$/', 'unique:deposit_requests,txid'],
         ]);
 
-        DepositRequest::create([
+        $deposit = DepositRequest::create([
             'user_id' => $request->user()->id,
             'currency' => $activeAddress->currency,
             'chain' => $activeAddress->chain,
@@ -60,6 +61,26 @@ class DepositController extends Controller
             'status' => 'pending',
             'expires_at' => now()->addHours($reviewHours),
         ]);
+
+        $notifications->notifyUser(
+            $request->user()->id,
+            'deposit_submitted',
+            'Deposit submitted',
+            'Your deposit request has been submitted and will be reviewed.',
+            'info',
+            ['deposit_request_id' => $deposit->id],
+            false,
+            $deposit->expires_at
+        );
+
+        $notifications->notifyAdminsByRoleOrPermission(
+            'deposit.review',
+            'deposit_submitted',
+            'New deposit request',
+            'A new deposit request was submitted.',
+            'info',
+            ['deposit_request_id' => $deposit->id]
+        );
 
         return redirect()->route('wallet.deposit')->with(
             'status',

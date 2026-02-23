@@ -43,6 +43,29 @@
             <li class="nav-item d-none d-md-block"><a href="{{ route('admin.dashboard') }}" class="nav-link">Home</a></li>
           </ul>
           <ul class="navbar-nav ms-auto">
+            <li class="nav-item dropdown">
+              <a class="nav-link position-relative" href="#" data-bs-toggle="dropdown">
+                <i class="bi bi-bell"></i>
+                @if (!empty($adminNotificationCount))
+                  <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    {{ $adminNotificationCount }}
+                  </span>
+                @endif
+              </a>
+              <div class="dropdown-menu dropdown-menu-end p-0" style="min-width:320px;">
+                <div class="dropdown-header">Notifications</div>
+                @forelse ($adminNotificationsPreview as $item)
+                  <a class="dropdown-item" href="{{ route('admin.alerts.index') }}">
+                    <div class="fw-semibold">{{ $item->notification->title }}</div>
+                    <div class="small text-muted">{{ \Illuminate\Support\Str::limit($item->notification->message, 60) }}</div>
+                  </a>
+                @empty
+                  <div class="dropdown-item text-muted">No notifications</div>
+                @endforelse
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item text-center" href="{{ route('admin.alerts.index') }}">View all</a>
+              </div>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="#" data-lte-toggle="fullscreen">
                 <i data-lte-icon="maximize" class="bi bi-arrows-fullscreen"></i>
@@ -175,6 +198,14 @@
                   <a href="{{ route('admin.deposit-addresses.index') }}" class="nav-link {{ request()->routeIs('admin.deposit-addresses.*') ? 'active' : '' }}">
                     <i class="nav-icon bi bi-geo"></i>
                     <p>Deposit Addresses</p>
+                  </a>
+                </li>
+              @endif
+              @if (auth('admin')->user()?->can('notification.manage'))
+                <li class="nav-item">
+                  <a href="{{ route('admin.notifications.index') }}" class="nav-link {{ request()->routeIs('admin.notifications.*') ? 'active' : '' }}">
+                    <i class="nav-icon bi bi-bell"></i>
+                    <p>Notifications</p>
                   </a>
                 </li>
               @endif
