@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\NotificationUser;
 use App\Models\NotificationAdmin;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -15,6 +16,14 @@ class NotificationServiceProvider extends ServiceProvider
             $user = auth()->user();
 
             if (!$user) {
+                $view->with([
+                    'userNotificationCount' => 0,
+                    'popupNotification' => null,
+                ]);
+                return;
+            }
+
+            if (!Schema::hasTable('notification_users') || !Schema::hasTable('notifications')) {
                 $view->with([
                     'userNotificationCount' => 0,
                     'popupNotification' => null,
@@ -58,6 +67,14 @@ class NotificationServiceProvider extends ServiceProvider
             $admin = auth('admin')->user();
 
             if (!$admin) {
+                $view->with([
+                    'adminNotificationCount' => 0,
+                    'adminNotificationsPreview' => collect(),
+                ]);
+                return;
+            }
+
+            if (!Schema::hasTable('notification_admins') || !Schema::hasTable('notifications')) {
                 $view->with([
                     'adminNotificationCount' => 0,
                     'adminNotificationsPreview' => collect(),

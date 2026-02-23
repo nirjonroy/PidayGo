@@ -209,6 +209,14 @@
                   </a>
                 </li>
               @endif
+              @if (auth('admin')->user()?->can('support.manage'))
+                <li class="nav-item">
+                  <a href="{{ route('admin.support.index') }}" class="nav-link {{ request()->routeIs('admin.support.*') ? 'active' : '' }}">
+                    <i class="nav-icon bi bi-chat-dots"></i>
+                    <p>Support</p>
+                  </a>
+                </li>
+              @endif
               @if (auth('admin')->user()?->can('reserve.manage'))
                 <li class="nav-item">
                   <a href="{{ route('admin.reserve.index') }}" class="nav-link {{ request()->routeIs('admin.reserve.*') ? 'active' : '' }}">

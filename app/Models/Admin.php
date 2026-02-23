@@ -49,4 +49,9 @@ class Admin extends Authenticatable
     {
         return $this->hasMany(NotificationAdmin::class);
     }
+
+    public function assignedConversations()
+    {
+        return $this->hasMany(Conversation::class, 'assigned_admin_id');
+    }
 }

@@ -12,6 +12,8 @@ use App\Http\Controllers\Admin\DepositController as AdminDepositController;
 use App\Http\Controllers\Admin\DepositAddressController;
 use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\Admin\AdminAlertController;
+use App\Http\Controllers\Admin\AdminConversationController;
+use App\Http\Controllers\Admin\AdminMessageController;
 use App\Http\Controllers\Admin\SiteSettingController;
 use App\Http\Controllers\Admin\StakingPlanController;
 use App\Http\Controllers\Admin\WithdrawalReviewController;
@@ -30,6 +32,8 @@ use App\Http\Controllers\User\DepositController;
 use App\Http\Controllers\User\UserNotificationController;
 use App\Http\Controllers\User\StakeController;
 use App\Http\Controllers\User\StakingController as UserStakingController;
+use App\Http\Controllers\User\UserConversationController;
+use App\Http\Controllers\User\UserMessageController;
 use App\Http\Controllers\User\WalletController;
 use App\Http\Controllers\User\WithdrawalController as UserWithdrawalController;
 use Illuminate\Support\Facades\Route;
@@ -82,6 +86,13 @@ Route::middleware(['auth', 'verified', '2fa.enabled', '2fa.passed'])->group(func
     Route::post('/notifications/{notification}/read', [UserNotificationController::class, 'markRead'])->name('notifications.read');
     Route::post('/notifications/{notification}/dismiss', [UserNotificationController::class, 'dismiss'])->name('notifications.dismiss');
     Route::post('/notifications/{notification}/shown', [UserNotificationController::class, 'shown'])->name('notifications.shown');
+
+    Route::get('/support', [UserConversationController::class, 'index'])->name('support.index');
+    Route::get('/support/create', [UserConversationController::class, 'create'])->name('support.create');
+    Route::post('/support', [UserConversationController::class, 'store'])->name('support.store');
+    Route::get('/support/{conversation}', [UserConversationController::class, 'show'])->name('support.show');
+    Route::post('/support/{conversation}/message', [UserMessageController::class, 'store'])->name('support.message.store');
+    Route::post('/support/{conversation}/close', [UserConversationController::class, 'close'])->name('support.close');
 });
 
 Route::middleware(['auth', 'verified', '2fa.enabled', '2fa.passed', 'kyc.approved'])->group(function () {
@@ -214,6 +225,14 @@ Route::prefix('admin')->name('admin.')->middleware('admin.ip')->group(function (
         Route::get('/alerts', [AdminAlertController::class, 'index'])->name('alerts.index');
         Route::post('/alerts/{notification}/read', [AdminAlertController::class, 'markRead'])->name('alerts.read');
         Route::post('/alerts/{notification}/dismiss', [AdminAlertController::class, 'dismiss'])->name('alerts.dismiss');
+
+        Route::middleware('permission:support.manage')->group(function () {
+            Route::get('/support', [AdminConversationController::class, 'index'])->name('support.index');
+            Route::get('/support/{conversation}', [AdminConversationController::class, 'show'])->name('support.show');
+            Route::post('/support/{conversation}/message', [AdminMessageController::class, 'store'])->name('support.message.store');
+            Route::post('/support/{conversation}/assign', [AdminConversationController::class, 'assign'])->name('support.assign');
+            Route::post('/support/{conversation}/status', [AdminConversationController::class, 'status'])->name('support.status');
+        });
 
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
