@@ -10,6 +10,16 @@
         <a class="btn btn-sm {{ $status === 'rejected' ? 'btn-primary' : 'btn-outline-primary' }}" href="{{ route('admin.withdrawals.index', ['status' => 'rejected']) }}">Rejected</a>
     </div>
 
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <div class="card">
         <div class="card-body">
             <table class="table table-striped align-middle">
@@ -48,6 +58,9 @@
                                         @csrf
                                         <button type="submit" class="btn btn-sm btn-success" {{ $eligible ? '' : 'disabled' }}>Approve</button>
                                     </form>
+                                    @if (!$eligible)
+                                        <div class="small text-muted mt-1">Available after {{ $request->eligible_at }}</div>
+                                    @endif
                                     <form method="POST" action="{{ route('admin.withdrawals.reject', $request) }}" style="display:inline;">
                                         @csrf
                                         <input type="hidden" name="notes" value="Rejected by admin">

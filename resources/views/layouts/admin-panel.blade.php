@@ -217,6 +217,14 @@
                   </a>
                 </li>
               @endif
+              @if (auth('admin')->user()?->can('mail.manage'))
+                <li class="nav-item">
+                  <a href="{{ route('admin.mail-settings.index') }}" class="nav-link {{ request()->routeIs('admin.mail-settings.*') ? 'active' : '' }}">
+                    <i class="nav-icon bi bi-envelope-at"></i>
+                    <p>Mail Settings</p>
+                  </a>
+                </li>
+              @endif
               @if (auth('admin')->user()?->can('reserve.manage'))
                 <li class="nav-item">
                   <a href="{{ route('admin.reserve.index') }}" class="nav-link {{ request()->routeIs('admin.reserve.*') ? 'active' : '' }}">

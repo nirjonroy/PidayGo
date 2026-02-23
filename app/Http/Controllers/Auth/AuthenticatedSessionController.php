@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Services\MailSettingsService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,7 +16,7 @@ class AuthenticatedSessionController extends Controller
         return view('auth.login');
     }
 
-    public function store(LoginRequest $request): RedirectResponse
+    public function store(LoginRequest $request, MailSettingsService $mailSettings): RedirectResponse
     {
         $request->authenticate();
 
@@ -24,7 +25,7 @@ class AuthenticatedSessionController extends Controller
 
         $user = $request->user();
 
-        if (!$user->hasVerifiedEmail()) {
+        if ($mailSettings->isActive() && !$user->hasVerifiedEmail()) {
             return redirect()->route('verification.notice');
         }
 

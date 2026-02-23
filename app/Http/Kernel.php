@@ -72,5 +72,6 @@ class Kernel extends HttpKernel
         '2fa.enabled' => \App\Http\Middleware\EnsureTwoFactorEnabled::class,
         '2fa.passed' => \App\Http\Middleware\EnsureTwoFactorPassed::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+        'verified.if.mail' => \App\Http\Middleware\EnsureEmailVerifiedIfMailActive::class,
     ];
 }

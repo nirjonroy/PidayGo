@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\Admin\AdminAlertController;
 use App\Http\Controllers\Admin\AdminConversationController;
 use App\Http\Controllers\Admin\AdminMessageController;
+use App\Http\Controllers\Admin\MailSettingsController;
 use App\Http\Controllers\Admin\SiteSettingController;
 use App\Http\Controllers\Admin\StakingPlanController;
 use App\Http\Controllers\Admin\WithdrawalReviewController;
@@ -75,13 +76,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/two-factor/challenge', [TwoFactorController::class, 'verifyChallenge'])->name('two-factor.verify');
 });
 
-Route::middleware(['auth', 'verified', '2fa.enabled', '2fa.passed'])->group(function () {
+Route::middleware(['auth', 'verified.if.mail', '2fa.enabled', '2fa.passed'])->group(function () {
     Route::get('/kyc', [KycController::class, 'create'])->name('kyc.form');
     Route::post('/kyc', [KycController::class, 'store'])->name('kyc.submit');
     Route::get('/kyc/status', [KycController::class, 'status'])->name('kyc.status');
 });
 
-Route::middleware(['auth', 'verified', '2fa.enabled', '2fa.passed'])->group(function () {
+Route::middleware(['auth', 'verified.if.mail', '2fa.enabled', '2fa.passed'])->group(function () {
     Route::get('/notifications', [UserNotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{notification}/read', [UserNotificationController::class, 'markRead'])->name('notifications.read');
     Route::post('/notifications/{notification}/dismiss', [UserNotificationController::class, 'dismiss'])->name('notifications.dismiss');
@@ -95,7 +96,7 @@ Route::middleware(['auth', 'verified', '2fa.enabled', '2fa.passed'])->group(func
     Route::post('/support/{conversation}/close', [UserConversationController::class, 'close'])->name('support.close');
 });
 
-Route::middleware(['auth', 'verified', '2fa.enabled', '2fa.passed', 'kyc.approved'])->group(function () {
+Route::middleware(['auth', 'verified.if.mail', '2fa.enabled', '2fa.passed', 'kyc.approved'])->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
@@ -108,7 +109,7 @@ Route::middleware(['auth', 'verified', '2fa.enabled', '2fa.passed', 'kyc.approve
     Route::post('/withdrawals', [UserWithdrawalController::class, 'store'])->name('withdrawals.store');
 });
 
-Route::middleware(['auth', 'verified', 'ensure.user2fa', 'ensure.kyc'])->group(function () {
+Route::middleware(['auth', 'verified.if.mail', 'ensure.user2fa', 'ensure.kyc'])->group(function () {
     Route::get('/stake', [StakeController::class, 'index'])->name('stake.index');
     Route::post('/stake', [StakeController::class, 'store'])->name('stake.store');
 });
@@ -232,6 +233,12 @@ Route::prefix('admin')->name('admin.')->middleware('admin.ip')->group(function (
             Route::post('/support/{conversation}/message', [AdminMessageController::class, 'store'])->name('support.message.store');
             Route::post('/support/{conversation}/assign', [AdminConversationController::class, 'assign'])->name('support.assign');
             Route::post('/support/{conversation}/status', [AdminConversationController::class, 'status'])->name('support.status');
+        });
+
+        Route::middleware('permission:mail.manage')->group(function () {
+            Route::get('/mail-settings', [MailSettingsController::class, 'index'])->name('mail-settings.index');
+            Route::post('/mail-settings', [MailSettingsController::class, 'update'])->name('mail-settings.update');
+            Route::post('/mail-settings/test', [MailSettingsController::class, 'test'])->name('mail-settings.test');
         });
 
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

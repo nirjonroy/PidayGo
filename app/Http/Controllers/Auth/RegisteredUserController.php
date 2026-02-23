@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\MailSettingsService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,7 +19,7 @@ class RegisteredUserController extends Controller
         return view('auth.register');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, MailSettingsService $mailSettings): RedirectResponse
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -32,11 +33,19 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($validated['password']),
         ]);
 
-        event(new Registered($user));
+        if ($mailSettings->isActive()) {
+            event(new Registered($user));
+        } else {
+            $user->forceFill(['email_verified_at' => now()])->save();
+        }
 
         Auth::login($user);
         $request->session()->put('two_factor_passed', false);
 
-        return redirect()->route('verification.notice');
+        if ($mailSettings->isActive()) {
+            return redirect()->route('verification.notice');
+        }
+
+        return redirect()->route('two-factor.setup');
     }
 }

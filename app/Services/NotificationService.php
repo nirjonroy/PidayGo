@@ -12,6 +12,10 @@ use Illuminate\Support\Facades\DB;
 
 class NotificationService
 {
+    public function __construct(private MailSettingsService $mailSettings)
+    {
+    }
+
     public function notifyUser(
         int $userId,
         string $type,
@@ -37,7 +41,7 @@ class NotificationService
         $expiresAt = null,
         ?int $senderAdminId = null
     ): Notification {
-        return DB::transaction(function () use ($userIds, $type, $title, $message, $level, $meta, $isPopup, $expiresAt, $senderAdminId) {
+        $notification = DB::transaction(function () use ($userIds, $type, $title, $message, $level, $meta, $isPopup, $expiresAt, $senderAdminId) {
             $notification = $this->createNotification(
                 'user',
                 $type,
@@ -54,6 +58,10 @@ class NotificationService
 
             return $notification;
         });
+
+        $this->sendUserEmails($userIds, $notification);
+
+        return $notification;
     }
 
     public function notifyAdmin(
@@ -96,7 +104,7 @@ class NotificationService
         $expiresAt = null,
         ?int $senderAdminId = null
     ): Notification {
-        return DB::transaction(function () use ($type, $title, $message, $level, $isPopup, $expiresAt, $senderAdminId) {
+        $notification = DB::transaction(function () use ($type, $title, $message, $level, $isPopup, $expiresAt, $senderAdminId) {
             $notification = $this->createNotification(
                 'user',
                 $type,
@@ -127,6 +135,10 @@ class NotificationService
 
             return $notification;
         });
+
+        $this->sendEmailsToAllUsers($notification);
+
+        return $notification;
     }
 
     private function notifyAdmins(
@@ -139,7 +151,7 @@ class NotificationService
         bool $isPopup,
         $expiresAt
     ): Notification {
-        return DB::transaction(function () use ($adminIds, $type, $title, $message, $level, $meta, $isPopup, $expiresAt) {
+        $notification = DB::transaction(function () use ($adminIds, $type, $title, $message, $level, $meta, $isPopup, $expiresAt) {
             $notification = $this->createNotification(
                 'admin',
                 $type,
@@ -156,6 +168,10 @@ class NotificationService
 
             return $notification;
         });
+
+        $this->sendAdminEmails($notification);
+
+        return $notification;
     }
 
     private function createNotification(
@@ -229,5 +245,61 @@ class NotificationService
         }
 
         return Carbon::parse($expiresAt);
+    }
+
+    private function sendUserEmails(array $userIds, Notification $notification): void
+    {
+        if (empty($userIds) || !$this->mailSettings->isActive()) {
+            return;
+        }
+
+        $subject = $notification->title;
+        $message = $notification->message;
+
+        User::query()
+            ->whereIn('id', $userIds)
+            ->select(['id', 'email'])
+            ->get()
+            ->each(function (User $user) use ($subject, $message) {
+                if (!empty($user->email)) {
+                    $this->mailSettings->sendNotificationEmail($user->email, $subject, $message);
+                }
+            });
+    }
+
+    private function sendEmailsToAllUsers(Notification $notification): void
+    {
+        if (!$this->mailSettings->isActive()) {
+            return;
+        }
+
+        $subject = $notification->title;
+        $message = $notification->message;
+
+        User::query()
+            ->whereNotNull('email')
+            ->select(['id', 'email'])
+            ->orderBy('id')
+            ->chunk(200, function ($users) use ($subject, $message) {
+                foreach ($users as $user) {
+                    if (!empty($user->email)) {
+                        $this->mailSettings->sendNotificationEmail($user->email, $subject, $message);
+                    }
+                }
+            });
+    }
+
+    private function sendAdminEmails(Notification $notification): void
+    {
+        if (!$this->mailSettings->isActive()) {
+            return;
+        }
+
+        $emails = $this->mailSettings->getAdminNotifyEmails();
+        if (empty($emails)) {
+            return;
+        }
+
+        $this->mailSettings->sendNotificationEmail($emails, $notification->title, $notification->message);
     }
 }
