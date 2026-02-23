@@ -3,10 +3,42 @@
 @section('content')
     <h1>Wallet</h1>
 
-    <div class="mb-4">
-        <strong>Balance:</strong> {{ number_format($balance, 4) }} USDT
-        <div style="margin-top:8px;">
-            <a href="{{ route('wallet.deposit') }}">Make a Deposit</a>
+    <style>
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 20px; }
+        .summary-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px; box-shadow: 0 8px 20px rgba(0,0,0,0.05); }
+        .summary-label { color: #6b7280; font-size: 0.9em; }
+        .summary-value { font-size: 1.25em; font-weight: 700; margin-top: 6px; }
+        .summary-sub { font-size: 0.85em; color: #4b5563; margin-top: 6px; }
+    </style>
+
+    <div class="summary-grid">
+        <div class="summary-card">
+            <div class="summary-label">Wallet Balance</div>
+            <div class="summary-value">{{ number_format($balance, 4) }} USDT</div>
+            <div class="summary-sub"><a href="{{ route('wallet.deposit') }}">Make a Deposit</a></div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-label">Balance for Reservation</div>
+            <div class="summary-value">{{ number_format($reservedBalance, 4) }} USDT</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-label">Today Earnings</div>
+            <div class="summary-value">{{ number_format($todayEarnings, 4) }} USDT</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-label">Cumulative Income</div>
+            <div class="summary-value">{{ number_format($cumulativeIncome, 4) }} USDT</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-label">Current Level</div>
+            @if ($level)
+                <div class="summary-value">{{ $level->code }}</div>
+                <div class="summary-sub">Income: {{ $level->income_min_percent }}% - {{ $level->income_max_percent }}%</div>
+                <div class="summary-sub">Reservation: {{ $level->min_reservation }} - {{ $level->max_reservation }}</div>
+            @else
+                <div class="summary-value">N/A</div>
+                <div class="summary-sub">No levels configured</div>
+            @endif
         </div>
     </div>
 

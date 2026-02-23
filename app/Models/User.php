@@ -10,6 +10,8 @@ use Laravel\Sanctum\HasApiTokens;
 use App\Notifications\CustomVerifyEmail;
 use App\Models\UserProfile;
 use App\Models\UserBankAccount;
+use App\Models\UserReserve;
+use App\Models\UserReserveLedger;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -68,6 +70,16 @@ class User extends Authenticatable implements MustVerifyEmail
     public function bankAccounts()
     {
         return $this->hasMany(UserBankAccount::class);
+    }
+
+    public function reserve()
+    {
+        return $this->hasOne(UserReserve::class);
+    }
+
+    public function reserveLedgers()
+    {
+        return $this->hasMany(UserReserveLedger::class);
     }
 
     public function hasTwoFactorEnabled(): bool

@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\AdminMessageController;
 use App\Http\Controllers\Admin\MailSettingsController;
 use App\Http\Controllers\Admin\SiteSettingController;
 use App\Http\Controllers\Admin\StakingPlanController;
+use App\Http\Controllers\Admin\LevelController;
 use App\Http\Controllers\Admin\WithdrawalReviewController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -198,6 +199,15 @@ Route::prefix('admin')->name('admin.')->middleware('admin.ip')->group(function (
             Route::get('/staking-plans/{stakingPlan}/edit', [StakingPlanController::class, 'edit'])->name('staking-plans.edit');
             Route::post('/staking-plans/{stakingPlan}/update', [StakingPlanController::class, 'update'])->name('staking-plans.update');
             Route::post('/staking-plans/{stakingPlan}/delete', [StakingPlanController::class, 'destroy'])->name('staking-plans.delete');
+        });
+
+        Route::middleware('permission:level.manage')->group(function () {
+            Route::get('/levels', [LevelController::class, 'index'])->name('levels.index');
+            Route::get('/levels/create', [LevelController::class, 'create'])->name('levels.create');
+            Route::post('/levels', [LevelController::class, 'store'])->name('levels.store');
+            Route::get('/levels/{level}/edit', [LevelController::class, 'edit'])->name('levels.edit');
+            Route::post('/levels/{level}/update', [LevelController::class, 'update'])->name('levels.update');
+            Route::post('/levels/{level}/toggle', [LevelController::class, 'toggle'])->name('levels.toggle');
         });
 
         Route::middleware('permission:withdrawal.review')->group(function () {

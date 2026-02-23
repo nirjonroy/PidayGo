@@ -7,12 +7,14 @@ use App\Models\Stake;
 use App\Models\StakePlan;
 use App\Services\NotificationService;
 use App\Services\WalletService;
+use App\Services\UserReserveService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class StakingController extends Controller
 {
-    public function store(Request $request, WalletService $walletService, NotificationService $notifications): RedirectResponse
+    public function store(Request $request, WalletService $walletService, NotificationService $notifications, UserReserveService $userReserveService): RedirectResponse
     {
         $validated = $request->validate([
             'plan_id' => ['required', 'exists:stake_plans,id'],
@@ -37,22 +39,33 @@ class StakingController extends Controller
             return back()->withErrors(['amount' => 'Insufficient balance.']);
         }
 
-        $stake = Stake::create([
-            'user_id' => $user->id,
-            'stake_plan_id' => $plan->id,
-            'principal_amount' => $amount,
-            'status' => 'active',
-            'started_at' => now(),
-            'ends_at' => now()->addDays($plan->duration_days),
-        ]);
+        $stake = null;
+        DB::transaction(function () use ($user, $plan, $amount, $walletService, $userReserveService, &$stake) {
+            $stake = Stake::create([
+                'user_id' => $user->id,
+                'stake_plan_id' => $plan->id,
+                'principal_amount' => $amount,
+                'status' => 'active',
+                'started_at' => now(),
+                'ends_at' => now()->addDays($plan->duration_days),
+            ]);
 
-        $walletService->debit(
-            $user,
-            'stake_lock',
-            $amount,
-            ['plan_id' => $plan->id],
-            $stake
-        );
+            $walletService->debit(
+                $user,
+                'stake_lock',
+                $amount,
+                ['plan_id' => $plan->id],
+                $stake
+            );
+
+            $userReserveService->creditUserReserve(
+                $user,
+                $amount,
+                'stake_lock',
+                'stake',
+                $stake->id
+            );
+        });
 
         $notifications->notifyUser(
             $user->id,
@@ -66,7 +79,7 @@ class StakingController extends Controller
         return back()->with('status', 'Stake created.');
     }
 
-    public function unstake(Request $request, Stake $stake, WalletService $walletService): RedirectResponse
+    public function unstake(Request $request, Stake $stake, WalletService $walletService, UserReserveService $userReserveService): RedirectResponse
     {
         if ($stake->user_id !== $request->user()->id) {
             abort(403);
@@ -90,15 +103,25 @@ class StakingController extends Controller
         $maxReward = max(0, $maxPayout - $principal);
         $reward = min($rawReward, $maxReward);
 
-        $walletService->credit($request->user(), 'stake_unlocked', $principal, [], $stake);
-        if ($reward > 0) {
-            $walletService->credit($request->user(), 'reward_credit', $reward, [], $stake);
-        }
+        DB::transaction(function () use ($request, $stake, $principal, $reward, $walletService, $userReserveService) {
+            $userReserveService->debitUserReserve(
+                $request->user(),
+                $principal,
+                'stake_unlocked',
+                'stake',
+                $stake->id
+            );
 
-        $stake->update([
-            'status' => 'completed',
-            'total_reward_paid' => $reward,
-        ]);
+            $walletService->credit($request->user(), 'stake_unlocked', $principal, [], $stake);
+            if ($reward > 0) {
+                $walletService->credit($request->user(), 'reward_credit', $reward, [], $stake);
+            }
+
+            $stake->update([
+                'status' => 'completed',
+                'total_reward_paid' => $reward,
+            ]);
+        });
 
         return back()->with('status', 'Stake completed.');
     }

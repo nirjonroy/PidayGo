@@ -169,14 +169,22 @@
                   </a>
                 </li>
               @endif
-              @if (auth('admin')->user()?->can('staking.manage'))
-                <li class="nav-item">
-                  <a href="{{ route('admin.staking-plans.index') }}" class="nav-link {{ request()->routeIs('admin.staking-plans.*') ? 'active' : '' }}">
-                    <i class="nav-icon bi bi-bank"></i>
-                    <p>Staking Plans</p>
-                  </a>
-                </li>
-              @endif
+                @if (auth('admin')->user()?->can('staking.manage'))
+                  <li class="nav-item">
+                    <a href="{{ route('admin.staking-plans.index') }}" class="nav-link {{ request()->routeIs('admin.staking-plans.*') ? 'active' : '' }}">
+                      <i class="nav-icon bi bi-bank"></i>
+                      <p>Staking Plans</p>
+                    </a>
+                  </li>
+                @endif
+                @if (auth('admin')->user()?->can('level.manage'))
+                  <li class="nav-item">
+                    <a href="{{ route('admin.levels.index') }}" class="nav-link {{ request()->routeIs('admin.levels.*') ? 'active' : '' }}">
+                      <i class="nav-icon bi bi-bar-chart-steps"></i>
+                      <p>Levels</p>
+                    </a>
+                  </li>
+                @endif
               @if (auth('admin')->user()?->can('withdrawal.review'))
                 <li class="nav-item">
                   <a href="{{ route('admin.withdrawals.index') }}" class="nav-link {{ request()->routeIs('admin.withdrawals.*') ? 'active' : '' }}">

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Stake;
 use App\Models\StakePlan;
 use App\Services\WalletService;
+use App\Services\UserReserveService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -29,7 +30,7 @@ class StakeController extends Controller
         ]);
     }
 
-    public function store(Request $request, WalletService $walletService): RedirectResponse
+    public function store(Request $request, WalletService $walletService, UserReserveService $userReserveService): RedirectResponse
     {
         $validated = $request->validate([
             'stake_plan_id' => ['required', 'exists:stake_plans,id'],
@@ -61,7 +62,7 @@ class StakeController extends Controller
 
         try {
             $stake = null;
-            DB::transaction(function () use ($request, $plan, $amount, $walletService, &$stake) {
+            DB::transaction(function () use ($request, $plan, $amount, $walletService, $userReserveService, &$stake) {
                 $stake = Stake::create([
                     'user_id' => $request->user()->id,
                     'stake_plan_id' => $plan->id,
@@ -77,6 +78,14 @@ class StakeController extends Controller
                     $amount,
                     ['plan_id' => $plan->id],
                     $stake
+                );
+
+                $userReserveService->creditUserReserve(
+                    $request->user(),
+                    $amount,
+                    'stake_lock',
+                    'stake',
+                    $stake->id
                 );
             });
         } catch (RuntimeException $exception) {

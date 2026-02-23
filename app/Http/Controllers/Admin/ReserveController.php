@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\ReserveAccount;
 use App\Models\ReserveLedger;
+use App\Services\ReserveService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -13,7 +14,7 @@ use Illuminate\View\View;
 
 class ReserveController extends Controller
 {
-    public function index(): View
+    public function index(ReserveService $reserveService): View
     {
         $reserve = ReserveAccount::firstOrCreate(
             ['currency' => 'USDT'],
@@ -25,7 +26,7 @@ class ReserveController extends Controller
         ]);
     }
 
-    public function add(Request $request): RedirectResponse
+    public function add(Request $request, ReserveService $reserveService): RedirectResponse
     {
         $validated = $request->validate([
             'amount' => ['required', 'numeric', 'min:0.0001'],
@@ -35,27 +36,7 @@ class ReserveController extends Controller
         $admin = $request->user('admin');
         $amount = (float) $validated['amount'];
 
-        DB::transaction(function () use ($admin, $amount, $validated) {
-            $reserve = ReserveAccount::where('currency', 'USDT')->lockForUpdate()->first();
-
-            if (!$reserve) {
-                $reserve = ReserveAccount::create([
-                    'currency' => 'USDT',
-                    'balance' => 0,
-                ]);
-            }
-
-            ReserveLedger::create([
-                'reserve_account_id' => $reserve->id,
-                'amount' => $amount,
-                'reason' => $validated['reason'],
-                'created_by_admin_id' => $admin->id,
-                'meta' => ['action' => 'add'],
-            ]);
-
-            $reserve->balance = round((float) $reserve->balance + $amount, 8);
-            $reserve->save();
-        });
+        $reserveService->credit($amount, $validated['reason'], 'admin_add', null, $admin->id);
 
         $this->logActivity($admin, 'reserve.added', [
             'amount' => $amount,
@@ -65,7 +46,7 @@ class ReserveController extends Controller
         return back()->with('status', 'Reserve updated.');
     }
 
-    public function deduct(Request $request): RedirectResponse
+    public function deduct(Request $request, ReserveService $reserveService): RedirectResponse
     {
         $validated = $request->validate([
             'amount' => ['required', 'numeric', 'min:0.0001'],
@@ -74,36 +55,10 @@ class ReserveController extends Controller
 
         $admin = $request->user('admin');
         $amount = (float) $validated['amount'];
-        $error = null;
-
-        DB::transaction(function () use ($admin, $amount, $validated, &$error) {
-            $reserve = ReserveAccount::where('currency', 'USDT')->lockForUpdate()->first();
-
-            if (!$reserve) {
-                $error = 'Reserve account not initialized.';
-                return;
-            }
-
-            $balance = (float) $reserve->balance;
-            if ($balance < $amount) {
-                $error = 'Insufficient reserve balance.';
-                return;
-            }
-
-            ReserveLedger::create([
-                'reserve_account_id' => $reserve->id,
-                'amount' => -$amount,
-                'reason' => $validated['reason'],
-                'created_by_admin_id' => $admin->id,
-                'meta' => ['action' => 'deduct'],
-            ]);
-
-            $reserve->balance = round($balance - $amount, 8);
-            $reserve->save();
-        });
-
-        if ($error) {
-            return back()->withErrors(['amount' => $error]);
+        try {
+            $reserveService->debit($amount, $validated['reason'], 'admin_deduct', null, $admin->id);
+        } catch (\RuntimeException $exception) {
+            return back()->withErrors(['amount' => $exception->getMessage()]);
         }
 
         $this->logActivity($admin, 'reserve.deducted', [

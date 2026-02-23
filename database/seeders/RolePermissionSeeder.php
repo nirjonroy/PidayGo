@@ -58,6 +58,11 @@ class RolePermissionSeeder extends Seeder
             'guard_name' => 'admin',
         ]);
 
+        $levelPermission = Permission::firstOrCreate([
+            'name' => 'level.manage',
+            'guard_name' => 'admin',
+        ]);
+
         $withdrawalPermission = Permission::firstOrCreate([
             'name' => 'withdrawal.review',
             'guard_name' => 'admin',
@@ -101,6 +106,7 @@ class RolePermissionSeeder extends Seeder
         $role->givePermissionTo($adminPermission);
         $role->givePermissionTo($activityPermission);
         $role->givePermissionTo($stakingPermission);
+        $role->givePermissionTo($levelPermission);
         $role->givePermissionTo($withdrawalPermission);
         $role->givePermissionTo($depositPermission);
         $role->givePermissionTo($depositAddressPermission);
