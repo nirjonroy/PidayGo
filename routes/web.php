@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\ReserveController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\DepositController as AdminDepositController;
+use App\Http\Controllers\Admin\DepositAddressController;
 use App\Http\Controllers\Admin\SiteSettingController;
 use App\Http\Controllers\Admin\StakingPlanController;
 use App\Http\Controllers\Admin\WithdrawalReviewController;
@@ -175,6 +176,16 @@ Route::prefix('admin')->name('admin.')->middleware('admin.ip')->group(function (
             Route::post('/deposits/{deposit}/approve', [AdminDepositController::class, 'approve'])->name('deposits.approve');
             Route::post('/deposits/{deposit}/reject', [AdminDepositController::class, 'reject'])->name('deposits.reject');
             Route::post('/deposits/{deposit}/expire', [AdminDepositController::class, 'expire'])->name('deposits.expire');
+        });
+
+        Route::middleware('permission:deposit.address.manage')->group(function () {
+            Route::get('/deposit-addresses', [DepositAddressController::class, 'index'])->name('deposit-addresses.index');
+            Route::get('/deposit-addresses/create', [DepositAddressController::class, 'create'])->name('deposit-addresses.create');
+            Route::post('/deposit-addresses', [DepositAddressController::class, 'store'])->name('deposit-addresses.store');
+            Route::get('/deposit-addresses/{depositAddress}/edit', [DepositAddressController::class, 'edit'])->name('deposit-addresses.edit');
+            Route::put('/deposit-addresses/{depositAddress}', [DepositAddressController::class, 'update'])->name('deposit-addresses.update');
+            Route::post('/deposit-addresses/{depositAddress}/activate', [DepositAddressController::class, 'activate'])->name('deposit-addresses.activate');
+            Route::post('/deposit-addresses/{depositAddress}/deactivate', [DepositAddressController::class, 'deactivate'])->name('deposit-addresses.deactivate');
         });
 
         Route::middleware('permission:reserve.manage')->group(function () {

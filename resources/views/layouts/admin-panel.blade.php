@@ -170,6 +170,14 @@
                   </a>
                 </li>
               @endif
+              @if (auth('admin')->user()?->can('deposit.address.manage'))
+                <li class="nav-item">
+                  <a href="{{ route('admin.deposit-addresses.index') }}" class="nav-link {{ request()->routeIs('admin.deposit-addresses.*') ? 'active' : '' }}">
+                    <i class="nav-icon bi bi-geo"></i>
+                    <p>Deposit Addresses</p>
+                  </a>
+                </li>
+              @endif
               @if (auth('admin')->user()?->can('reserve.manage'))
                 <li class="nav-item">
                   <a href="{{ route('admin.reserve.index') }}" class="nav-link {{ request()->routeIs('admin.reserve.*') ? 'active' : '' }}">

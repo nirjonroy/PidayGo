@@ -54,12 +54,6 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label" for="usdt_trc20_address">USDT TRC20 Address</label>
-                    <input id="usdt_trc20_address" name="usdt_trc20_address" class="form-control" value="{{ old('usdt_trc20_address', $setting->usdt_trc20_address) }}">
-                    @error('usdt_trc20_address') <div class="text-danger">{{ $message }}</div> @enderror
-                </div>
-
-                <div class="mb-3">
                     <label class="form-label" for="min_deposit_usdt">Minimum Deposit (USDT)</label>
                     <input id="min_deposit_usdt" name="min_deposit_usdt" type="number" step="0.0001" class="form-control" value="{{ old('min_deposit_usdt', $setting->min_deposit_usdt ?? 50) }}" required>
                     @error('min_deposit_usdt') <div class="text-danger">{{ $message }}</div> @enderror

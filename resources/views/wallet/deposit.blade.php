@@ -4,13 +4,13 @@
     <h1>USDT Deposit (TRC20)</h1>
 
     <div class="mb-4">
-        <strong>Deposit Chain:</strong> USDT-TRON (TRC20)<br>
+        <strong>Deposit Chain:</strong> {{ $currency }}-{{ $chain }}<br>
         <strong>Minimum Deposit:</strong> {{ number_format($minDeposit, 4) }} USDT<br>
         <strong>Review Time:</strong> Within {{ $reviewHours }} hours
     </div>
 
     @if (empty($address))
-        <div class="error">Deposit address is not configured. Please contact support.</div>
+        <div class="error">Deposit is temporarily unavailable. Please contact support.</div>
     @else
         <div class="mb-3">
             <button type="button" id="btn-show-qr">Show QR</button>
@@ -18,7 +18,7 @@
         </div>
 
         <div id="qr-box" style="margin-bottom:16px;">
-            {!! QrCode::size(220)->margin(1)->generate($address) !!}
+            {!! QrCode::size(220)->margin(1)->generate($qrPayload ?? $address) !!}
         </div>
 
         <div id="address-box" style="display:none; margin-bottom:16px;">

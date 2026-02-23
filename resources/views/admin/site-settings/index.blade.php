@@ -26,7 +26,6 @@
                 <div class="mb-3"><strong>Email:</strong> {{ $setting->email ?? '-' }}</div>
                 <div class="mb-3"><strong>Address:</strong> {{ $setting->address ?? '-' }}</div>
                 <div class="mb-3"><strong>Description:</strong> {{ $setting->description ?? '-' }}</div>
-                <div class="mb-3"><strong>USDT TRC20 Address:</strong> {{ $setting->usdt_trc20_address ?? '-' }}</div>
                 <div class="mb-3"><strong>Min Deposit (USDT):</strong> {{ $setting->min_deposit_usdt ?? 50 }}</div>
                 <div class="mb-3"><strong>Deposit Review Hours:</strong> {{ $setting->deposit_review_hours ?? 24 }}</div>
 
