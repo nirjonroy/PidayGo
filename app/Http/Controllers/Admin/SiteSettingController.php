@@ -84,6 +84,9 @@ class SiteSettingController extends Controller
             'email' => ['nullable', 'email', 'max:150'],
             'address' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:1000'],
+            'usdt_trc20_address' => ['nullable', 'string', 'max:120'],
+            'min_deposit_usdt' => ['required', 'numeric', 'min:0'],
+            'deposit_review_hours' => ['required', 'integer', 'min:1', 'max:168'],
             'logo' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:2048'],
         ]);
     }

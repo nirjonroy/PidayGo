@@ -76,4 +76,9 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(WalletLedger::class);
     }
+
+    public function depositRequests()
+    {
+        return $this->hasMany(DepositRequest::class);
+    }
 }

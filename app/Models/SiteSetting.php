@@ -16,5 +16,8 @@ class SiteSetting extends Model
         'email',
         'address',
         'description',
+        'usdt_trc20_address',
+        'min_deposit_usdt',
+        'deposit_review_hours',
     ];
 }

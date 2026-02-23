@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\ReserveController;
 use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\DepositController as AdminDepositController;
 use App\Http\Controllers\Admin\SiteSettingController;
 use App\Http\Controllers\Admin\StakingPlanController;
 use App\Http\Controllers\Admin\WithdrawalReviewController;
@@ -22,6 +23,7 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\TwoFactorController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\KycController;
+use App\Http\Controllers\User\DepositController;
 use App\Http\Controllers\User\StakeController;
 use App\Http\Controllers\User\StakingController as UserStakingController;
 use App\Http\Controllers\User\WalletController;
@@ -77,6 +79,8 @@ Route::middleware(['auth', 'verified', '2fa.enabled', '2fa.passed', 'kyc.approve
     })->name('dashboard');
 
     Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
+    Route::get('/wallet/deposit', [DepositController::class, 'create'])->name('wallet.deposit');
+    Route::post('/wallet/deposit', [DepositController::class, 'store'])->name('wallet.deposit.store');
     Route::post('/staking', [UserStakingController::class, 'store'])->name('staking.store');
     Route::post('/staking/{stake}/unstake', [UserStakingController::class, 'unstake'])->name('staking.unstake');
     Route::post('/withdrawals', [UserWithdrawalController::class, 'store'])->name('withdrawals.store');
@@ -163,6 +167,14 @@ Route::prefix('admin')->name('admin.')->middleware('admin.ip')->group(function (
             Route::get('/withdrawals', [WithdrawalReviewController::class, 'index'])->name('withdrawals.index');
             Route::post('/withdrawals/{withdrawal}/approve', [WithdrawalReviewController::class, 'approve'])->name('withdrawals.approve');
             Route::post('/withdrawals/{withdrawal}/reject', [WithdrawalReviewController::class, 'reject'])->name('withdrawals.reject');
+        });
+
+        Route::middleware('permission:deposit.review')->group(function () {
+            Route::get('/deposits', [AdminDepositController::class, 'index'])->name('deposits.index');
+            Route::get('/deposits/{deposit}', [AdminDepositController::class, 'show'])->name('deposits.show');
+            Route::post('/deposits/{deposit}/approve', [AdminDepositController::class, 'approve'])->name('deposits.approve');
+            Route::post('/deposits/{deposit}/reject', [AdminDepositController::class, 'reject'])->name('deposits.reject');
+            Route::post('/deposits/{deposit}/expire', [AdminDepositController::class, 'expire'])->name('deposits.expire');
         });
 
         Route::middleware('permission:reserve.manage')->group(function () {

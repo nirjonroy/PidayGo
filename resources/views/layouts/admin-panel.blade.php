@@ -162,6 +162,14 @@
                   </a>
                 </li>
               @endif
+              @if (auth('admin')->user()?->can('deposit.review'))
+                <li class="nav-item">
+                  <a href="{{ route('admin.deposits.index') }}" class="nav-link {{ request()->routeIs('admin.deposits.*') ? 'active' : '' }}">
+                    <i class="nav-icon bi bi-box-arrow-in-down"></i>
+                    <p>Deposits</p>
+                  </a>
+                </li>
+              @endif
               @if (auth('admin')->user()?->can('reserve.manage'))
                 <li class="nav-item">
                   <a href="{{ route('admin.reserve.index') }}" class="nav-link {{ request()->routeIs('admin.reserve.*') ? 'active' : '' }}">

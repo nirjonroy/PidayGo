@@ -16,6 +16,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->command('stakes:credit-daily-rewards')->daily();
+        $schedule->command('deposits:expire-pending')->hourly();
     }
 
     /**

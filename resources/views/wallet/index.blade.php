@@ -5,6 +5,9 @@
 
     <div class="mb-4">
         <strong>Balance:</strong> {{ number_format($balance, 4) }} USDT
+        <div style="margin-top:8px;">
+            <a href="{{ route('wallet.deposit') }}">Make a Deposit</a>
+        </div>
     </div>
 
     <h2>Staking Plans</h2>

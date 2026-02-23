@@ -20,6 +20,9 @@ class SiteSettingServiceProvider extends ServiceProvider
                     'siteEmail' => null,
                     'siteAddress' => null,
                     'siteDescription' => null,
+                    'siteUsdtTrc20Address' => null,
+                    'siteMinDepositUsdt' => 50,
+                    'siteDepositReviewHours' => 24,
                 ]);
                 return;
             }
@@ -33,6 +36,9 @@ class SiteSettingServiceProvider extends ServiceProvider
                 'siteEmail' => $setting?->email,
                 'siteAddress' => $setting?->address,
                 'siteDescription' => $setting?->description,
+                'siteUsdtTrc20Address' => $setting?->usdt_trc20_address,
+                'siteMinDepositUsdt' => $setting?->min_deposit_usdt ?? 50,
+                'siteDepositReviewHours' => $setting?->deposit_review_hours ?? 24,
             ]);
         });
     }
