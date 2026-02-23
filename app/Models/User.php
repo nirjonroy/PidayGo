@@ -8,6 +8,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Notifications\CustomVerifyEmail;
+use App\Models\UserProfile;
+use App\Models\UserBankAccount;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -56,6 +58,16 @@ class User extends Authenticatable implements MustVerifyEmail
     public function latestKycRequest()
     {
         return $this->hasOne(KycRequest::class)->latestOfMany();
+    }
+
+    public function profile()
+    {
+        return $this->hasOne(UserProfile::class);
+    }
+
+    public function bankAccounts()
+    {
+        return $this->hasMany(UserBankAccount::class);
     }
 
     public function hasTwoFactorEnabled(): bool

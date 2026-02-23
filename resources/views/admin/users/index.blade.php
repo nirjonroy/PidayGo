@@ -14,6 +14,7 @@
                         <th>KYC</th>
                         <th>2FA</th>
                         <th>Joined</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -25,6 +26,9 @@
                             <td>{{ $user->isKycApproved() ? 'Approved' : 'Pending' }}</td>
                             <td>{{ $user->hasTwoFactorEnabled() ? 'Enabled' : 'Disabled' }}</td>
                             <td>{{ $user->created_at?->format('Y-m-d') }}</td>
+                            <td class="text-end">
+                                <a href="{{ route('admin.users.show', $user) }}" class="btn btn-sm btn-outline-primary">View</a>
+                            </td>
                         </tr>
                     @endforeach
                 </tbody>

@@ -26,6 +26,7 @@
                 <thead>
                     <tr>
                         <th>User</th>
+                        <th>User Info</th>
                         <th>Amount</th>
                         <th>Status</th>
                         <th>Requested</th>
@@ -39,9 +40,23 @@
                         @php
                             $eligible = $request->eligible_at && now()->gte($request->eligible_at);
                             $overdue = $request->eligible_at && now()->gt($request->eligible_at->copy()->addHours(24));
+                            $defaultBank = $request->user->bankAccounts->firstWhere('is_default', true) ?? $request->user->bankAccounts->first();
                         @endphp
                         <tr>
-                            <td>{{ $request->user->email }}</td>
+                            <td>
+                                <div>{{ $request->user->email }}</div>
+                                <div class="small text-muted">{{ $request->user->name }}</div>
+                            </td>
+                            <td>
+                                <div class="small"><strong>KYC:</strong> {{ $request->user->isKycApproved() ? 'Approved' : 'Pending' }}</div>
+                                @if ($defaultBank)
+                                    <div class="small"><strong>Bank:</strong> {{ $defaultBank->bank_name }}</div>
+                                    <div class="small"><strong>Acc:</strong> {{ $defaultBank->account_number }}</div>
+                                @else
+                                    <div class="small text-muted">No bank on file</div>
+                                @endif
+                                <a class="small" href="{{ route('admin.users.show', $request->user) }}">View full profile</a>
+                            </td>
                             <td>{{ $request->amount }}</td>
                             <td>{{ ucfirst($request->status) }}</td>
                             <td>{{ $request->requested_at }}</td>

@@ -16,6 +16,8 @@ class KycRequest extends Model
         'reviewed_at',
         'reviewed_by',
         'notes',
+        'document_type',
+        'document_number',
         'document_front_path',
         'document_back_path',
         'selfie_path',
@@ -25,6 +27,30 @@ class KycRequest extends Model
         'submitted_at' => 'datetime',
         'reviewed_at' => 'datetime',
     ];
+
+    public function setDocumentNumberAttribute(?string $value): void
+    {
+        if ($value === null || $value === '') {
+            $this->attributes['document_number'] = null;
+            return;
+        }
+
+        $this->attributes['document_number'] = \Illuminate\Support\Facades\Crypt::encryptString($value);
+    }
+
+    public function getDocumentNumberAttribute($value): ?string
+    {
+        if (!$value) {
+            return null;
+        }
+
+        try {
+            return \Illuminate\Support\Facades\Crypt::decryptString($value);
+        } catch (\Throwable $e) {
+            report($e);
+            return null;
+        }
+    }
 
     public function user()
     {

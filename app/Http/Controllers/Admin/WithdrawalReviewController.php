@@ -19,7 +19,13 @@ class WithdrawalReviewController extends Controller
     {
         $status = request('status', 'pending');
 
-        $query = WithdrawalRequest::query()->with('user')->orderByDesc('requested_at');
+        $query = WithdrawalRequest::query()
+            ->with([
+                'user.profile',
+                'user.bankAccounts',
+                'user.latestKycRequest',
+            ])
+            ->orderByDesc('requested_at');
         if ($status !== 'all') {
             $query->where('status', $status);
         }

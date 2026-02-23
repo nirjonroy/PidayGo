@@ -5,6 +5,12 @@
 
     <p><strong>User:</strong> {{ $kyc->user->name }} ({{ $kyc->user->email }})</p>
     <p><strong>Status:</strong> {{ ucfirst($kyc->status) }}</p>
+    @if ($kyc->document_type)
+        <p><strong>Document Type:</strong> {{ strtoupper($kyc->document_type) }}</p>
+    @endif
+    @if ($kyc->document_number)
+        <p><strong>Document Number:</strong> {{ $kyc->document_number }}</p>
+    @endif
     @if ($kyc->notes)
         <p><strong>Notes:</strong> {{ $kyc->notes }}</p>
     @endif

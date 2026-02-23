@@ -10,6 +10,23 @@
 
     <form method="POST" action="{{ route('kyc.submit') }}" enctype="multipart/form-data">
         @csrf
+        <label for="document_type">Document Type (optional)</label>
+        <select id="document_type" name="document_type">
+            <option value="">Select type</option>
+            <option value="nid" @selected(old('document_type') === 'nid')>National ID</option>
+            <option value="passport" @selected(old('document_type') === 'passport')>Passport</option>
+            <option value="driving_license" @selected(old('document_type') === 'driving_license')>Driving License</option>
+        </select>
+        @error('document_type')
+            <div class="error">{{ $message }}</div>
+        @enderror
+
+        <label for="document_number">Document Number (optional)</label>
+        <input id="document_number" type="text" name="document_number" value="{{ old('document_number') }}">
+        @error('document_number')
+            <div class="error">{{ $message }}</div>
+        @enderror
+
         <label for="document_front">Document Front (jpg, png, pdf)</label>
         <input id="document_front" type="file" name="document_front" required>
         @error('document_front')

@@ -35,6 +35,8 @@ use App\Http\Controllers\User\StakeController;
 use App\Http\Controllers\User\StakingController as UserStakingController;
 use App\Http\Controllers\User\UserConversationController;
 use App\Http\Controllers\User\UserMessageController;
+use App\Http\Controllers\User\ProfileController as UserProfileController;
+use App\Http\Controllers\User\BankAccountController;
 use App\Http\Controllers\User\WalletController;
 use App\Http\Controllers\User\WithdrawalController as UserWithdrawalController;
 use Illuminate\Support\Facades\Route;
@@ -83,6 +85,17 @@ Route::middleware(['auth', 'verified.if.mail', '2fa.enabled', '2fa.passed'])->gr
 });
 
 Route::middleware(['auth', 'verified.if.mail', '2fa.enabled', '2fa.passed'])->group(function () {
+    Route::get('/profile', [UserProfileController::class, 'edit'])->name('profile.edit');
+    Route::post('/profile', [UserProfileController::class, 'update'])->name('profile.update');
+
+    Route::get('/profile/bank', [BankAccountController::class, 'index'])->name('profile.bank.index');
+    Route::get('/profile/bank/create', [BankAccountController::class, 'create'])->name('profile.bank.create');
+    Route::post('/profile/bank', [BankAccountController::class, 'store'])->name('profile.bank.store');
+    Route::get('/profile/bank/{bankAccount}/edit', [BankAccountController::class, 'edit'])->name('profile.bank.edit');
+    Route::put('/profile/bank/{bankAccount}', [BankAccountController::class, 'update'])->name('profile.bank.update');
+    Route::delete('/profile/bank/{bankAccount}', [BankAccountController::class, 'destroy'])->name('profile.bank.delete');
+    Route::post('/profile/bank/{bankAccount}/default', [BankAccountController::class, 'setDefault'])->name('profile.bank.default');
+
     Route::get('/notifications', [UserNotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{notification}/read', [UserNotificationController::class, 'markRead'])->name('notifications.read');
     Route::post('/notifications/{notification}/dismiss', [UserNotificationController::class, 'dismiss'])->name('notifications.dismiss');
@@ -162,6 +175,7 @@ Route::prefix('admin')->name('admin.')->middleware('admin.ip')->group(function (
 
         Route::middleware('permission:user.manage')->group(function () {
             Route::get('/users', [UserController::class, 'index'])->name('users.index');
+            Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
         });
 
         Route::middleware('permission:admin.manage')->group(function () {

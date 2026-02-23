@@ -22,6 +22,8 @@ class KycController extends Controller
             'document_front' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
             'document_back' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
             'selfie_data' => ['required', 'string'],
+            'document_type' => ['nullable', 'in:nid,passport,driving_license'],
+            'document_number' => ['nullable', 'string', 'max:100'],
             'notes' => ['nullable', 'string', 'max:1000'],
         ]);
 
@@ -33,6 +35,8 @@ class KycController extends Controller
             'user_id' => $user->id,
             'status' => 'pending',
             'submitted_at' => now(),
+            'document_type' => $validated['document_type'] ?? null,
+            'document_number' => $validated['document_number'] ?? null,
             'notes' => $validated['notes'] ?? null,
             'document_front_path' => $validated['document_front']->store('kyc'),
             'document_back_path' => $validated['document_back']->store('kyc'),

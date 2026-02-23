@@ -44,6 +44,7 @@
                             <span class="badge">{{ $userNotificationCount }}</span>
                         @endif
                     </a>
+                    <a href="{{ route('profile.edit') }}">Profile</a>
                     <a href="{{ route('support.index') }}">Support</a>
                     <form method="POST" action="{{ route('logout') }}" style="display:inline;">
                         @csrf
