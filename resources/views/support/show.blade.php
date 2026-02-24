@@ -1,44 +1,77 @@
-@extends('layouts.app')
+@extends('layouts.frontend')
 
 @section('content')
-    <h1>{{ $conversation->subject }}</h1>
-    <p class="muted">Status: {{ ucfirst($conversation->status) }} | Priority: {{ ucfirst($conversation->priority) }}</p>
-
-    <div style="margin:16px 0;">
-        @foreach ($conversation->messages as $message)
-            <div style="margin-bottom:12px; padding:10px; border-radius:8px; background: {{ $message->sender_type === 'user' ? '#eef2ff' : '#f3f4f6' }};">
-                <div class="muted" style="font-size:12px;">
-                    {{ $message->sender_type === 'user' ? 'You' : 'Admin' }} • {{ $message->created_at }}
+<section id="subheader" class="text-light" data-bgimage="url({{ asset('frontend/images/background/subheader.jpg') }}) top">
+    <div class="center-y relative text-center">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <h1>{{ $conversation->subject }}</h1>
                 </div>
-                <div>{{ $message->body }}</div>
-                @if ($message->attachment_path)
-                    <div style="margin-top:6px;">
-                        <a href="{{ asset('storage/' . $message->attachment_path) }}" target="_blank">View attachment</a>
-                    </div>
-                @endif
             </div>
-        @endforeach
+        </div>
     </div>
+</section>
 
-    @if ($conversation->status !== 'closed')
-        <form method="POST" action="{{ route('support.message.store', $conversation) }}" enctype="multipart/form-data">
-            @csrf
-            <label for="body">Reply</label>
-            <textarea id="body" name="body" rows="4" required></textarea>
-            @error('body') <div class="error">{{ $message }}</div> @enderror
+<section aria-label="section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 mb20">
+                <div class="nft__item s2">
+                    <div class="nft__item_info">
+                        <div class="text-muted">Status: {{ ucfirst($conversation->status) }} | Priority: {{ ucfirst($conversation->priority) }}</div>
+                    </div>
+                </div>
+            </div>
 
-            <label for="attachment">Attachment (optional)</label>
-            <input id="attachment" name="attachment" type="file" accept=".png,.jpg,.jpeg,.pdf">
-            @error('attachment') <div class="error">{{ $message }}</div> @enderror
+            <div class="col-lg-12 mb30">
+                @foreach ($conversation->messages as $message)
+                    <div class="nft__item s2 mb-3" style="border-left: 4px solid {{ $message->sender_type === 'user' ? '#6b6bf1' : '#9ca3af' }};">
+                        <div class="nft__item_info">
+                            <div class="small text-muted">
+                                {{ $message->sender_type === 'user' ? 'You' : 'Admin' }} &bull; {{ $message->created_at }}
+                            </div>
+                            <div class="mt-2">{{ $message->body }}</div>
+                            @if ($message->attachment_path)
+                                <div class="mt-2">
+                                    <a href="{{ asset('storage/' . $message->attachment_path) }}" target="_blank">View attachment</a>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                @endforeach
+            </div>
 
-            <button type="submit">Send Reply</button>
-        </form>
+            @if ($conversation->status !== 'closed')
+                <div class="col-lg-12">
+                    <form method="POST" action="{{ route('support.message.store', $conversation) }}" enctype="multipart/form-data" class="form-border">
+                        @csrf
+                        <div class="field-set">
+                            <h5>Reply</h5>
+                            <textarea id="body" name="body" rows="4" class="form-control" required></textarea>
+                            @error('body') <div class="text-danger">{{ $message }}</div> @enderror
 
-        <form method="POST" action="{{ route('support.close', $conversation) }}" style="margin-top:12px;">
-            @csrf
-            <button type="submit">Close Ticket</button>
-        </form>
-    @else
-        <div class="muted">This conversation is closed.</div>
-    @endif
+                            <div class="spacer-20"></div>
+
+                            <h5>Attachment (optional)</h5>
+                            <input id="attachment" name="attachment" type="file" class="form-control" accept=".png,.jpg,.jpeg,.pdf">
+                            @error('attachment') <div class="text-danger">{{ $message }}</div> @enderror
+
+                            <div class="spacer-20"></div>
+
+                            <button type="submit" class="btn-main">Send Reply</button>
+                        </div>
+                    </form>
+
+                    <form method="POST" action="{{ route('support.close', $conversation) }}" class="mt-3">
+                        @csrf
+                        <button type="submit" class="btn-main btn-light">Close Ticket</button>
+                    </form>
+                </div>
+            @else
+                <div class="col-lg-12 text-muted">This conversation is closed.</div>
+            @endif
+        </div>
+    </div>
+</section>
 @endsection

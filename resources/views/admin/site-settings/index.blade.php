@@ -22,6 +22,43 @@
                         <span class="text-secondary">Not set</span>
                     @endif
                 </div>
+                <div class="mb-3">
+                    <strong>Logo Light:</strong>
+                    @if ($setting->logo_light_path)
+                        <div>
+                            <img src="{{ asset('storage/' . $setting->logo_light_path) }}" alt="Logo Light" style="height:60px;">
+                        </div>
+                    @else
+                        <span class="text-secondary">Not set</span>
+                    @endif
+                </div>
+                <div class="mb-3">
+                    <strong>Logo Dark:</strong>
+                    @if ($setting->logo_dark_path)
+                        <div>
+                            <img src="{{ asset('storage/' . $setting->logo_dark_path) }}" alt="Logo Dark" style="height:60px;">
+                        </div>
+                    @else
+                        <span class="text-secondary">Not set</span>
+                    @endif
+                </div>
+                <div class="mb-3">
+                    <strong>Favicon:</strong>
+                    @if ($setting->favicon_path)
+                        <div>
+                            <img src="{{ asset('storage/' . $setting->favicon_path) }}" alt="Favicon" style="height:32px;">
+                        </div>
+                    @else
+                        <span class="text-secondary">Not set</span>
+                    @endif
+                    <div class="mt-2">
+                        <a href="{{ route('admin.site-settings.edit') }}" class="btn btn-sm btn-outline-primary">
+                            Upload / Change Favicon
+                        </a>
+                    </div>
+                </div>
+                <div class="mb-3"><strong>Hero Headline:</strong> {{ $setting->hero_headline ?? '-' }}</div>
+                <div class="mb-3"><strong>Hero Subtitle:</strong> {{ $setting->hero_subtitle ?? '-' }}</div>
                 <div class="mb-3"><strong>Mobile:</strong> {{ $setting->mobile ?? '-' }}</div>
                 <div class="mb-3"><strong>Email:</strong> {{ $setting->email ?? '-' }}</div>
                 <div class="mb-3"><strong>Address:</strong> {{ $setting->address ?? '-' }}</div>

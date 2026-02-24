@@ -28,6 +28,11 @@ class RolePermissionSeeder extends Seeder
             'guard_name' => 'admin',
         ]);
 
+        $homeSlidePermission = Permission::firstOrCreate([
+            'name' => 'home.slide.manage',
+            'guard_name' => 'admin',
+        ]);
+
         $rolePermission = Permission::firstOrCreate([
             'name' => 'role.manage',
             'guard_name' => 'admin',
@@ -83,6 +88,21 @@ class RolePermissionSeeder extends Seeder
             'guard_name' => 'admin',
         ]);
 
+        $sellerPermission = Permission::firstOrCreate([
+            'name' => 'seller.manage',
+            'guard_name' => 'admin',
+        ]);
+
+        $nftPermission = Permission::firstOrCreate([
+            'name' => 'nft.manage',
+            'guard_name' => 'admin',
+        ]);
+
+        $bidPermission = Permission::firstOrCreate([
+            'name' => 'bid.manage',
+            'guard_name' => 'admin',
+        ]);
+
         $supportPermission = Permission::firstOrCreate([
             'name' => 'support.manage',
             'guard_name' => 'admin',
@@ -100,6 +120,7 @@ class RolePermissionSeeder extends Seeder
 
         $role->givePermissionTo($permission);
         $role->givePermissionTo($sitePermission);
+        $role->givePermissionTo($homeSlidePermission);
         $role->givePermissionTo($rolePermission);
         $role->givePermissionTo($permPermission);
         $role->givePermissionTo($userPermission);
@@ -111,6 +132,9 @@ class RolePermissionSeeder extends Seeder
         $role->givePermissionTo($depositPermission);
         $role->givePermissionTo($depositAddressPermission);
         $role->givePermissionTo($notificationPermission);
+        $role->givePermissionTo($sellerPermission);
+        $role->givePermissionTo($nftPermission);
+        $role->givePermissionTo($bidPermission);
         $role->givePermissionTo($supportPermission);
         $role->givePermissionTo($mailPermission);
         $role->givePermissionTo($reservePermission);

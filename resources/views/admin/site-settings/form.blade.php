@@ -28,6 +28,48 @@
                         </div>
                     @endif
                 </div>
+                <div class="mb-3">
+                    <label class="form-label" for="logo_light">Logo Light</label>
+                    <input id="logo_light" name="logo_light" type="file" class="form-control">
+                    @error('logo_light') <div class="text-danger">{{ $message }}</div> @enderror
+                    @if ($setting->logo_light_path)
+                        <div class="mt-2">
+                            <img src="{{ asset('storage/' . $setting->logo_light_path) }}" alt="Logo Light" style="height:60px;">
+                        </div>
+                    @endif
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="logo_dark">Logo Dark</label>
+                    <input id="logo_dark" name="logo_dark" type="file" class="form-control">
+                    @error('logo_dark') <div class="text-danger">{{ $message }}</div> @enderror
+                    @if ($setting->logo_dark_path)
+                        <div class="mt-2">
+                            <img src="{{ asset('storage/' . $setting->logo_dark_path) }}" alt="Logo Dark" style="height:60px;">
+                        </div>
+                    @endif
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="favicon">Favicon</label>
+                    <input id="favicon" name="favicon" type="file" class="form-control">
+                    @error('favicon') <div class="text-danger">{{ $message }}</div> @enderror
+                    @if ($setting->favicon_path)
+                        <div class="mt-2">
+                            <img src="{{ asset('storage/' . $setting->favicon_path) }}" alt="Favicon" style="height:32px;">
+                        </div>
+                    @endif
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="hero_headline">Hero Headline</label>
+                    <input id="hero_headline" name="hero_headline" class="form-control" value="{{ old('hero_headline', $setting->hero_headline) }}">
+                    @error('hero_headline') <div class="text-danger">{{ $message }}</div> @enderror
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="hero_subtitle">Hero Subtitle</label>
+                    <textarea id="hero_subtitle" name="hero_subtitle" class="form-control" rows="3">{{ old('hero_subtitle', $setting->hero_subtitle) }}</textarea>
+                    @error('hero_subtitle') <div class="text-danger">{{ $message }}</div> @enderror
+                </div>
 
                 <div class="mb-3">
                     <label class="form-label" for="mobile">Mobile</label>

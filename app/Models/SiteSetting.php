@@ -12,6 +12,11 @@ class SiteSetting extends Model
     protected $fillable = [
         'site_name',
         'logo_path',
+        'logo_light_path',
+        'logo_dark_path',
+        'favicon_path',
+        'hero_headline',
+        'hero_subtitle',
         'mobile',
         'email',
         'address',

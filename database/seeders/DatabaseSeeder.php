@@ -18,6 +18,10 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             RolePermissionSeeder::class,
+            HomeSlidesSeeder::class,
+            SellersSeeder::class,
+            NftItemsSeeder::class,
+            BidsSeeder::class,
         ]);
     }
 }

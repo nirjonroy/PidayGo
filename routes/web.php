@@ -15,11 +15,16 @@ use App\Http\Controllers\Admin\AdminAlertController;
 use App\Http\Controllers\Admin\AdminConversationController;
 use App\Http\Controllers\Admin\AdminMessageController;
 use App\Http\Controllers\Admin\MailSettingsController;
+use App\Http\Controllers\Admin\HomeSlideController;
 use App\Http\Controllers\Admin\SiteSettingController;
 use App\Http\Controllers\Admin\StakingPlanController;
 use App\Http\Controllers\Admin\LevelController;
 use App\Http\Controllers\Admin\WithdrawalReviewController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\SellerController;
+use App\Http\Controllers\Admin\NftItemController;
+use App\Http\Controllers\Admin\BidController;
+use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
@@ -43,8 +48,14 @@ use App\Http\Controllers\User\WithdrawalController as UserWithdrawalController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return app(FrontendController::class)->home();
 })->name('home');
+
+Route::get('/explore', [FrontendController::class, 'explore'])->name('explore');
+Route::get('/item/{slug}', [FrontendController::class, 'itemDetails'])->name('item.details');
+Route::get('/rankings', function () {
+    return view('frontend.rankings');
+})->name('rankings');
 
 Route::middleware('guest')->group(function () {
     Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
@@ -86,16 +97,20 @@ Route::middleware(['auth', 'verified.if.mail', '2fa.enabled', '2fa.passed'])->gr
 });
 
 Route::middleware(['auth', 'verified.if.mail', '2fa.enabled', '2fa.passed'])->group(function () {
-    Route::get('/profile', [UserProfileController::class, 'edit'])->name('profile.edit');
-    Route::post('/profile', [UserProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profile', function () {
+        return view('frontend.profile');
+    })->name('profile');
 
-    Route::get('/profile/bank', [BankAccountController::class, 'index'])->name('profile.bank.index');
-    Route::get('/profile/bank/create', [BankAccountController::class, 'create'])->name('profile.bank.create');
-    Route::post('/profile/bank', [BankAccountController::class, 'store'])->name('profile.bank.store');
-    Route::get('/profile/bank/{bankAccount}/edit', [BankAccountController::class, 'edit'])->name('profile.bank.edit');
-    Route::put('/profile/bank/{bankAccount}', [BankAccountController::class, 'update'])->name('profile.bank.update');
-    Route::delete('/profile/bank/{bankAccount}', [BankAccountController::class, 'destroy'])->name('profile.bank.delete');
-    Route::post('/profile/bank/{bankAccount}/default', [BankAccountController::class, 'setDefault'])->name('profile.bank.default');
+    Route::get('/account/profile', [UserProfileController::class, 'edit'])->name('profile.edit');
+    Route::post('/account/profile', [UserProfileController::class, 'update'])->name('profile.update');
+
+    Route::get('/account/bank', [BankAccountController::class, 'index'])->name('profile.bank.index');
+    Route::get('/account/bank/create', [BankAccountController::class, 'create'])->name('profile.bank.create');
+    Route::post('/account/bank', [BankAccountController::class, 'store'])->name('profile.bank.store');
+    Route::get('/account/bank/{bankAccount}/edit', [BankAccountController::class, 'edit'])->name('profile.bank.edit');
+    Route::put('/account/bank/{bankAccount}', [BankAccountController::class, 'update'])->name('profile.bank.update');
+    Route::delete('/account/bank/{bankAccount}', [BankAccountController::class, 'destroy'])->name('profile.bank.delete');
+    Route::post('/account/bank/{bankAccount}/default', [BankAccountController::class, 'setDefault'])->name('profile.bank.default');
 
     Route::get('/notifications', [UserNotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{notification}/read', [UserNotificationController::class, 'markRead'])->name('notifications.read');
@@ -154,6 +169,16 @@ Route::prefix('admin')->name('admin.')->middleware('admin.ip')->group(function (
             Route::post('/site-settings', [SiteSettingController::class, 'store'])->name('site-settings.store');
             Route::get('/site-settings/edit', [SiteSettingController::class, 'edit'])->name('site-settings.edit');
             Route::post('/site-settings/update', [SiteSettingController::class, 'update'])->name('site-settings.update');
+        });
+
+        Route::middleware('permission:home.slide.manage')->group(function () {
+            Route::get('/home-slides', [HomeSlideController::class, 'index'])->name('home-slides.index');
+            Route::get('/home-slides/create', [HomeSlideController::class, 'create'])->name('home-slides.create');
+            Route::post('/home-slides', [HomeSlideController::class, 'store'])->name('home-slides.store');
+            Route::get('/home-slides/{homeSlide}/edit', [HomeSlideController::class, 'edit'])->name('home-slides.edit');
+            Route::post('/home-slides/{homeSlide}/update', [HomeSlideController::class, 'update'])->name('home-slides.update');
+            Route::post('/home-slides/{homeSlide}/toggle', [HomeSlideController::class, 'toggle'])->name('home-slides.toggle');
+            Route::post('/home-slides/{homeSlide}/delete', [HomeSlideController::class, 'destroy'])->name('home-slides.delete');
         });
 
         Route::middleware('permission:role.manage')->group(function () {
@@ -245,6 +270,32 @@ Route::prefix('admin')->name('admin.')->middleware('admin.ip')->group(function (
             Route::get('/notifications', [AdminNotificationController::class, 'index'])->name('notifications.index');
             Route::get('/notifications/create', [AdminNotificationController::class, 'create'])->name('notifications.create');
             Route::post('/notifications', [AdminNotificationController::class, 'store'])->name('notifications.store');
+        });
+
+        Route::middleware('permission:seller.manage')->group(function () {
+            Route::get('/sellers', [SellerController::class, 'index'])->name('sellers.index');
+            Route::get('/sellers/create', [SellerController::class, 'create'])->name('sellers.create');
+            Route::post('/sellers', [SellerController::class, 'store'])->name('sellers.store');
+            Route::get('/sellers/{seller}/edit', [SellerController::class, 'edit'])->name('sellers.edit');
+            Route::post('/sellers/{seller}/update', [SellerController::class, 'update'])->name('sellers.update');
+            Route::post('/sellers/{seller}/toggle', [SellerController::class, 'toggle'])->name('sellers.toggle');
+            Route::post('/sellers/{seller}/delete', [SellerController::class, 'destroy'])->name('sellers.delete');
+        });
+
+        Route::middleware('permission:nft.manage')->group(function () {
+            Route::get('/nft-items', [NftItemController::class, 'index'])->name('nft-items.index');
+            Route::get('/nft-items/create', [NftItemController::class, 'create'])->name('nft-items.create');
+            Route::post('/nft-items', [NftItemController::class, 'store'])->name('nft-items.store');
+            Route::get('/nft-items/{nftItem}/edit', [NftItemController::class, 'edit'])->name('nft-items.edit');
+            Route::post('/nft-items/{nftItem}/update', [NftItemController::class, 'update'])->name('nft-items.update');
+            Route::post('/nft-items/{nftItem}/delete', [NftItemController::class, 'destroy'])->name('nft-items.delete');
+        });
+
+        Route::middleware('permission:bid.manage')->group(function () {
+            Route::get('/bids', [BidController::class, 'index'])->name('bids.index');
+            Route::get('/bids/create', [BidController::class, 'create'])->name('bids.create');
+            Route::post('/bids', [BidController::class, 'store'])->name('bids.store');
+            Route::post('/bids/{bid}/delete', [BidController::class, 'destroy'])->name('bids.delete');
         });
 
         Route::get('/alerts', [AdminAlertController::class, 'index'])->name('alerts.index');

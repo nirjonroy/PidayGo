@@ -137,6 +137,14 @@
                   <p>Site Settings</p>
                 </a>
               </li>
+              @if (auth('admin')->user()?->can('home.slide.manage'))
+                <li class="nav-item">
+                  <a href="{{ route('admin.home-slides.index') }}" class="nav-link {{ request()->routeIs('admin.home-slides.*') ? 'active' : '' }}">
+                    <i class="nav-icon bi bi-images"></i>
+                    <p>Home Slides</p>
+                  </a>
+                </li>
+              @endif
               @if (auth('admin')->user()?->can('user.manage'))
                 <li class="nav-item">
                   <a href="{{ route('admin.users.index') }}" class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
@@ -206,6 +214,30 @@
                   <a href="{{ route('admin.deposit-addresses.index') }}" class="nav-link {{ request()->routeIs('admin.deposit-addresses.*') ? 'active' : '' }}">
                     <i class="nav-icon bi bi-geo"></i>
                     <p>Deposit Addresses</p>
+                  </a>
+                </li>
+              @endif
+              @if (auth('admin')->user()?->can('seller.manage'))
+                <li class="nav-item">
+                  <a href="{{ route('admin.sellers.index') }}" class="nav-link {{ request()->routeIs('admin.sellers.*') ? 'active' : '' }}">
+                    <i class="nav-icon bi bi-person-badge"></i>
+                    <p>Sellers</p>
+                  </a>
+                </li>
+              @endif
+              @if (auth('admin')->user()?->can('nft.manage'))
+                <li class="nav-item">
+                  <a href="{{ route('admin.nft-items.index') }}" class="nav-link {{ request()->routeIs('admin.nft-items.*') ? 'active' : '' }}">
+                    <i class="nav-icon bi bi-grid"></i>
+                    <p>NFT Items</p>
+                  </a>
+                </li>
+              @endif
+              @if (auth('admin')->user()?->can('bid.manage'))
+                <li class="nav-item">
+                  <a href="{{ route('admin.bids.index') }}" class="nav-link {{ request()->routeIs('admin.bids.*') ? 'active' : '' }}">
+                    <i class="nav-icon bi bi-cash-stack"></i>
+                    <p>Bids</p>
                   </a>
                 </li>
               @endif

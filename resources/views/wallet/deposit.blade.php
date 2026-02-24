@@ -1,122 +1,171 @@
-@extends('layouts.app')
+@extends('layouts.frontend')
 
 @section('content')
-    <h1>USDT Deposit (TRC20)</h1>
-
-    <div class="mb-4">
-        <strong>Deposit Chain:</strong> {{ $currency }}-{{ $chain }}<br>
-        <strong>Minimum Deposit:</strong> {{ number_format($minDeposit, 4) }} USDT<br>
-        <strong>Review Time:</strong> Within {{ $reviewHours }} hours
-    </div>
-
-    @if (empty($address))
-        <div class="error">Deposit is temporarily unavailable. Please contact support.</div>
-    @else
-        <div class="mb-3">
-            <button type="button" id="btn-show-qr">Show QR</button>
-            <button type="button" id="btn-show-address" style="margin-left:8px;">Show Address</button>
-        </div>
-
-        <div id="qr-box" style="margin-bottom:16px;">
-            {!! QrCode::size(220)->margin(1)->generate($qrPayload ?? $address) !!}
-        </div>
-
-        <div id="address-box" style="display:none; margin-bottom:16px;">
-            <div style="display:flex; gap:8px; align-items:center;">
-                <input type="text" id="deposit-address" value="{{ $address }}" readonly>
-                <button type="button" id="copy-address">Copy</button>
+<section id="subheader" class="text-light" data-bgimage="url({{ asset('frontend/images/background/subheader.jpg') }}) top">
+    <div class="center-y relative text-center">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <h1>USDT Deposit (TRC20)</h1>
+                </div>
             </div>
-            <div id="copy-toast" class="muted" style="display:none; margin-top:6px;">Address copied.</div>
+        </div>
+    </div>
+</section>
+
+<section aria-label="section">
+    <div class="container">
+        @if (session('status'))
+            <div class="alert alert-success">{{ session('status') }}</div>
+        @endif
+        @if ($errors->any())
+            <div class="alert alert-danger">
+                {{ $errors->first() }}
+            </div>
+        @endif
+        <div class="row">
+            <div class="col-lg-12 mb30">
+                <div class="nft__item s2">
+                    <div class="nft__item_info">
+                        <div><strong>Deposit Chain:</strong> {{ $currency }}-{{ $chain }}</div>
+                        <div><strong>Minimum Deposit:</strong> {{ number_format($minDeposit, 4) }} USDT</div>
+                        <div><strong>Review Time:</strong> Within {{ $reviewHours }} hours</div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="mb-4">
-            <strong>How to deposit:</strong>
-            <ol>
-                <li>Copy address</li>
-                <li>Open Binance App</li>
-                <li>Wallet → Withdraw/Send</li>
-                <li>Select USDT</li>
-                <li>Network: TRC20</li>
-                <li>Paste address, enter amount, confirm</li>
-                <li>Copy TxID and submit below</li>
-            </ol>
-        </div>
+        @if (empty($address))
+            <div class="text-danger">Deposit is temporarily unavailable. Please contact support.</div>
+        @else
+            <div class="row">
+                <div class="col-lg-6 mb30">
+                    <div class="nft__item s2">
+                        <div class="nft__item_info">
+                            <div class="mb-3">
+                                <button type="button" id="btn-show-qr" class="btn-main btn-light btn-sm">Show QR</button>
+                                <button type="button" id="btn-show-address" class="btn-main btn-sm">Show Address</button>
+                            </div>
 
-        <form method="POST" action="{{ route('wallet.deposit.store') }}">
-            @csrf
-            <label for="amount">Amount (USDT)</label>
-            <input id="amount" name="amount" type="number" step="0.0001" min="{{ $minDeposit }}" required>
-            @error('amount') <div class="error">{{ $message }}</div> @enderror
+                            <div id="qr-box" class="mb-3">
+                                {!! QrCode::size(220)->margin(1)->generate($qrPayload ?? $address) !!}
+                            </div>
 
-            <label for="txid">TxID</label>
-            <input id="txid" name="txid" type="text" required>
-            @error('txid') <div class="error">{{ $message }}</div> @enderror
+                            <div id="address-box" style="display:none;" class="mb-3">
+                                <div class="d-flex gap-2 align-items-center">
+                                    <input type="text" id="deposit-address" class="form-control" value="{{ $address }}" readonly>
+                                    <button type="button" id="copy-address" class="btn-main btn-light btn-sm">Copy</button>
+                                </div>
+                                <div id="copy-toast" class="text-muted mt-2" style="display:none;">Address copied.</div>
+                            </div>
 
-            @error('address') <div class="error">{{ $message }}</div> @enderror
+                            <div>
+                                <strong>How to deposit:</strong>
+                                <ol class="mt-2">
+                                    <li>Copy address</li>
+                                    <li>Open Binance App</li>
+                                    <li>Wallet -> Withdraw/Send</li>
+                                    <li>Select USDT</li>
+                                    <li>Network: TRC20</li>
+                                    <li>Paste address, enter amount, confirm</li>
+                                    <li>Copy TxID and submit below</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-            <button type="submit">Submit Deposit</button>
-        </form>
-    @endif
+                <div class="col-lg-6 mb30">
+                    <form method="POST" action="{{ route('wallet.deposit.store') }}" class="form-border">
+                        @csrf
+                        <div class="field-set">
+                            <h5>Submit Deposit</h5>
+                            <input id="amount" name="amount" type="number" step="0.0001" min="{{ $minDeposit }}" class="form-control" placeholder="Amount (USDT)" required>
+                            @error('amount') <div class="text-danger">{{ $message }}</div> @enderror
 
-    <h2 style="margin-top:24px;">Recent Deposits</h2>
-    @if ($history->isEmpty())
-        <p class="muted">No deposits yet.</p>
-    @else
-        <table>
-            <thead>
-                <tr>
-                    <th>Amount</th>
-                    <th>TxID</th>
-                    <th>Status</th>
-                    <th>Submitted</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($history as $item)
-                    <tr>
-                        <td>{{ $item->amount }}</td>
-                        <td style="max-width:220px; word-break:break-all;">{{ $item->txid }}</td>
-                        <td>{{ ucfirst($item->status) }}</td>
-                        <td>{{ $item->created_at }}</td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-    @endif
+                            <div class="spacer-20"></div>
 
-    <script>
-        const qrBox = document.getElementById('qr-box');
-        const addressBox = document.getElementById('address-box');
-        const btnShowQr = document.getElementById('btn-show-qr');
-        const btnShowAddress = document.getElementById('btn-show-address');
-        const copyBtn = document.getElementById('copy-address');
-        const toast = document.getElementById('copy-toast');
+                            <input id="txid" name="txid" type="text" class="form-control" placeholder="TxID" required>
+                            @error('txid') <div class="text-danger">{{ $message }}</div> @enderror
 
-        if (btnShowQr && btnShowAddress) {
-            btnShowQr.addEventListener('click', () => {
-                qrBox.style.display = 'block';
-                addressBox.style.display = 'none';
-            });
-            btnShowAddress.addEventListener('click', () => {
-                qrBox.style.display = 'none';
-                addressBox.style.display = 'block';
-            });
-        }
+                            @error('address') <div class="text-danger">{{ $message }}</div> @enderror
 
-        if (copyBtn) {
-            copyBtn.addEventListener('click', async () => {
-                const input = document.getElementById('deposit-address');
-                try {
-                    await navigator.clipboard.writeText(input.value);
-                    toast.style.display = 'block';
-                    setTimeout(() => { toast.style.display = 'none'; }, 1500);
-                } catch (e) {
-                    input.select();
-                    document.execCommand('copy');
-                    toast.style.display = 'block';
-                    setTimeout(() => { toast.style.display = 'none'; }, 1500);
-                }
-            });
-        }
-    </script>
+                            <div class="spacer-20"></div>
+
+                            <button type="submit" class="btn-main">Submit Deposit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-12">
+                    <h2>Recent Deposits</h2>
+                    <div class="table-responsive">
+                        <table class="table table-borderless table-striped align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Amount</th>
+                                    <th>TxID</th>
+                                    <th>Status</th>
+                                    <th>Submitted</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse ($history as $item)
+                                    <tr>
+                                        <td>{{ number_format($item->amount, 4) }}</td>
+                                        <td style="max-width:220px; word-break:break-all;">{{ $item->txid }}</td>
+                                        <td>{{ ucfirst($item->status) }}</td>
+                                        <td>{{ $item->created_at }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted">No deposits yet.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        @endif
+    </div>
+</section>
+
+<script>
+    const qrBox = document.getElementById('qr-box');
+    const addressBox = document.getElementById('address-box');
+    const btnShowQr = document.getElementById('btn-show-qr');
+    const btnShowAddress = document.getElementById('btn-show-address');
+    const copyBtn = document.getElementById('copy-address');
+    const toast = document.getElementById('copy-toast');
+
+    if (btnShowQr && btnShowAddress) {
+        btnShowQr.addEventListener('click', () => {
+            qrBox.style.display = 'block';
+            addressBox.style.display = 'none';
+        });
+        btnShowAddress.addEventListener('click', () => {
+            qrBox.style.display = 'none';
+            addressBox.style.display = 'block';
+        });
+    }
+
+    if (copyBtn) {
+        copyBtn.addEventListener('click', async () => {
+            const input = document.getElementById('deposit-address');
+            try {
+                await navigator.clipboard.writeText(input.value);
+                toast.style.display = 'block';
+                setTimeout(() => { toast.style.display = 'none'; }, 1500);
+            } catch (e) {
+                input.select();
+                document.execCommand('copy');
+                toast.style.display = 'block';
+                setTimeout(() => { toast.style.display = 'none'; }, 1500);
+            }
+        });
+    }
+</script>
 @endsection

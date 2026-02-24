@@ -40,6 +40,15 @@ class SiteSettingController extends Controller
         if ($request->hasFile('logo')) {
             $setting->logo_path = $request->file('logo')->store('site', 'public');
         }
+        if ($request->hasFile('logo_light')) {
+            $setting->logo_light_path = $request->file('logo_light')->store('site', 'public');
+        }
+        if ($request->hasFile('logo_dark')) {
+            $setting->logo_dark_path = $request->file('logo_dark')->store('site', 'public');
+        }
+        if ($request->hasFile('favicon')) {
+            $setting->favicon_path = $request->file('favicon')->store('site', 'public');
+        }
 
         $setting->save();
         ActivityLog::record('site.settings.created', $request->user('admin'), $setting);
@@ -69,6 +78,24 @@ class SiteSettingController extends Controller
             }
             $setting->logo_path = $request->file('logo')->store('site', 'public');
         }
+        if ($request->hasFile('logo_light')) {
+            if ($setting->logo_light_path) {
+                Storage::disk('public')->delete($setting->logo_light_path);
+            }
+            $setting->logo_light_path = $request->file('logo_light')->store('site', 'public');
+        }
+        if ($request->hasFile('logo_dark')) {
+            if ($setting->logo_dark_path) {
+                Storage::disk('public')->delete($setting->logo_dark_path);
+            }
+            $setting->logo_dark_path = $request->file('logo_dark')->store('site', 'public');
+        }
+        if ($request->hasFile('favicon')) {
+            if ($setting->favicon_path) {
+                Storage::disk('public')->delete($setting->favicon_path);
+            }
+            $setting->favicon_path = $request->file('favicon')->store('site', 'public');
+        }
 
         $setting->save();
         ActivityLog::record('site.settings.updated', $request->user('admin'), $setting);
@@ -80,6 +107,8 @@ class SiteSettingController extends Controller
     {
         return $request->validate([
             'site_name' => ['required', 'string', 'max:150'],
+            'hero_headline' => ['nullable', 'string', 'max:200'],
+            'hero_subtitle' => ['nullable', 'string', 'max:1000'],
             'mobile' => ['nullable', 'string', 'max:50'],
             'email' => ['nullable', 'email', 'max:150'],
             'address' => ['nullable', 'string', 'max:255'],
@@ -88,6 +117,9 @@ class SiteSettingController extends Controller
             'min_deposit_usdt' => ['required', 'numeric', 'min:0'],
             'deposit_review_hours' => ['required', 'integer', 'min:1', 'max:168'],
             'logo' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:2048'],
+            'logo_light' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:2048'],
+            'logo_dark' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:2048'],
+            'favicon' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp,ico', 'max:1024'],
         ]);
     }
 }
