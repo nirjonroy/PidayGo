@@ -30,6 +30,7 @@ class BidsSeeder extends Seeder
                     'user_id' => $user?->id,
                     'bidder_name' => $bidderName,
                     'amount' => $faker->randomFloat(4, 10, 5000),
+                    'is_active' => true,
                 ]);
             }
         }

@@ -38,6 +38,7 @@ class NftItemController extends Controller
         $validated['slug'] = $this->makeUniqueSlug($validated['title']);
         $validated['is_trending'] = (bool) ($validated['is_trending'] ?? false);
         $validated['is_featured'] = (bool) ($validated['is_featured'] ?? false);
+        $validated['is_active'] = (bool) ($validated['is_active'] ?? false);
 
         $item = new NftItem($validated);
 
@@ -72,6 +73,7 @@ class NftItemController extends Controller
 
         $validated['is_trending'] = (bool) ($validated['is_trending'] ?? false);
         $validated['is_featured'] = (bool) ($validated['is_featured'] ?? false);
+        $validated['is_active'] = (bool) ($validated['is_active'] ?? false);
 
         $nftItem->fill($validated);
 
@@ -86,6 +88,14 @@ class NftItemController extends Controller
         ActivityLog::record('nft.item.updated', $request->user('admin'), $nftItem);
 
         return redirect()->route('admin.nft-items.index')->with('status', 'NFT item updated.');
+    }
+
+    public function toggle(Request $request, NftItem $nftItem): RedirectResponse
+    {
+        $nftItem->update(['is_active' => !$nftItem->is_active]);
+        ActivityLog::record('nft.item.toggled', $request->user('admin'), $nftItem);
+
+        return back()->with('status', 'NFT item status updated.');
     }
 
     public function destroy(Request $request, NftItem $nftItem): RedirectResponse
@@ -114,6 +124,7 @@ class NftItemController extends Controller
             'is_trending' => ['nullable', 'boolean'],
             'is_featured' => ['nullable', 'boolean'],
             'status' => ['required', 'in:draft,published'],
+            'is_active' => ['nullable', 'boolean'],
             'image' => array_filter([
                 $requireImage ? 'required' : 'nullable',
                 'image',

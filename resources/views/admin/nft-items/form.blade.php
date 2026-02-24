@@ -80,18 +80,25 @@
             <input id="views_count" name="views_count" type="number" min="0" class="form-control" value="{{ old('views_count', $item->views_count ?? 0) }}">
             @error('views_count') <div class="text-danger">{{ $message }}</div> @enderror
           </div>
-          <div class="col-md-3 mb-3 d-flex align-items-end">
+          <div class="col-md-2 mb-3 d-flex align-items-end">
             <div class="form-check">
               <input type="hidden" name="is_trending" value="0">
               <input class="form-check-input" type="checkbox" name="is_trending" id="is_trending" value="1" {{ old('is_trending', $item->is_trending) ? 'checked' : '' }}>
               <label class="form-check-label" for="is_trending">Trending</label>
             </div>
           </div>
-          <div class="col-md-3 mb-3 d-flex align-items-end">
+          <div class="col-md-2 mb-3 d-flex align-items-end">
             <div class="form-check">
               <input type="hidden" name="is_featured" value="0">
               <input class="form-check-input" type="checkbox" name="is_featured" id="is_featured" value="1" {{ old('is_featured', $item->is_featured) ? 'checked' : '' }}>
               <label class="form-check-label" for="is_featured">Featured</label>
+            </div>
+          </div>
+          <div class="col-md-2 mb-3 d-flex align-items-end">
+            <div class="form-check">
+              <input type="hidden" name="is_active" value="0">
+              <input class="form-check-input" type="checkbox" name="is_active" id="is_active" value="1" {{ old('is_active', $item->is_active ?? true) ? 'checked' : '' }}>
+              <label class="form-check-label" for="is_active">Active</label>
             </div>
           </div>
         </div>

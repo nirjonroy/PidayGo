@@ -107,6 +107,25 @@
                     @error('deposit_review_hours') <div class="text-danger">{{ $message }}</div> @enderror
                 </div>
 
+                <div class="mb-3">
+                    <h5 class="mb-2">Feature Settings</h5>
+                    <div class="form-check mb-2">
+                        <input type="hidden" name="sellers_enabled" value="0">
+                        <input class="form-check-input" type="checkbox" id="sellers_enabled" name="sellers_enabled" value="1" {{ old('sellers_enabled', $setting->sellers_enabled ?? true) ? 'checked' : '' }}>
+                        <label class="form-check-label" for="sellers_enabled">Enable Sellers</label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input type="hidden" name="nft_enabled" value="0">
+                        <input class="form-check-input" type="checkbox" id="nft_enabled" name="nft_enabled" value="1" {{ old('nft_enabled', $setting->nft_enabled ?? true) ? 'checked' : '' }}>
+                        <label class="form-check-label" for="nft_enabled">Enable NFTs/Explore</label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input type="hidden" name="bids_enabled" value="0">
+                        <input class="form-check-input" type="checkbox" id="bids_enabled" name="bids_enabled" value="1" {{ old('bids_enabled', $setting->bids_enabled ?? true) ? 'checked' : '' }}>
+                        <label class="form-check-label" for="bids_enabled">Enable Bids</label>
+                    </div>
+                </div>
+
                 <button type="submit" class="btn btn-success">Save</button>
                 <a href="{{ route('admin.site-settings.index') }}" class="btn btn-secondary">Cancel</a>
             </form>

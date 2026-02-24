@@ -23,6 +23,7 @@ class NftItem extends Model
         'is_trending',
         'is_featured',
         'status',
+        'is_active',
     ];
 
     protected $casts = [
@@ -32,6 +33,7 @@ class NftItem extends Model
         'views_count' => 'integer',
         'is_trending' => 'boolean',
         'is_featured' => 'boolean',
+        'is_active' => 'boolean',
     ];
 
     public function creatorSeller()

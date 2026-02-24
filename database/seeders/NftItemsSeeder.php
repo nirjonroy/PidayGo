@@ -53,6 +53,7 @@ class NftItemsSeeder extends Seeder
                 'is_trending' => false,
                 'is_featured' => $faker->boolean(25),
                 'status' => 'published',
+                'is_active' => true,
             ]);
         }
 

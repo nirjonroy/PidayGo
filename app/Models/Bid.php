@@ -14,10 +14,12 @@ class Bid extends Model
         'user_id',
         'bidder_name',
         'amount',
+        'is_active',
     ];
 
     protected $casts = [
         'amount' => 'decimal:8',
+        'is_active' => 'boolean',
     ];
 
     public function item()

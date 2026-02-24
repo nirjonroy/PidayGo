@@ -2,7 +2,8 @@
 
 namespace App\Providers;
 
-use App\Models\SiteSetting;
+use App\Services\FeatureFlagService;
+use App\Services\SiteSettingService;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -31,14 +32,21 @@ class AppServiceProvider extends ServiceProvider
                 $view->with([
                     'siteSetting' => null,
                     'settings' => null,
+                    'featureFlags' => [
+                        'sellers_enabled' => true,
+                        'nft_enabled' => true,
+                        'bids_enabled' => true,
+                    ],
                 ]);
                 return;
             }
 
-            $setting = SiteSetting::first();
+            $setting = app(SiteSettingService::class)->get();
+            $featureFlags = app(FeatureFlagService::class)->all();
             $view->with([
                 'siteSetting' => $setting,
                 'settings' => $setting,
+                'featureFlags' => $featureFlags,
             ]);
         });
     }

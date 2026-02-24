@@ -127,8 +127,8 @@
                             <p class="text-muted">No items found.</p>
                         </div>
                         @endforelse
-                        <div class="col-md-12 text-center">
-                            {{ $items->links() }}
+                        <div class="col-md-12 text-center mt-3">
+                            {{ $items->links('vendor.pagination.gigaland') }}
                         </div>
                     </div>
                 </div>

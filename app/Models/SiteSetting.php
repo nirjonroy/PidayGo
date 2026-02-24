@@ -24,5 +24,8 @@ class SiteSetting extends Model
         'usdt_trc20_address',
         'min_deposit_usdt',
         'deposit_review_hours',
+        'sellers_enabled',
+        'nft_enabled',
+        'bids_enabled',
     ];
 }

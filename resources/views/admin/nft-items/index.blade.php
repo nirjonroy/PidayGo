@@ -19,6 +19,7 @@
               <th>Owner</th>
               <th>Price</th>
               <th>Status</th>
+              <th>Active</th>
               <th>Trending</th>
               <th>Updated</th>
               <th></th>
@@ -41,6 +42,13 @@
                 <td>{{ $item->price ? number_format($item->price, 4) : '-' }}</td>
                 <td>{{ ucfirst($item->status) }}</td>
                 <td>
+                  @if ($item->is_active)
+                    <span class="badge bg-success">Active</span>
+                  @else
+                    <span class="badge bg-secondary">Inactive</span>
+                  @endif
+                </td>
+                <td>
                   @if ($item->is_trending)
                     <span class="badge bg-success">Yes</span>
                   @else
@@ -50,6 +58,12 @@
                 <td>{{ $item->updated_at }}</td>
                 <td class="text-end">
                   <a href="{{ route('admin.nft-items.edit', $item) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                  <form method="POST" action="{{ route('admin.nft-items.toggle', $item) }}" class="d-inline">
+                    @csrf
+                    <button class="btn btn-sm btn-outline-secondary" type="submit">
+                      {{ $item->is_active ? 'Disable' : 'Enable' }}
+                    </button>
+                  </form>
                   <form method="POST" action="{{ route('admin.nft-items.delete', $item) }}" class="d-inline" onsubmit="return confirm('Delete this item?')">
                     @csrf
                     <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
@@ -58,7 +72,7 @@
               </tr>
             @empty
               <tr>
-                <td colspan="9" class="text-center text-muted">No NFT items yet.</td>
+                <td colspan="10" class="text-center text-muted">No NFT items yet.</td>
               </tr>
             @endforelse
           </tbody>

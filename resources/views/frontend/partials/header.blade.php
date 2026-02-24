@@ -25,8 +25,10 @@
             <div class="header-center">
                 <ul id="mainmenu">
                     <li><a href="{{ route('home') }}">Home<span></span></a></li>
-                    <li><a href="{{ route('explore') }}">Explore<span></span></a></li>
-                    <li><a href="{{ route('rankings') }}">Rankings<span></span></a></li>
+                    @if (feature('nft_enabled'))
+                        <li><a href="{{ route('explore') }}">Explore<span></span></a></li>
+                        <li><a href="{{ route('rankings') }}">Rankings<span></span></a></li>
+                    @endif
                     @auth
                         <li><a href="{{ route('dashboard') }}">Dashboard<span></span></a></li>
                         <li><a href="{{ route('profile.edit') }}">Profile<span></span></a></li>

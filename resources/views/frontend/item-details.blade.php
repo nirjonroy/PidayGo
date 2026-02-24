@@ -75,7 +75,9 @@
 
                                     <ul class="de_nav">
                                         <li class="active"><span>Details</span></li>
-                                        <li><span>Bids</span></li>
+                                        @if (feature('bids_enabled'))
+                                            <li><span>Bids</span></li>
+                                        @endif
                                         <li><span>History</span></li>
                                     </ul>
 
@@ -166,27 +168,29 @@
                                             <div class="spacer-30"></div>
                                         </div>
 
-                                        <div class="tab-2">
-                                            @forelse ($item->bids as $bid)
-                                                <div class="p_list">
-                                                    <div class="p_list_pp">
-                                                        <a href="#">
-                                                            <img class="lazy" src="{{ asset('frontend/images/author/author-1.jpg') }}" alt="">
-                                                            <i class="fa fa-check"></i>
-                                                        </a>
+                                        @if (feature('bids_enabled'))
+                                            <div class="tab-2">
+                                                @forelse ($item->bids as $bid)
+                                                    <div class="p_list">
+                                                        <div class="p_list_pp">
+                                                            <a href="#">
+                                                                <img class="lazy" src="{{ asset('frontend/images/author/author-1.jpg') }}" alt="">
+                                                                <i class="fa fa-check"></i>
+                                                            </a>
+                                                        </div>
+                                                        <div class="p_list_info">
+                                                            Bid <b>{{ number_format($bid->amount, 4) }} USDT</b>
+                                                            <span>
+                                                                by <b>{{ $bid->user?->name ?? $bid->bidder_name ?? 'Anonymous' }}</b>
+                                                                at {{ $bid->created_at->format('M d, Y H:i') }}
+                                                            </span>
+                                                        </div>
                                                     </div>
-                                                    <div class="p_list_info">
-                                                        Bid <b>{{ number_format($bid->amount, 4) }} USDT</b>
-                                                        <span>
-                                                            by <b>{{ $bid->user?->name ?? $bid->bidder_name ?? 'Anonymous' }}</b>
-                                                            at {{ $bid->created_at->format('M d, Y H:i') }}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            @empty
-                                                <div class="text-muted">No bids yet.</div>
-                                            @endforelse
-                                        </div>
+                                                @empty
+                                                    <div class="text-muted">No bids yet.</div>
+                                                @endforelse
+                                            </div>
+                                        @endif
 
                                         <div class="tab-3">
                                             <div class="text-muted">No history yet.</div>
@@ -208,10 +212,13 @@
                                     <!-- Button trigger modal -->
                                     <a href="#" class="btn-main btn-lg" data-bs-toggle="modal" data-bs-target="#buy_now">
                                   Buy Now
-                                </a> &nbsp;
-                                    <a href="#" class="btn-main btn-lg btn-light" data-bs-toggle="modal" data-bs-target="#place_a_bid">
-                                  Place a Bid
                                 </a>
+                                    @if (feature('bids_enabled'))
+                                        &nbsp;
+                                        <a href="#" class="btn-main btn-lg btn-light" data-bs-toggle="modal" data-bs-target="#place_a_bid">
+                                      Place a Bid
+                                    </a>
+                                    @endif
 
                                 </div>
 

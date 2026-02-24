@@ -11,7 +11,7 @@
                                     {{ $heroSubtitle ?? 'Welcome to the future, you can buy and sell awesome artworks form here. The world largest digital marketplace for non-fungible tokens.' }}
                                 </p>
                                 <a href="{{ route('explore') }}" class="btn-main btn-lg">Explore</a>&nbsp;&nbsp;
-                                <a href="{{ route('register') }}" class="btn-main btn-lg btn-light">Sell</a>
+                                <a href="{{ auth()->check() ? route('stake.index') : route('login') }}" class="btn-main btn-lg btn-light">Stake</a>
                             </div>
 
                             <div class="col-lg-6">
@@ -99,6 +99,7 @@
                 </div>
             </section>
 
+            @if (feature('sellers_enabled'))
             <section id="section-collections" class="no-top no-bottom">
                 <div class="m-5 mt-0 mb-0 padding30 br-15 bg-custom">
                     <div class="container">
@@ -154,7 +155,9 @@
                     </div>
                 </div>
             </section>
+            @endif
 
+            @if (feature('nft_enabled'))
             <section id="section-trending" class="pt40 no-bottom">
                 <div class="container">
                     <div class="row">
@@ -222,6 +225,51 @@
                     </div>
                 </div>
             </section>
+            @endif
+
+            @if (feature('bids_enabled'))
+            <section id="section-bids" class="pt40 no-bottom">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <h2>Latest Bids</h2>
+                        </div>
+                        <div class="col-lg-12">
+                            <div class="nft__item s2">
+                                <div class="nft__item_info">
+                                    <div class="table-responsive">
+                                        <table class="table table-borderless table-striped align-middle">
+                                            <thead>
+                                                <tr>
+                                                    <th>Item</th>
+                                                    <th>Bidder</th>
+                                                    <th>Amount</th>
+                                                    <th>Time</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @forelse ($latestBids as $bid)
+                                                    <tr>
+                                                        <td>{{ $bid->item?->title ?? '-' }}</td>
+                                                        <td>{{ $bid->user?->name ?? $bid->bidder_name ?? 'Anonymous' }}</td>
+                                                        <td>{{ number_format($bid->amount, 4) }} USDT</td>
+                                                        <td>{{ $bid->created_at->diffForHumans() }}</td>
+                                                    </tr>
+                                                @empty
+                                                    <tr>
+                                                        <td colspan="4" class="text-center text-muted">No bids yet.</td>
+                                                    </tr>
+                                                @endforelse
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            @endif
 
             <section id="section-category" class="pt20 no-bottom">
                 <div class="container">
@@ -324,20 +372,6 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section id="section-download" class="pt60 pb50 bg-loop text-light overflow-hidden" data-bgimage="url({{ asset('frontend/images/background/24.jpg') }}) top">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-lg-6 text-center wow fadeInLeft">
-                            <h2>Download Gigaland app for your mobile.</h2>
-                        </div>
-                        <div class="col-lg-6 text-center wow fadeInRight">
-                            <a href="#"><img src="{{ asset('frontend/images/misc/download-appstore.png') }}" alt=""></a>&nbsp;
-                            <a href="#"><img src="{{ asset('frontend/images/misc/download-playstore.png') }}" alt=""></a>
                         </div>
                     </div>
                 </div>

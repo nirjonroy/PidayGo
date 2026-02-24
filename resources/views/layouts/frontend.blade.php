@@ -145,6 +145,31 @@
             line-height: 1;
             font-weight: 600;
         }
+        .gigaland-pagination .pagination {
+            gap: 6px;
+            margin-top: 10px;
+        }
+        .gigaland-pagination .page-link {
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.05);
+            color: #f2f5f9;
+            padding: 6px 12px;
+            line-height: 1.2;
+        }
+        .gigaland-pagination .page-item.active .page-link {
+            background: linear-gradient(90deg, #fbb040, #8a2be2);
+            border-color: transparent;
+            color: #fff;
+        }
+        .gigaland-pagination .page-item.disabled .page-link {
+            opacity: 0.5;
+        }
+        .gigaland-pagination .page-link::before,
+        .gigaland-pagination .page-link::after {
+            display: none !important;
+            content: none !important;
+        }
         .popup-backdrop {
             position: fixed;
             inset: 0;

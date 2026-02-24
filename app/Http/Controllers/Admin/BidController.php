@@ -32,6 +32,7 @@ class BidController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $this->validatePayload($request);
+        $validated['is_active'] = (bool) ($validated['is_active'] ?? false);
 
         if (empty($validated['user_id']) && empty($validated['bidder_name'])) {
             return back()->withErrors(['bidder_name' => 'Bidder name is required when no user is selected.'])->withInput();
@@ -44,6 +45,14 @@ class BidController extends Controller
         ActivityLog::record('bid.created', $request->user('admin'), $bid);
 
         return redirect()->route('admin.bids.index')->with('status', 'Bid created.');
+    }
+
+    public function toggle(Request $request, Bid $bid): RedirectResponse
+    {
+        $bid->update(['is_active' => !$bid->is_active]);
+        ActivityLog::record('bid.toggled', $request->user('admin'), $bid);
+
+        return back()->with('status', 'Bid status updated.');
     }
 
     public function destroy(Request $request, Bid $bid): RedirectResponse
@@ -61,6 +70,7 @@ class BidController extends Controller
             'user_id' => ['nullable', 'exists:users,id'],
             'bidder_name' => ['nullable', 'string', 'max:150'],
             'amount' => ['required', 'numeric', 'min:0.00000001'],
+            'is_active' => ['nullable', 'boolean'],
         ]);
     }
 }

@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\SiteSetting;
+use App\Services\FeatureFlagService;
+use App\Services\SiteSettingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -34,6 +36,9 @@ class SiteSettingController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $this->validatePayload($request);
+        $validated['sellers_enabled'] = $request->boolean('sellers_enabled');
+        $validated['nft_enabled'] = $request->boolean('nft_enabled');
+        $validated['bids_enabled'] = $request->boolean('bids_enabled');
 
         $setting = new SiteSetting($validated);
 
@@ -51,6 +56,8 @@ class SiteSettingController extends Controller
         }
 
         $setting->save();
+        app(SiteSettingService::class)->clearCache();
+        app(FeatureFlagService::class)->clearCache();
         ActivityLog::record('site.settings.created', $request->user('admin'), $setting);
 
         return redirect()->route('admin.site-settings.index')->with('status', 'Site settings saved.');
@@ -69,6 +76,9 @@ class SiteSettingController extends Controller
     {
         $setting = SiteSetting::firstOrFail();
         $validated = $this->validatePayload($request);
+        $validated['sellers_enabled'] = $request->boolean('sellers_enabled');
+        $validated['nft_enabled'] = $request->boolean('nft_enabled');
+        $validated['bids_enabled'] = $request->boolean('bids_enabled');
 
         $setting->fill($validated);
 
@@ -98,6 +108,8 @@ class SiteSettingController extends Controller
         }
 
         $setting->save();
+        app(SiteSettingService::class)->clearCache();
+        app(FeatureFlagService::class)->clearCache();
         ActivityLog::record('site.settings.updated', $request->user('admin'), $setting);
 
         return redirect()->route('admin.site-settings.index')->with('status', 'Site settings updated.');
@@ -120,6 +132,9 @@ class SiteSettingController extends Controller
             'logo_light' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:2048'],
             'logo_dark' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:2048'],
             'favicon' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp,ico', 'max:1024'],
+            'sellers_enabled' => ['nullable', 'boolean'],
+            'nft_enabled' => ['nullable', 'boolean'],
+            'bids_enabled' => ['nullable', 'boolean'],
         ]);
     }
 }

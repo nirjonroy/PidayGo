@@ -51,8 +51,8 @@ Route::get('/', function () {
     return app(FrontendController::class)->home();
 })->name('home');
 
-Route::get('/explore', [FrontendController::class, 'explore'])->name('explore');
-Route::get('/item/{slug}', [FrontendController::class, 'itemDetails'])->name('item.details');
+Route::get('/explore', [FrontendController::class, 'explore'])->middleware('feature:nft_enabled')->name('explore');
+Route::get('/item/{slug}', [FrontendController::class, 'itemDetails'])->middleware('feature:nft_enabled')->name('item.details');
 Route::get('/rankings', function () {
     return view('frontend.rankings');
 })->name('rankings');
@@ -289,6 +289,7 @@ Route::prefix('admin')->name('admin.')->middleware('admin.ip')->group(function (
             Route::post('/nft-items', [NftItemController::class, 'store'])->name('nft-items.store');
             Route::get('/nft-items/{nftItem}/edit', [NftItemController::class, 'edit'])->name('nft-items.edit');
             Route::post('/nft-items/{nftItem}/update', [NftItemController::class, 'update'])->name('nft-items.update');
+            Route::post('/nft-items/{nftItem}/toggle', [NftItemController::class, 'toggle'])->name('nft-items.toggle');
             Route::post('/nft-items/{nftItem}/delete', [NftItemController::class, 'destroy'])->name('nft-items.delete');
         });
 
@@ -296,6 +297,7 @@ Route::prefix('admin')->name('admin.')->middleware('admin.ip')->group(function (
             Route::get('/bids', [BidController::class, 'index'])->name('bids.index');
             Route::get('/bids/create', [BidController::class, 'create'])->name('bids.create');
             Route::post('/bids', [BidController::class, 'store'])->name('bids.store');
+            Route::post('/bids/{bid}/toggle', [BidController::class, 'toggle'])->name('bids.toggle');
             Route::post('/bids/{bid}/delete', [BidController::class, 'destroy'])->name('bids.delete');
         });
 

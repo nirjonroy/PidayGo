@@ -61,6 +61,7 @@ class Kernel extends HttpKernel
         'can' => \Illuminate\Auth\Middleware\Authorize::class,
         'ensure.kyc' => \App\Http\Middleware\EnsureKycApproved::class,
         'ensure.user2fa' => \App\Http\Middleware\EnsureUserTwoFactor::class,
+        'feature' => \App\Http\Middleware\CheckFeatureEnabled::class,
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'kyc.approved' => \App\Http\Middleware\EnsureKycApproved::class,
         'password.confirm' => \Illuminate\Auth\Middleware\RequirePassword::class,
