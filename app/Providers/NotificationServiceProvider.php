@@ -63,6 +63,57 @@ class NotificationServiceProvider extends ServiceProvider
             ]);
         });
 
+        View::composer(['layouts.frontend', 'frontend.partials.header'], function ($view) {
+            $user = auth()->user();
+
+            if (!$user) {
+                $view->with([
+                    'userNotificationCount' => 0,
+                    'popupNotification' => null,
+                ]);
+                return;
+            }
+
+            if (!Schema::hasTable('notification_users') || !Schema::hasTable('notifications')) {
+                $view->with([
+                    'userNotificationCount' => 0,
+                    'popupNotification' => null,
+                ]);
+                return;
+            }
+
+            $baseQuery = NotificationUser::query()
+                ->where('user_id', $user->id)
+                ->whereHas('notification', function ($query) {
+                    $query->where('audience', 'user')
+                        ->where(function ($q) {
+                            $q->whereNull('expires_at')
+                                ->orWhere('expires_at', '>', now());
+                        });
+                });
+
+            $count = (clone $baseQuery)
+                ->whereNull('read_at')
+                ->whereNull('dismissed_at')
+                ->count();
+
+            $popup = (clone $baseQuery)
+                ->whereNull('read_at')
+                ->whereNull('dismissed_at')
+                ->whereNull('shown_popup_at')
+                ->whereHas('notification', function ($query) {
+                    $query->where('is_popup', true);
+                })
+                ->with('notification')
+                ->orderBy('id')
+                ->first();
+
+            $view->with([
+                'userNotificationCount' => $count,
+                'popupNotification' => $popup,
+            ]);
+        });
+
         View::composer('layouts.admin-panel', function ($view) {
             $admin = auth('admin')->user();
 

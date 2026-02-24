@@ -15,12 +15,22 @@
 
 <section aria-label="section">
     <div class="container">
+        @php
+            $user = auth()->user();
+            $emailVerified = !is_null($user->email_verified_at);
+            $twoFactorEnabled = $user->hasTwoFactorEnabled();
+            $kycStatus = $user->latestKycRequest?->status;
+        @endphp
         <div class="row">
             <div class="col-lg-12 mb-4">
                 <div class="nft__item s2">
                     <div class="nft__item_info">
                         <h4>Welcome back</h4>
-                        <p class="text-muted mb-0">Your account is verified, 2FA enabled, and KYC approved.</p>
+                        <p class="text-muted mb-0">
+                            Email: {{ $emailVerified ? 'Verified' : 'Pending' }},
+                            2FA: {{ $twoFactorEnabled ? 'Enabled' : 'Disabled' }},
+                            KYC: {{ $kycStatus ? ucfirst($kycStatus) : 'Not submitted' }}.
+                        </p>
                     </div>
                 </div>
             </div>

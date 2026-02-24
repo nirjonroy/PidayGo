@@ -28,11 +28,18 @@ class AppServiceProvider extends ServiceProvider
     {
         View::composer('layouts.frontend', function ($view) {
             if (!Schema::hasTable('site_settings')) {
-                $view->with('siteSetting', null);
+                $view->with([
+                    'siteSetting' => null,
+                    'settings' => null,
+                ]);
                 return;
             }
 
-            $view->with('siteSetting', SiteSetting::first());
+            $setting = SiteSetting::first();
+            $view->with([
+                'siteSetting' => $setting,
+                'settings' => $setting,
+            ]);
         });
     }
 }

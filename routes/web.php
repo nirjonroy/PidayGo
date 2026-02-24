@@ -98,11 +98,12 @@ Route::middleware(['auth', 'verified.if.mail', '2fa.enabled', '2fa.passed'])->gr
 
 Route::middleware(['auth', 'verified.if.mail', '2fa.enabled', '2fa.passed'])->group(function () {
     Route::get('/profile', function () {
-        return view('frontend.profile');
+        return redirect()->route('profile.edit');
     })->name('profile');
 
     Route::get('/account/profile', [UserProfileController::class, 'edit'])->name('profile.edit');
     Route::post('/account/profile', [UserProfileController::class, 'update'])->name('profile.update');
+    Route::post('/account/notifications', [UserProfileController::class, 'updateNotifications'])->name('profile.notifications.update');
 
     Route::get('/account/bank', [BankAccountController::class, 'index'])->name('profile.bank.index');
     Route::get('/account/bank/create', [BankAccountController::class, 'create'])->name('profile.bank.create');

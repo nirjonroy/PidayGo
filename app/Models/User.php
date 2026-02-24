@@ -12,6 +12,7 @@ use App\Models\UserProfile;
 use App\Models\UserBankAccount;
 use App\Models\UserReserve;
 use App\Models\UserReserveLedger;
+use App\Models\UserNotificationSetting;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -115,5 +116,10 @@ class User extends Authenticatable implements MustVerifyEmail
     public function conversations()
     {
         return $this->hasMany(Conversation::class);
+    }
+
+    public function notificationSettings()
+    {
+        return $this->hasOne(UserNotificationSetting::class);
     }
 }

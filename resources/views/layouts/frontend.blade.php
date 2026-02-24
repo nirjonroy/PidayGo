@@ -3,16 +3,16 @@
 
 <head>
     @php
-        $logoLight = $siteSetting?->logo_light_path ? asset('storage/' . $siteSetting->logo_light_path) : asset('frontend/images/logo-7-light.png');
-        $logoDark = $siteSetting?->logo_dark_path ? asset('storage/' . $siteSetting->logo_dark_path) : asset('frontend/images/logo-7.png');
-        $siteName = $siteSetting?->site_name ?: config('app.name', 'PidayGo');
+        $settings = $settings ?? $siteSetting ?? null;
+        $siteName = $settings?->site_name ?: config('app.name', 'PidayGo');
     @endphp
     <title>{{ $siteName }}</title>
-    @if ($siteSetting?->favicon_path)
-        <link rel="icon" href="{{ asset('storage/' . $siteSetting->favicon_path) }}">
+    @if ($settings?->favicon_path)
+        <link rel="icon" href="{{ asset('storage/' . $settings->favicon_path) }}">
     @else
         <link rel="icon" href="{{ asset('frontend/images/icon.png') }}">
     @endif
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <meta content="PidayGo - NFT Marketplace" name="description" />
@@ -42,71 +42,155 @@
                 height: 38px;
             }
         }
+        .dark-scheme .table,
+        .dark-scheme .table td,
+        .dark-scheme .table th {
+            color: #ffffff;
+        }
+        .dark-scheme .table thead th {
+            color: #ffffff;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        .dark-scheme .table td,
+        .dark-scheme .table th {
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+        .dark-scheme .table-striped > tbody > tr:nth-of-type(odd) {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        .dark-scheme .table-striped > tbody > tr:nth-of-type(even) {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+        .dark-scheme .table .text-muted {
+            color: #b4b9c2 !important;
+        }
+        .dark-scheme .form-control,
+        .dark-scheme .form-select,
+        .dark-scheme select,
+        .dark-scheme textarea,
+        .dark-scheme input[type="text"],
+        .dark-scheme input[type="number"],
+        .dark-scheme input[type="email"],
+        .dark-scheme input[type="password"] {
+            background: rgba(255, 255, 255, 0.06);
+            color: #f2f5f9;
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+        .dark-scheme .form-control::placeholder,
+        .dark-scheme textarea::placeholder {
+            color: rgba(255, 255, 255, 0.55);
+        }
+        .dark-scheme body,
+        .dark-scheme,
+        .dark-scheme p,
+        .dark-scheme li,
+        .dark-scheme label,
+        .dark-scheme .form-label,
+        .dark-scheme h1,
+        .dark-scheme h2,
+        .dark-scheme h3,
+        .dark-scheme h4,
+        .dark-scheme h5,
+        .dark-scheme h6 {
+            color: #f2f5f9;
+        }
+        .dark-scheme .text-dark {
+            color: #f2f5f9 !important;
+        }
+        .header-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            min-width: 260px;
+        }
+        .header-search input {
+            min-width: 220px;
+        }
+        .header-center {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+        #mainmenu {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            flex-wrap: wrap;
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            justify-content: flex-end;
+            min-width: 220px;
+        }
+        .notif-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 6px;
+            margin-left: 6px;
+            border-radius: 999px;
+            background: #ff5b5b;
+            color: #fff;
+            font-size: 11px;
+            line-height: 1;
+            font-weight: 600;
+        }
+        .popup-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .popup-card {
+            background: #101017;
+            color: #f2f5f9;
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 520px;
+            width: 92%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+        }
+        .popup-card h3 {
+            margin-top: 0;
+            font-size: 20px;
+        }
+        .popup-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 16px;
+        }
+        @media (max-width: 991.98px) {
+            .header-center {
+                display: none;
+            }
+            .header-left {
+                flex: 1;
+            }
+            .header-right {
+                min-width: auto;
+            }
+        }
     </style>
 </head>
 
 <body class="switch-scheme dark-scheme">
     <div id="wrapper">
         <!-- header begin -->
-        <header class="scroll-dark">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="de-flex sm-pt10">
-                            <div class="de-flex-col">
-                                <div class="de-flex-col">
-                                    <!-- logo begin -->
-                                    <div id="logo">
-                                        <a href="{{ route('home') }}">
-                                            <img alt="" class="logo" src="{{ $logoLight }}" />
-                                            <img alt="" class="logo-2" src="{{ $logoDark }}" />
-                                        </a>
-                                    </div>
-                                    <!-- logo close -->
-                                </div>
-                                <div class="de-flex-col">
-                                    <input id="quick_search" class="xs-hide" name="quick_search" placeholder="search item here..." type="text" />
-                                </div>
-                            </div>
-                            <div class="de-flex-col header-col-mid">
-                                <!-- mainmenu begin -->
-                                <ul id="mainmenu">
-                                    <li><a href="{{ route('home') }}">Home<span></span></a></li>
-                                    <li><a href="{{ route('explore') }}">Explore<span></span></a></li>
-                                    <li><a href="{{ route('rankings') }}">Rankings<span></span></a></li>
-                                    @auth
-                                        <li><a href="{{ route('dashboard') }}">Dashboard<span></span></a></li>
-                                        <li><a href="{{ route('profile') }}">Profile<span></span></a></li>
-                                        <li><a href="{{ route('wallet.index') }}">Wallet<span></span></a></li>
-                                        <li><a href="{{ route('stake.index') }}">Stake<span></span></a></li>
-                                        <li><a href="{{ route('notifications.index') }}">Notifications<span></span></a></li>
-                                        <li><a href="{{ route('support.index') }}">Support<span></span></a></li>
-                                    @endauth
-                                </ul>
-                                <div class="menu_side_area">
-                                    @auth
-                                        <a href="{{ route('wallet.index') }}" class="btn-main btn-wallet"><i class="icon_wallet_alt"></i><span>Wallet</span></a>
-                                        <form method="POST" action="{{ route('logout') }}" style="display:inline;">
-                                            @csrf
-                                            <button type="submit" class="btn-main btn-light">Logout</button>
-                                        </form>
-                                    @else
-                                        <a href="{{ route('login') }}" class="btn-main">Login</a>
-                                        <a href="{{ route('register') }}" class="btn-main btn-light">Register</a>
-                                    @endauth
-                                    <span href="#" id="switch_scheme">
-                                        <i class="ss_dark fa fa-moon-o"></i>
-                                        <i class="ss_light fa fa-sun-o"></i>
-                                    </span>
-                                    <span id="menu-btn"></span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </header>
-        <!-- header close -->
+        @include('frontend.partials.header')
         <!-- content begin -->
         <div class="no-bottom no-top" id="content">
             <div id="top"></div>
@@ -214,6 +298,45 @@
     ================================================== -->
     <script src="{{ asset('frontend/js/plugins.js') }}"></script>
     <script src="{{ asset('frontend/js/designesia.js') }}"></script>
+
+    @if (!empty($popupNotification) && $popupNotification->notification)
+        <div class="popup-backdrop" id="notif-modal">
+            <div class="popup-card">
+                <h3>{{ $popupNotification->notification->title }}</h3>
+                <p>{{ $popupNotification->notification->message }}</p>
+                <div class="popup-actions">
+                    <form method="POST" action="{{ route('notifications.dismiss', $popupNotification->notification) }}">
+                        @csrf
+                        <button type="submit" class="btn-main btn-light">Dismiss</button>
+                    </form>
+                    <form method="POST" action="{{ route('notifications.read', $popupNotification->notification) }}">
+                        @csrf
+                        <button type="submit" class="btn-main">Mark as Read</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const modal = document.getElementById('notif-modal');
+                if (modal) {
+                    modal.style.display = 'flex';
+                    fetch("{{ route('notifications.shown', $popupNotification->notification) }}", {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                            'Accept': 'application/json'
+                        }
+                    });
+                    modal.addEventListener('click', function (e) {
+                        if (e.target === modal) {
+                            modal.style.display = 'none';
+                        }
+                    });
+                }
+            });
+        </script>
+    @endif
 </body>
 
 </html>

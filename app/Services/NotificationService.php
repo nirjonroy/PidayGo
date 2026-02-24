@@ -7,8 +7,10 @@ use App\Models\Notification;
 use App\Models\NotificationAdmin;
 use App\Models\NotificationUser;
 use App\Models\User;
+use App\Models\UserNotificationSetting;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class NotificationService
 {
@@ -41,6 +43,8 @@ class NotificationService
         $expiresAt = null,
         ?int $senderAdminId = null
     ): Notification {
+        $userIds = $this->filterUserIdsByPreference($userIds, $type);
+
         $notification = DB::transaction(function () use ($userIds, $type, $title, $message, $level, $meta, $isPopup, $expiresAt, $senderAdminId) {
             $notification = $this->createNotification(
                 'user',
@@ -118,9 +122,14 @@ class NotificationService
             );
 
             User::query()->select('id')->orderBy('id')->chunk(500, function ($users) use ($notification) {
+                $userIds = $users->pluck('id')->all();
+                $allowed = $this->filterUserIdsByPreference($userIds, $notification->type);
                 $rows = [];
                 $now = now();
                 foreach ($users as $user) {
+                    if (!in_array($user->id, $allowed, true)) {
+                        continue;
+                    }
                     $rows[] = [
                         'notification_id' => $notification->id,
                         'user_id' => $user->id,
@@ -280,8 +289,12 @@ class NotificationService
             ->whereNotNull('email')
             ->select(['id', 'email'])
             ->orderBy('id')
-            ->chunk(200, function ($users) use ($subject, $message) {
+            ->chunk(200, function ($users) use ($subject, $message, $notification) {
+                $allowed = $this->filterUserIdsByPreference($users->pluck('id')->all(), $notification->type);
                 foreach ($users as $user) {
+                    if (!in_array($user->id, $allowed, true)) {
+                        continue;
+                    }
                     if (!empty($user->email)) {
                         $this->mailSettings->sendNotificationEmail($user->email, $subject, $message);
                     }
@@ -301,5 +314,53 @@ class NotificationService
         }
 
         $this->mailSettings->sendNotificationEmail($emails, $notification->title, $notification->message);
+    }
+
+    private function filterUserIdsByPreference(array $userIds, string $type): array
+    {
+        if (empty($userIds)) {
+            return [];
+        }
+
+        $preferenceMap = [
+            'deposit_submitted' => 'system_alerts',
+            'deposit_approved' => 'system_alerts',
+            'deposit_rejected' => 'system_alerts',
+            'withdraw_requested' => 'system_alerts',
+            'withdraw_approved' => 'system_alerts',
+            'withdraw_rejected' => 'system_alerts',
+            'stake_created' => 'system_alerts',
+            'kyc_submitted' => 'system_alerts',
+            'kyc_approved' => 'system_alerts',
+            'kyc_rejected' => 'system_alerts',
+            'support_reply' => 'system_alerts',
+            'admin_custom' => 'system_alerts',
+        ];
+
+        $column = $preferenceMap[$type] ?? null;
+        if (!$column) {
+            return $userIds;
+        }
+
+        if (!Schema::hasTable('user_notification_settings')) {
+            return $userIds;
+        }
+
+        $settings = UserNotificationSetting::query()
+            ->whereIn('user_id', $userIds)
+            ->pluck($column, 'user_id');
+
+        $allowed = [];
+        foreach ($userIds as $userId) {
+            if (!$settings->has($userId)) {
+                $allowed[] = $userId;
+                continue;
+            }
+            if ($settings->get($userId)) {
+                $allowed[] = $userId;
+            }
+        }
+
+        return $allowed;
     }
 }
