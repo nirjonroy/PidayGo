@@ -17,6 +17,7 @@
                         <img alt="" class="logo-2" src="{{ $logoDark }}" />
                     </a>
                 </div>
+                <span id="menu-btn"></span>
                 <div class="header-search xs-hide">
                     <input id="quick_search" name="quick_search" placeholder="search item here..." type="text" />
                 </div>
@@ -30,20 +31,25 @@
                         <li><a href="{{ route('rankings') }}">Rankings<span></span></a></li>
                     @endif
                     @auth
-                        <li><a href="{{ route('dashboard') }}">Dashboard<span></span></a></li>
-                        <li><a href="{{ route('profile.edit') }}">Profile<span></span></a></li>
-                        <li><a href="{{ route('wallet.index') }}">Wallet<span></span></a></li>
-                        <li><a href="{{ route('stake.index') }}">Stake<span></span></a></li>
                         <li>
-                            <a href="{{ route('notifications.index') }}">
-                                Notifications
-                                @if ($notificationCount > 0)
-                                    <span class="notif-badge">{{ $notificationCount }}</span>
-                                @endif
-                                <span></span>
-                            </a>
+                            <a href="#">Profile<span></span></a>
+                            <ul>
+                                <li><a href="{{ route('dashboard') }}">Dashboard</a></li>
+                                <li><a href="{{ route('wallet.index') }}">Wallet</a></li>
+                                <li><a href="{{ route('stake.index') }}">Stake</a></li>
+                                <li><a href="{{ route('wallet.index') }}#reservation">Reserve</a></li>
+                                <li>
+                                    <a href="{{ route('notifications.index') }}">
+                                        Notifications
+                                        @if ($notificationCount > 0)
+                                            <span class="notif-badge">{{ $notificationCount }}</span>
+                                        @endif
+                                    </a>
+                                </li>
+                                <li><a href="{{ route('support.index') }}">Support</a></li>
+                                <li><a href="{{ route('profile.edit') }}">Profile Settings</a></li>
+                            </ul>
                         </li>
-                        <li><a href="{{ route('support.index') }}">Support<span></span></a></li>
                     @endauth
                 </ul>
             </div>
@@ -65,7 +71,6 @@
                     <i class="ss_dark fa fa-moon-o"></i>
                     <i class="ss_light fa fa-sun-o"></i>
                 </span>
-                <span id="menu-btn"></span>
             </div>
         </div>
     </div>

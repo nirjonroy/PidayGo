@@ -1,21 +1,7 @@
 @extends('layouts.frontend')
 
 @section('content')
-<!-- section begin -->
-            <section id="subheader" class="text-light" data-bgimage="url({{ asset('frontend/images/background/subheader.jpg') }}) top">
-                <div class="center-y relative text-center">
-                    <div class="container">
-                        <div class="row">
-
-                            <div class="col-md-12 text-center">
-                                <h1>Top NFTs</h1>
-                            </div>
-                            <div class="clearfix"></div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-            <!-- section close -->
+@include('frontend.partials.page-banner', ['title' => 'Top NFTs'])
 
 
             <!-- section begin -->

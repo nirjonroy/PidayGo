@@ -105,18 +105,20 @@
                     <div class="container">
                         <div class="row">
                             <div class="col-lg-12">
-                                <h2>Top Sellers in</h2>
-                                <div id="top_sellers_filter" class="dropdown alt-2">
+                                <div class="top-sellers-header">
+                                    <h2 class="top-sellers-title">Top Sellers in</h2>
+                                    <div id="top_sellers_filter" class="dropdown alt-2 top-sellers-filter">
                                     <a href="#" class="btn-selector">30 days</a>
                                     <ul>
                                         <li class="active"><span>30 days</span></li>
                                         <li><span>1 day</span></li>
                                         <li><span>7 days</span></li>
                                     </ul>
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-md-12 wow fadeIn">
-                                <ol class="author_list alt-2 d-col-3">
+                                <div class="row g-3 top-sellers-grid">
                                     @forelse ($topSellers as $seller)
                                         @php
                                             $avatar = $seller->avatar_path
@@ -125,31 +127,27 @@
                                                     : asset('storage/' . $seller->avatar_path))
                                                 : asset('frontend/images/author/author-1.jpg');
                                         @endphp
-                                        <li>
-                                            <div class="author_list_pp">
-                                                <a href="#">
+                                        <div class="col-lg-4 col-md-6">
+                                            <div class="seller-card">
+                                                <div class="seller-avatar">
                                                     <img class="lazy" src="{{ $avatar }}" alt="">
                                                     @if ($seller->is_verified)
-                                                        <i class="fa fa-check"></i>
+                                                        <span class="seller-badge"><i class="fa fa-check"></i></span>
                                                     @endif
-                                                </a>
+                                                </div>
+                                                <div class="seller-meta">
+                                                    <div class="seller-name">{{ $seller->name }}</div>
+                                                    <div class="seller-username">{{ '@' . $seller->username }}</div>
+                                                </div>
+                                                <div class="seller-volume">{{ number_format($seller->volume, 4) }} USDT</div>
                                             </div>
-                                            <div class="author_list_info">
-                                                <a href="#">{{ $seller->name }}</a>
-                                                <span>{{ '@' . $seller->username }}</span>
-                                            </div>
-                                            <div class="author_list_info_e">
-                                                <span>{{ number_format($seller->volume, 4) }} USDT</span>
-                                            </div>
-                                        </li>
+                                        </div>
                                     @empty
-                                        <li>
-                                            <div class="author_list_info">
-                                                <span>No sellers found.</span>
-                                            </div>
-                                        </li>
+                                        <div class="col-md-12">
+                                            <div class="seller-empty">No sellers found.</div>
+                                        </div>
                                     @endforelse
-                                </ol>
+                                </div>
                             </div>
                         </div>
                     </div>

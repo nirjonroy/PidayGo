@@ -1,17 +1,7 @@
 @extends('layouts.frontend')
 
 @section('content')
-<section id="subheader" class="text-light" data-bgimage="url({{ asset('frontend/images/background/subheader.jpg') }}) top">
-    <div class="center-y relative text-center">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-12 text-center">
-                    <h1>Wallet</h1>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+@include('frontend.partials.page-banner', ['title' => 'Wallet'])
 
 <section aria-label="section">
     <div class="container">
@@ -35,7 +25,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-lg-3 col-md-6 mb30">
+            <div class="col-lg-3 col-md-6 mb30" id="reservation">
                 <div class="nft__item s2">
                     <div class="nft__item_info">
                         <h4>Reservation Balance</h4>

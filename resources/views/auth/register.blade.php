@@ -1,19 +1,10 @@
 @extends('layouts.frontend')
 
 @section('content')
-    <section id="subheader" class="text-light" data-bgimage="url({{ asset('frontend/images/background/subheader.jpg') }}) top">
-        <div class="center-y relative text-center">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-12 text-center">
-                        <h1>Create Account</h1>
-                        <p>Join PidayGo to start collecting NFTs.</p>
-                    </div>
-                    <div class="clearfix"></div>
-                </div>
-            </div>
-        </div>
-    </section>
+    @include('frontend.partials.page-banner', [
+        'title' => 'Create Account',
+        'subtitle' => 'Join PidayGo to start collecting NFTs.',
+    ])
 
     <section aria-label="section">
         <div class="container">

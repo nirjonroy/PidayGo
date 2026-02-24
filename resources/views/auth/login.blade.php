@@ -1,19 +1,10 @@
 @extends('layouts.frontend')
 
 @section('content')
-    <section id="subheader" class="text-light" data-bgimage="url({{ asset('frontend/images/background/subheader.jpg') }}) top">
-        <div class="center-y relative text-center">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-12 text-center">
-                        <h1>User Login</h1>
-                        <p>Welcome back. Sign in to continue.</p>
-                    </div>
-                    <div class="clearfix"></div>
-                </div>
-            </div>
-        </div>
-    </section>
+    @include('frontend.partials.page-banner', [
+        'title' => 'User Login',
+        'subtitle' => 'Welcome back. Sign in to continue.',
+    ])
 
     <section aria-label="section">
         <div class="container">
