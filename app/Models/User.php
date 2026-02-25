@@ -13,6 +13,7 @@ use App\Models\UserBankAccount;
 use App\Models\UserReserve;
 use App\Models\UserReserveLedger;
 use App\Models\UserNotificationSetting;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -27,6 +28,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
+        'user_code',
         'two_factor_secret',
         'two_factor_confirmed_at',
     ];
@@ -52,6 +54,24 @@ class User extends Authenticatable implements MustVerifyEmail
         'two_factor_secret' => 'encrypted',
         'two_factor_confirmed_at' => 'datetime',
     ];
+
+    protected static function booted()
+    {
+        static::creating(function (self $user) {
+            if (empty($user->user_code)) {
+                $user->user_code = self::generateUserCode();
+            }
+        });
+    }
+
+    public static function generateUserCode(): string
+    {
+        do {
+            $code = 'PG' . now()->format('ymd') . strtoupper(Str::random(6));
+        } while (self::where('user_code', $code)->exists());
+
+        return $code;
+    }
 
     public function kycRequests()
     {

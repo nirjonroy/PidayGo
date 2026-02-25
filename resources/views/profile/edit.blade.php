@@ -21,6 +21,10 @@
                                 <label class="form-label">Email</label>
                                 <input class="form-control" value="{{ $user->email }}" readonly>
                             </div>
+                            <div class="mb-3">
+                                <label class="form-label">User ID</label>
+                                <input class="form-control" value="{{ $user->user_code }}" readonly>
+                            </div>
 
                             <div class="row">
                                 <div class="col-md-6 mb-3">
