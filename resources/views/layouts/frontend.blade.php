@@ -134,6 +134,17 @@
             justify-content: flex-end;
             min-width: 220px;
         }
+        .menu-mobile-only {
+            display: none;
+        }
+        .menu-logout-btn {
+            background: none;
+            border: none;
+            padding: 0;
+            color: inherit;
+            font: inherit;
+            cursor: pointer;
+        }
         .notif-badge {
             display: inline-flex;
             align-items: center;
@@ -396,6 +407,13 @@
                 gap: 0;
                 white-space: normal;
             }
+            .menu-mobile-only {
+                display: block;
+            }
+            .menu-logout-btn {
+                width: 100%;
+                text-align: left;
+            }
             #menu-btn:before {
                 font-size: 22px;
             }
@@ -420,6 +438,39 @@
             }
             .author_list.alt-2 li {
                 width: 100%;
+            }
+        }
+
+        .hero-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 18px;
+        }
+        .hero-card {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 18px;
+            padding: 28px;
+            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.08);
+        }
+        .dark-scheme .hero-card {
+            background: rgba(13, 13, 20, 0.65);
+            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.28);
+        }
+        @media (max-width: 991.98px) {
+            .hero-card {
+                padding: 20px;
+            }
+            #section-hero h1 {
+                font-size: clamp(26px, 6vw, 36px);
+                text-align: center;
+            }
+            #section-hero .lead {
+                text-align: center;
+            }
+            .hero-actions {
+                justify-content: center;
             }
         }
     </style>

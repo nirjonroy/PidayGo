@@ -49,6 +49,7 @@ use App\Http\Controllers\User\BankAccountController;
 use App\Http\Controllers\User\WalletController;
 use App\Http\Controllers\User\WithdrawalController as UserWithdrawalController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
 
 Route::get('/', function () {
     return app(FrontendController::class)->home();
@@ -163,6 +164,18 @@ Route::prefix('admin')->name('admin.')->middleware('admin.ip')->group(function (
         Route::get('/', function () {
             return view('admin.dashboard');
         })->name('dashboard');
+
+        Route::middleware('permission:admin.manage')->group(function () {
+            Route::post('/clear-cache', function () {
+                Artisan::call('config:clear');
+                Artisan::call('cache:clear');
+                Artisan::call('route:clear');
+                Artisan::call('view:clear');
+                Artisan::call('optimize:clear');
+
+                return back()->with('status', 'Cache cleared successfully.');
+            })->name('clear-cache');
+        });
 
         Route::middleware('permission:kyc.review')->group(function () {
             Route::get('/kyc', [KycReviewController::class, 'index'])->name('kyc.index');

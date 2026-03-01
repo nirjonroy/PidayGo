@@ -2,7 +2,7 @@
 
 @section('content')
 <section id="section-hero" class="no-top no-bottom mt90 sm-mt-0" aria-label="section">
-                <div class="m-5 padding30 br-15 bg-custom">
+                <div class="m-5 padding30 br-15 bg-custom hero-card">
                     <div class="container">
                         <div class="row align-items-center">
                             <div class="col-lg-6 mb-sm-30">
@@ -10,8 +10,10 @@
                                 <p class="lead">
                                     {{ $heroSubtitle ?? 'Welcome to the future, you can buy and sell awesome artworks form here. The world largest digital marketplace for non-fungible tokens.' }}
                                 </p>
-                                <a href="{{ route('explore') }}" class="btn-main btn-lg">Explore</a>&nbsp;&nbsp;
-                                <a href="{{ auth()->check() ? route('stake.index') : route('login') }}" class="btn-main btn-lg btn-light">Stake</a>
+                                <div class="hero-actions">
+                                    <a href="{{ route('explore') }}" class="btn-main btn-lg">Explore</a>
+                                    <a href="{{ auth()->check() ? route('stake.index') : route('login') }}" class="btn-main btn-lg btn-light">Stake</a>
+                                </div>
                             </div>
 
                             <div class="col-lg-6">

@@ -30,6 +30,10 @@
                         <li><a href="{{ route('explore') }}">Explore<span></span></a></li>
                         <li><a href="{{ route('rankings') }}">Rankings<span></span></a></li>
                     @endif
+                    @guest
+                        <li class="menu-mobile-only"><a href="{{ route('login') }}">Login<span></span></a></li>
+                        <li class="menu-mobile-only"><a href="{{ route('register') }}">Register<span></span></a></li>
+                    @endguest
                     @auth
                         <li>
                             <a href="#">Profile<span></span></a>
@@ -49,6 +53,13 @@
                                 <li><a href="{{ route('support.index') }}">Support</a></li>
                                 <li><a href="{{ route('profile.edit') }}">Profile Settings</a></li>
                             </ul>
+                        </li>
+                        <li class="menu-mobile-only"><a href="{{ route('wallet.index') }}">Wallet<span></span></a></li>
+                        <li class="menu-mobile-only">
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="menu-logout-btn">Logout</button>
+                            </form>
                         </li>
                     @endauth
                 </ul>
