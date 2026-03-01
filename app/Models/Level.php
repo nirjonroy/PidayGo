@@ -11,6 +11,11 @@ class Level extends Model
 
     protected $fillable = [
         'code',
+        'min_deposit',
+        'max_deposit',
+        'req_chain_a',
+        'req_chain_b',
+        'req_chain_c',
         'min_reservation',
         'max_reservation',
         'income_min_percent',
@@ -23,6 +28,13 @@ class Level extends Model
         'max_reservation' => 'decimal:8',
         'income_min_percent' => 'decimal:3',
         'income_max_percent' => 'decimal:3',
+        'min_deposit' => 'decimal:8',
+        'max_deposit' => 'decimal:8',
         'is_active' => 'boolean',
     ];
+
+    public function reservePlans()
+    {
+        return $this->hasMany(ReservePlan::class);
+    }
 }

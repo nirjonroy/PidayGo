@@ -37,7 +37,7 @@
                                 <li><a href="{{ route('dashboard') }}">Dashboard</a></li>
                                 <li><a href="{{ route('wallet.index') }}">Wallet</a></li>
                                 <li><a href="{{ route('stake.index') }}">Stake</a></li>
-                                <li><a href="{{ route('wallet.index') }}#reservation">Reserve</a></li>
+                                <li><a href="{{ route('reserve.index') }}">Reserve</a></li>
                                 <li>
                                     <a href="{{ route('notifications.index') }}">
                                         Notifications

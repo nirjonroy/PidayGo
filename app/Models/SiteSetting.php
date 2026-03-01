@@ -27,5 +27,6 @@ class SiteSetting extends Model
         'sellers_enabled',
         'nft_enabled',
         'bids_enabled',
+        'reserve_enabled',
     ];
 }

@@ -25,6 +25,13 @@
                                 <label class="form-label">User ID</label>
                                 <input class="form-control" value="{{ $user->user_code }}" readonly>
                             </div>
+                            <div class="mb-3">
+                                <label class="form-label">Referral Code</label>
+                                <div class="input-group">
+                                    <input class="form-control" value="{{ $user->ref_code }}" id="ref-code" readonly>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="navigator.clipboard.writeText(document.getElementById('ref-code').value)">Copy</button>
+                                </div>
+                            </div>
 
                             <div class="row">
                                 <div class="col-md-6 mb-3">

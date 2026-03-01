@@ -7,24 +7,25 @@ use App\Models\StakePlan;
 use App\Models\Stake;
 use App\Models\WithdrawalRequest;
 use App\Services\UserReserveService;
-use App\Services\LevelResolver;
+use App\Services\UserLevelResolver;
 use Illuminate\Http\Request;
 
 class WalletController extends Controller
 {
-    public function index(Request $request, UserReserveService $userReserveService, LevelResolver $levelResolver)
+    public function index(Request $request, UserReserveService $userReserveService, UserLevelResolver $levelResolver)
     {
         $user = $request->user();
         $balance = (float) $user->walletLedgers()->sum('amount');
-        $reservedBalance = $userReserveService->getBalance($user);
+        $reservedBalance = (float) $user->reserves()->where('status', 'confirmed')->sum('amount');
         $todayEarnings = (float) $user->walletLedgers()
-            ->where('type', 'reward_credit')
+            ->whereIn('type', ['nft_profit', 'chain_income'])
             ->whereDate('created_at', now()->toDateString())
             ->sum('amount');
         $cumulativeIncome = (float) $user->walletLedgers()
-            ->where('type', 'reward_credit')
+            ->whereIn('type', ['nft_profit', 'chain_income'])
             ->sum('amount');
-        $level = $levelResolver->getUserLevel($user);
+        $level = $levelResolver->resolve($user);
+        $canSell = $reservedBalance > 0;
 
         return view('wallet.index', [
             'balance' => $balance,
@@ -32,6 +33,7 @@ class WalletController extends Controller
             'todayEarnings' => $todayEarnings,
             'cumulativeIncome' => $cumulativeIncome,
             'level' => $level,
+            'canSell' => $canSell,
             'plans' => StakePlan::where('is_active', true)->get(),
             'stakes' => Stake::where('user_id', $user->id)->latest()->get(),
             'withdrawals' => WithdrawalRequest::where('user_id', $user->id)->latest()->get(),

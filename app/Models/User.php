@@ -29,6 +29,11 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'password',
         'user_code',
+        'ref_code',
+        'referred_by_id',
+        'chain_slot',
+        'chain_path',
+        'is_master',
         'two_factor_secret',
         'two_factor_confirmed_at',
     ];
@@ -53,6 +58,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at' => 'datetime',
         'two_factor_secret' => 'encrypted',
         'two_factor_confirmed_at' => 'datetime',
+        'is_master' => 'boolean',
     ];
 
     protected static function booted()
@@ -60,6 +66,9 @@ class User extends Authenticatable implements MustVerifyEmail
         static::creating(function (self $user) {
             if (empty($user->user_code)) {
                 $user->user_code = self::generateUserCode();
+            }
+            if (empty($user->ref_code)) {
+                $user->ref_code = self::generateRefCode();
             }
         });
     }
@@ -69,6 +78,15 @@ class User extends Authenticatable implements MustVerifyEmail
         do {
             $code = 'PG' . now()->format('ymd') . strtoupper(Str::random(6));
         } while (self::where('user_code', $code)->exists());
+
+        return $code;
+    }
+
+    public static function generateRefCode(): string
+    {
+        do {
+            $code = 'PG' . strtoupper(Str::random(8));
+        } while (self::where('ref_code', $code)->exists());
 
         return $code;
     }
@@ -141,5 +159,30 @@ class User extends Authenticatable implements MustVerifyEmail
     public function notificationSettings()
     {
         return $this->hasOne(UserNotificationSetting::class);
+    }
+
+    public function sponsor()
+    {
+        return $this->belongsTo(User::class, 'referred_by_id');
+    }
+
+    public function placementParent()
+    {
+        return $this->belongsTo(User::class, 'referred_by_id');
+    }
+
+    public function placements()
+    {
+        return $this->hasMany(User::class, 'referred_by_id');
+    }
+
+    public function referrals()
+    {
+        return $this->hasMany(User::class, 'referred_by_id');
+    }
+
+    public function reserves()
+    {
+        return $this->hasMany(UserReserve::class);
     }
 }

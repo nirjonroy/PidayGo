@@ -12,14 +12,40 @@ class UserReserve extends Model
     protected $fillable = [
         'user_id',
         'reserved_balance',
+        'level_id',
+        'reserve_plan_id',
+        'amount',
+        'status',
+        'confirmed_at',
+        'completed_at',
+        'meta',
     ];
 
     protected $casts = [
         'reserved_balance' => 'decimal:8',
+        'amount' => 'decimal:8',
+        'confirmed_at' => 'datetime',
+        'completed_at' => 'datetime',
+        'meta' => 'array',
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function level()
+    {
+        return $this->belongsTo(Level::class);
+    }
+
+    public function plan()
+    {
+        return $this->belongsTo(ReservePlan::class, 'reserve_plan_id');
+    }
+
+    public function sale()
+    {
+        return $this->hasOne(NftSale::class, 'user_reserve_id');
     }
 }

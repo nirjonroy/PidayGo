@@ -6,7 +6,7 @@ use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\KycReviewController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProfileController;
-use App\Http\Controllers\Admin\ReserveController;
+use App\Http\Controllers\Admin\ReserveController as AdminReserveController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\DepositController as AdminDepositController;
 use App\Http\Controllers\Admin\DepositAddressController;
@@ -24,6 +24,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\SellerController;
 use App\Http\Controllers\Admin\NftItemController;
 use App\Http\Controllers\Admin\BidController;
+use App\Http\Controllers\Admin\ReservePlanController;
 use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
@@ -39,6 +40,7 @@ use App\Http\Controllers\User\DepositController;
 use App\Http\Controllers\User\UserNotificationController;
 use App\Http\Controllers\User\StakeController;
 use App\Http\Controllers\User\StakingController as UserStakingController;
+use App\Http\Controllers\User\ReserveController as UserReserveController;
 use App\Http\Controllers\User\UserConversationController;
 use App\Http\Controllers\User\UserMessageController;
 use App\Http\Controllers\User\ProfileController as UserProfileController;
@@ -58,7 +60,7 @@ Route::get('/rankings', function () {
 })->name('rankings');
 
 Route::middleware('guest')->group(function () {
-    Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
+    Route::get('/register/{ref?}', [RegisteredUserController::class, 'create'])->name('register');
     Route::post('/register', [RegisteredUserController::class, 'store'])->name('register.store');
 
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
@@ -134,6 +136,11 @@ Route::middleware(['auth', 'verified.if.mail', '2fa.enabled', '2fa.passed', 'kyc
     Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
     Route::get('/wallet/deposit', [DepositController::class, 'create'])->name('wallet.deposit');
     Route::post('/wallet/deposit', [DepositController::class, 'store'])->name('wallet.deposit.store');
+    Route::get('/reserve', [UserReserveController::class, 'index'])->name('reserve.index');
+    Route::post('/reserve/confirm', [UserReserveController::class, 'confirm'])->name('reserve.confirm');
+    Route::get('/reserve/sell', [UserReserveController::class, 'sellForm'])->name('reserve.sell.form');
+    Route::post('/reserve/sell', [UserReserveController::class, 'sellSubmit'])->name('reserve.sell.submit');
+    Route::get('/sell', fn () => redirect()->route('reserve.sell.form'))->name('sell.index');
     Route::post('/staking', [UserStakingController::class, 'store'])->name('staking.store');
     Route::post('/staking/{stake}/unstake', [UserStakingController::class, 'unstake'])->name('staking.unstake');
     Route::post('/withdrawals', [UserWithdrawalController::class, 'store'])->name('withdrawals.store');
@@ -261,10 +268,18 @@ Route::prefix('admin')->name('admin.')->middleware('admin.ip')->group(function (
         });
 
         Route::middleware('permission:reserve.manage')->group(function () {
-            Route::get('/reserve', [ReserveController::class, 'index'])->name('reserve.index');
-            Route::post('/reserve/add', [ReserveController::class, 'add'])->name('reserve.add');
-            Route::post('/reserve/deduct', [ReserveController::class, 'deduct'])->name('reserve.deduct');
-            Route::get('/reserve/ledger', [ReserveController::class, 'ledger'])->name('reserve.ledger');
+            Route::get('/reserve', [AdminReserveController::class, 'index'])->name('reserve.index');
+            Route::post('/reserve/add', [AdminReserveController::class, 'add'])->name('reserve.add');
+            Route::post('/reserve/deduct', [AdminReserveController::class, 'deduct'])->name('reserve.deduct');
+            Route::get('/reserve/ledger', [AdminReserveController::class, 'ledger'])->name('reserve.ledger');
+
+            Route::get('/reserve-plans', [ReservePlanController::class, 'index'])->name('reserve-plans.index');
+            Route::get('/reserve-plans/create', [ReservePlanController::class, 'create'])->name('reserve-plans.create');
+            Route::post('/reserve-plans', [ReservePlanController::class, 'store'])->name('reserve-plans.store');
+            Route::get('/reserve-plans/{reservePlan}/edit', [ReservePlanController::class, 'edit'])->name('reserve-plans.edit');
+            Route::post('/reserve-plans/{reservePlan}/update', [ReservePlanController::class, 'update'])->name('reserve-plans.update');
+            Route::post('/reserve-plans/{reservePlan}/toggle', [ReservePlanController::class, 'toggle'])->name('reserve-plans.toggle');
+            Route::post('/reserve-plans/{reservePlan}/delete', [ReservePlanController::class, 'destroy'])->name('reserve-plans.delete');
         });
 
         Route::middleware('permission:notification.manage')->group(function () {

@@ -39,6 +39,7 @@ class SiteSettingController extends Controller
         $validated['sellers_enabled'] = $request->boolean('sellers_enabled');
         $validated['nft_enabled'] = $request->boolean('nft_enabled');
         $validated['bids_enabled'] = $request->boolean('bids_enabled');
+        $validated['reserve_enabled'] = $request->boolean('reserve_enabled');
 
         $setting = new SiteSetting($validated);
 
@@ -79,6 +80,7 @@ class SiteSettingController extends Controller
         $validated['sellers_enabled'] = $request->boolean('sellers_enabled');
         $validated['nft_enabled'] = $request->boolean('nft_enabled');
         $validated['bids_enabled'] = $request->boolean('bids_enabled');
+        $validated['reserve_enabled'] = $request->boolean('reserve_enabled');
 
         $setting->fill($validated);
 
@@ -135,6 +137,7 @@ class SiteSettingController extends Controller
             'sellers_enabled' => ['nullable', 'boolean'],
             'nft_enabled' => ['nullable', 'boolean'],
             'bids_enabled' => ['nullable', 'boolean'],
+            'reserve_enabled' => ['nullable', 'boolean'],
         ]);
     }
 }

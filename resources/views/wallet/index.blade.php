@@ -21,6 +21,10 @@
                         <div class="nft__item_price">{{ number_format($balance, 4) }} USDT</div>
                         <div class="mt-3">
                             <a href="{{ route('wallet.deposit') }}" class="btn-main btn-light btn-sm">Deposit</a>
+                            <a href="{{ route('reserve.index') }}" class="btn-main btn-sm">Reserve</a>
+                            @if ($canSell)
+                                <a href="{{ route('sell.index') }}" class="btn-main btn-sm btn-light">Sell</a>
+                            @endif
                         </div>
                     </div>
                 </div>

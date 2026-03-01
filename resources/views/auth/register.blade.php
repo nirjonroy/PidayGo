@@ -31,6 +31,14 @@
                         </div>
 
                         <div class="field-set">
+                            <label>Referral Code</label>
+                            <input type="text" name="ref_code" class="form-control" value="{{ old('ref_code', $ref ?? '') }}" placeholder="Enter referral code" required>
+                            @error('ref_code')
+                                <div class="text-danger">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="field-set">
                             <label>Password</label>
                             <input type="password" name="password" class="form-control" required>
                             @error('password')

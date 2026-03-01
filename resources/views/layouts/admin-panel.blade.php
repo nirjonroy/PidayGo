@@ -193,6 +193,14 @@
                     </a>
                   </li>
                 @endif
+                @if (auth('admin')->user()?->can('reserve.manage'))
+                  <li class="nav-item">
+                    <a href="{{ route('admin.reserve-plans.index') }}" class="nav-link {{ request()->routeIs('admin.reserve-plans.*') ? 'active' : '' }}">
+                      <i class="nav-icon bi bi-diagram-3"></i>
+                      <p>Reserve Plans</p>
+                    </a>
+                  </li>
+                @endif
               @if (auth('admin')->user()?->can('withdrawal.review'))
                 <li class="nav-item">
                   <a href="{{ route('admin.withdrawals.index') }}" class="nav-link {{ request()->routeIs('admin.withdrawals.*') ? 'active' : '' }}">
