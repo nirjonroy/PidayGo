@@ -60,14 +60,22 @@ class LevelController extends Controller
     {
         $validated = $request->validate([
             'code' => ['required', 'string', 'max:20'],
+            'min_deposit' => ['required', 'numeric', 'min:0'],
+            'max_deposit' => ['required', 'numeric', 'gte:min_deposit'],
             'min_reservation' => ['required', 'numeric', 'min:0'],
             'max_reservation' => ['required', 'numeric', 'gte:min_reservation'],
+            'req_chain_a' => ['nullable', 'integer', 'min:0'],
+            'req_chain_b' => ['nullable', 'integer', 'min:0'],
+            'req_chain_c' => ['nullable', 'integer', 'min:0'],
             'income_min_percent' => ['required', 'numeric', 'min:0'],
             'income_max_percent' => ['required', 'numeric', 'gte:income_min_percent'],
             'is_active' => ['nullable', 'boolean'],
         ]);
 
         $validated['is_active'] = (bool) ($validated['is_active'] ?? false);
+        $validated['req_chain_a'] = (int) ($validated['req_chain_a'] ?? 0);
+        $validated['req_chain_b'] = (int) ($validated['req_chain_b'] ?? 0);
+        $validated['req_chain_c'] = (int) ($validated['req_chain_c'] ?? 0);
 
         return $validated;
     }

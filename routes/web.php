@@ -25,6 +25,7 @@ use App\Http\Controllers\Admin\SellerController;
 use App\Http\Controllers\Admin\NftItemController;
 use App\Http\Controllers\Admin\BidController;
 use App\Http\Controllers\Admin\ReservePlanController;
+use App\Http\Controllers\Admin\ChainBonusSettingController;
 use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
@@ -280,6 +281,16 @@ Route::prefix('admin')->name('admin.')->middleware('admin.ip')->group(function (
             Route::post('/reserve-plans/{reservePlan}/update', [ReservePlanController::class, 'update'])->name('reserve-plans.update');
             Route::post('/reserve-plans/{reservePlan}/toggle', [ReservePlanController::class, 'toggle'])->name('reserve-plans.toggle');
             Route::post('/reserve-plans/{reservePlan}/delete', [ReservePlanController::class, 'destroy'])->name('reserve-plans.delete');
+        });
+
+        Route::middleware('permission:chain.manage')->group(function () {
+            Route::get('/chain-bonuses', [ChainBonusSettingController::class, 'index'])->name('chain-bonuses.index');
+            Route::get('/chain-bonuses/create', [ChainBonusSettingController::class, 'create'])->name('chain-bonuses.create');
+            Route::post('/chain-bonuses', [ChainBonusSettingController::class, 'store'])->name('chain-bonuses.store');
+            Route::get('/chain-bonuses/{chainBonus}/edit', [ChainBonusSettingController::class, 'edit'])->name('chain-bonuses.edit');
+            Route::post('/chain-bonuses/{chainBonus}/update', [ChainBonusSettingController::class, 'update'])->name('chain-bonuses.update');
+            Route::post('/chain-bonuses/{chainBonus}/toggle', [ChainBonusSettingController::class, 'toggle'])->name('chain-bonuses.toggle');
+            Route::post('/chain-bonuses/{chainBonus}/delete', [ChainBonusSettingController::class, 'destroy'])->name('chain-bonuses.delete');
         });
 
         Route::middleware('permission:notification.manage')->group(function () {

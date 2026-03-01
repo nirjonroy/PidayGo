@@ -4,6 +4,9 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\UserProfile;
+use App\Models\ChainCommission;
+use App\Models\User;
+use App\Models\WalletLedger;
 use App\Models\UserNotificationSetting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,9 +18,33 @@ class ProfileController extends Controller
 {
     public function edit(Request $request): View
     {
+        $user = $request->user();
+        $directA = $user->referrals()->where('chain_slot', 'A')->count();
+        $directB = $user->referrals()->where('chain_slot', 'B')->count();
+        $directC = $user->referrals()->where('chain_slot', 'C')->count();
+
+        $userId = $user->id;
+        $downlineCount = User::query()
+            ->where(function ($query) use ($userId) {
+                $query->where('chain_path', 'like', $userId . '/%')
+                    ->orWhere('chain_path', 'like', '%/' . $userId . '/%');
+            })
+            ->count();
+
+        $chainIncomeTotal = (float) WalletLedger::query()
+            ->where('user_id', $user->id)
+            ->where('type', 'chain_income')
+            ->sum('amount');
+
+        $recentChain = ChainCommission::with('sourceUser')
+            ->where('target_user_id', $user->id)
+            ->orderByDesc('created_at')
+            ->limit(10)
+            ->get();
+
         return view('profile.edit', [
-            'profile' => $request->user()->profile ?? new UserProfile(),
-            'user' => $request->user(),
+            'profile' => $user->profile ?? new UserProfile(),
+            'user' => $user,
             'notificationSettings' => $request->user()->notificationSettings ?? new UserNotificationSetting([
                 'system_alerts' => true,
                 'item_sold' => true,
@@ -27,6 +54,10 @@ class ProfileController extends Controller
                 'price_change' => true,
                 'successful_purchase' => true,
             ]),
+            'directCounts' => ['A' => $directA, 'B' => $directB, 'C' => $directC],
+            'downlineCount' => $downlineCount,
+            'chainIncomeTotal' => $chainIncomeTotal,
+            'recentChain' => $recentChain,
         ]);
     }
 

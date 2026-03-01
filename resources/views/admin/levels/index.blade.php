@@ -21,8 +21,10 @@
                         <thead>
                             <tr>
                                 <th>Code</th>
+                                <th>Deposit Range</th>
                                 <th>Reservation Range</th>
                                 <th>Income % Range</th>
+                                <th>Chain Req (A/B/C)</th>
                                 <th>Status</th>
                                 <th></th>
                             </tr>
@@ -31,8 +33,10 @@
                             @foreach ($levels as $level)
                                 <tr>
                                     <td>{{ $level->code }}</td>
+                                    <td>{{ $level->min_deposit }} - {{ $level->max_deposit }}</td>
                                     <td>{{ $level->min_reservation }} - {{ $level->max_reservation }}</td>
                                     <td>{{ $level->income_min_percent }}% - {{ $level->income_max_percent }}%</td>
+                                    <td>{{ $level->req_chain_a ?? 0 }} / {{ $level->req_chain_b ?? 0 }} / {{ $level->req_chain_c ?? 0 }}</td>
                                     <td>
                                         @if ($level->is_active)
                                             <span class="badge bg-success">Active</span>

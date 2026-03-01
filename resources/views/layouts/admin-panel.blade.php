@@ -281,6 +281,14 @@
                   </a>
                 </li>
               @endif
+              @if (auth('admin')->user()?->can('chain.manage'))
+                <li class="nav-item">
+                  <a href="{{ route('admin.chain-bonuses.index') }}" class="nav-link {{ request()->routeIs('admin.chain-bonuses.*') ? 'active' : '' }}">
+                    <i class="nav-icon bi bi-diagram-2"></i>
+                    <p>Chain Bonus</p>
+                  </a>
+                </li>
+              @endif
               @if (auth('admin')->user()?->can('activity.view'))
                 <li class="nav-item">
                   <a href="{{ route('admin.activity.index') }}" class="nav-link {{ request()->routeIs('admin.activity.*') ? 'active' : '' }}">

@@ -179,6 +179,51 @@
                         </form>
                     </div>
                 </div>
+
+                <div class="nft__item s2 mb30">
+                    <div class="nft__item_info">
+                        <h4 class="mb-3">Chain Details</h4>
+                        <div class="nft__item_price">Sponsor Code: {{ $user->sponsor?->ref_code ?? 'N/A' }}</div>
+                        <div class="nft__item_price">My Chain Slot: {{ $user->chain_slot ?? '-' }}</div>
+                        <div class="nft__item_price">Direct A: {{ $directCounts['A'] ?? 0 }}</div>
+                        <div class="nft__item_price">Direct B: {{ $directCounts['B'] ?? 0 }}</div>
+                        <div class="nft__item_price">Direct C: {{ $directCounts['C'] ?? 0 }}</div>
+                        <div class="nft__item_price">Total Downline: {{ $downlineCount }}</div>
+                        <div class="nft__item_price">Chain Income Total: {{ number_format($chainIncomeTotal, 8) }} USDT</div>
+                    </div>
+                </div>
+
+                <div class="nft__item s2 mb30">
+                    <div class="nft__item_info">
+                        <h4 class="mb-3">Recent Chain Income</h4>
+                        @if ($recentChain->isEmpty())
+                            <div class="text-muted">No chain income yet.</div>
+                        @else
+                            <div class="table-responsive">
+                                <table class="table table-sm align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>From</th>
+                                            <th>Depth</th>
+                                            <th>%</th>
+                                            <th>Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($recentChain as $row)
+                                            <tr>
+                                                <td>{{ $row->sourceUser?->ref_code ?? $row->source_user_id }}</td>
+                                                <td>{{ $row->level_depth }}</td>
+                                                <td>{{ $row->percent }}%</td>
+                                                <td>{{ number_format((float) $row->amount, 8) }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @endif
+                    </div>
+                </div>
             </div>
         </div>
     </div>

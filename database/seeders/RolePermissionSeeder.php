@@ -118,6 +118,11 @@ class RolePermissionSeeder extends Seeder
             'guard_name' => 'admin',
         ]);
 
+        $chainPermission = Permission::firstOrCreate([
+            'name' => 'chain.manage',
+            'guard_name' => 'admin',
+        ]);
+
         $role->givePermissionTo($permission);
         $role->givePermissionTo($sitePermission);
         $role->givePermissionTo($homeSlidePermission);
@@ -138,6 +143,7 @@ class RolePermissionSeeder extends Seeder
         $role->givePermissionTo($supportPermission);
         $role->givePermissionTo($mailPermission);
         $role->givePermissionTo($reservePermission);
+        $role->givePermissionTo($chainPermission);
 
         Admin::query()->each(function (Admin $admin) use ($role) {
             if (!$admin->hasRole($role)) {
