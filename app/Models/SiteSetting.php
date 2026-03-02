@@ -38,6 +38,9 @@ class SiteSetting extends Model
         'footer_social_youtube',
         'footer_social_email',
         'footer_copyright_text',
+        'theme_primary_color',
+        'theme_secondary_color',
+        'theme_mode',
     ];
 
     protected $casts = [

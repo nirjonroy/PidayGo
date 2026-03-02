@@ -1,6 +1,21 @@
-@props(['title' => '', 'subtitle' => null])
+@props(['title' => '', 'subtitle' => null, 'compact' => null])
 
-<section class="page-banner">
+@php
+    $isCompact = $compact ?? request()->is(
+        'dashboard',
+        'dashboard/*',
+        'profile',
+        'account/*',
+        'wallet*',
+        'notifications*',
+        'support*',
+        'reserve*',
+        'sell*',
+        'stake*'
+    );
+@endphp
+
+<section class="page-banner{{ $isCompact ? ' page-banner--compact' : '' }}">
     <div class="container">
         <div class="page-banner__content text-center">
             <h1 class="page-banner__title">{{ $title }}</h1>

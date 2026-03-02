@@ -66,6 +66,14 @@
                 <div class="mb-3"><strong>Min Deposit (USDT):</strong> {{ $setting->min_deposit_usdt ?? 50 }}</div>
                 <div class="mb-3"><strong>Deposit Review Hours:</strong> {{ $setting->deposit_review_hours ?? 24 }}</div>
                 <div class="mb-3">
+                    <strong>Theme Colors:</strong>
+                    <div class="mt-1">
+                        <div>Primary: {{ $setting->theme_primary_color ?? 'Default' }}</div>
+                        <div>Secondary: {{ $setting->theme_secondary_color ?? 'Default' }}</div>
+                    </div>
+                </div>
+                <div class="mb-3"><strong>Default Theme Mode:</strong> {{ ucfirst($setting->theme_mode ?? 'auto') }}</div>
+                <div class="mb-3">
                     <strong>Feature Flags:</strong>
                     <div class="mt-1">
                         <span class="badge {{ $setting->sellers_enabled ? 'bg-success' : 'bg-secondary' }}">Sellers {{ $setting->sellers_enabled ? 'On' : 'Off' }}</span>

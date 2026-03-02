@@ -36,6 +36,7 @@ class SiteSettingController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $this->validatePayload($request);
+        $validated = $this->normalizeThemeColors($validated);
         $validated['sellers_enabled'] = $request->boolean('sellers_enabled');
         $validated['nft_enabled'] = $request->boolean('nft_enabled');
         $validated['bids_enabled'] = $request->boolean('bids_enabled');
@@ -78,6 +79,7 @@ class SiteSettingController extends Controller
     {
         $setting = SiteSetting::firstOrFail();
         $validated = $this->validatePayload($request);
+        $validated = $this->normalizeThemeColors($validated);
         $validated['sellers_enabled'] = $request->boolean('sellers_enabled');
         $validated['nft_enabled'] = $request->boolean('nft_enabled');
         $validated['bids_enabled'] = $request->boolean('bids_enabled');
@@ -138,6 +140,9 @@ class SiteSettingController extends Controller
             'footer_social_youtube' => ['nullable', 'string', 'max:255'],
             'footer_social_email' => ['nullable', 'string', 'max:255'],
             'footer_copyright_text' => ['nullable', 'string', 'max:255'],
+            'theme_primary_color' => ['nullable', 'string', 'regex:/^#?[0-9a-fA-F]{6}$/'],
+            'theme_secondary_color' => ['nullable', 'string', 'regex:/^#?[0-9a-fA-F]{6}$/'],
+            'theme_mode' => ['nullable', 'in:auto,light,dark'],
             'usdt_trc20_address' => ['nullable', 'string', 'max:120'],
             'min_deposit_usdt' => ['required', 'numeric', 'min:0'],
             'deposit_review_hours' => ['required', 'integer', 'min:1', 'max:168'],
@@ -151,5 +156,17 @@ class SiteSettingController extends Controller
             'reserve_enabled' => ['nullable', 'boolean'],
             'two_factor_enabled' => ['nullable', 'boolean'],
         ]);
+    }
+
+    private function normalizeThemeColors(array $validated): array
+    {
+        foreach (['theme_primary_color', 'theme_secondary_color'] as $field) {
+            if (!empty($validated[$field])) {
+                $color = ltrim($validated[$field], '#');
+                $validated[$field] = '#' . strtoupper($color);
+            }
+        }
+
+        return $validated;
     }
 }

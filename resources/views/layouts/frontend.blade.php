@@ -5,6 +5,24 @@
     @php
         $settings = $settings ?? $siteSetting ?? null;
         $siteName = $settings?->site_name ?: config('app.name', 'PidayGo');
+        $normalizeHex = function ($hex) {
+            $hex = trim((string) $hex);
+            if ($hex === '') {
+                return null;
+            }
+            $hex = ltrim($hex, '#');
+            if (!preg_match('/^[0-9a-fA-F]{6}$/', $hex)) {
+                return null;
+            }
+            return '#' . strtoupper($hex);
+        };
+        $hexToRgb = function ($hex) {
+            $hex = ltrim($hex, '#');
+            return hexdec(substr($hex, 0, 2)) . ', ' . hexdec(substr($hex, 2, 2)) . ', ' . hexdec(substr($hex, 4, 2));
+        };
+        $themePrimary = $normalizeHex($settings?->theme_primary_color);
+        $themeSecondary = $normalizeHex($settings?->theme_secondary_color);
+        $themeMode = $settings?->theme_mode ?? 'auto';
     @endphp
     <title>{{ $siteName }}</title>
     @if ($settings?->favicon_path)
@@ -30,16 +48,53 @@
     <link href="{{ asset('frontend/css/coloring-gradient.css') }}" rel="stylesheet" type="text/css" />
     <!-- custom font -->
     <link href="{{ asset('frontend/css/custom-font-3.css') }}" rel="stylesheet" type="text/css" />
+    @if (in_array($themeMode, ['light', 'dark'], true))
+        <script>
+            (function () {
+                var mode = "{{ $themeMode }}";
+                var value = mode === 'dark' ? '1' : '2';
+                var expires = new Date();
+                expires.setFullYear(expires.getFullYear() + 3);
+                document.cookie = "c_mod=" + value + "; path=/; expires=" + expires.toUTCString();
+            })();
+        </script>
+    @endif
+    @if ($themePrimary || $themeSecondary)
+        <style>
+            :root {
+                @if ($themePrimary)
+                --primary-color: {{ $themePrimary }};
+                --primary-color-rgb: {{ $hexToRgb($themePrimary) }};
+                --primary-color-2: {{ $themePrimary }};
+                --primary-color-2-rgb: {{ $hexToRgb($themePrimary) }};
+                @endif
+                @if ($themeSecondary)
+                --secondary-color: {{ $themeSecondary }};
+                --secondary-color-rgb: {{ $hexToRgb($themeSecondary) }};
+                --secondary-color-2: {{ $themeSecondary }};
+                --secondary-color-rgb-2: {{ $hexToRgb($themeSecondary) }};
+                @endif
+            }
+        </style>
+    @endif
     <style>
         #logo img.logo,
         #logo img.logo-2 {
-            height: 46px;
+            height: 60px;
             width: auto;
+        }
+        #logo {
+            display: flex;
+            align-items: center;
+        }
+        #logo a {
+            display: inline-flex;
+            align-items: center;
         }
         @media (max-width: 991.98px) {
             #logo img.logo,
             #logo img.logo-2 {
-                height: 38px;
+                height: 52px;
             }
         }
         .dark-scheme .table,
@@ -63,6 +118,24 @@
         }
         .dark-scheme .table .text-muted {
             color: #b4b9c2 !important;
+        }
+        .reserve-table-card {
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 16px;
+            padding: 12px 16px;
+            box-shadow: 0 10px 24px rgba(24, 24, 31, 0.08);
+            margin-bottom: 16px;
+        }
+        .reserve-table-card .table {
+            margin-bottom: 0;
+        }
+        .reserve-table-card .table th,
+        .reserve-table-card .table td {
+            padding: 10px 12px;
+        }
+        .dark-scheme .reserve-table-card {
+            background: rgba(13, 13, 20, 0.65);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.32);
         }
         .dark-scheme .form-control,
         .dark-scheme .form-select,
@@ -194,6 +267,9 @@
             display: flex;
             align-items: center;
         }
+        .page-banner--compact {
+            margin-top: 24px;
+        }
         .page-banner > .container {
             width: 100%;
         }
@@ -225,6 +301,9 @@
                 min-height: 140px;
                 margin: 70px 0 20px;
                 border-radius: 14px;
+            }
+            .page-banner--compact {
+                margin-top: 16px;
             }
         }
         .gigaland-pagination .pagination {
@@ -443,24 +522,10 @@
                 justify-content: space-between;
             }
             header.header-mobile #mainmenu > li > span {
-                background: none !important;
-                width: 28px;
-                height: 28px;
-                right: 0;
-                margin-top: 8px;
+                display: none !important;
             }
-            header.header-mobile #mainmenu > li > span::before {
-                content: "\f107";
-                font-family: "FontAwesome";
-                font-size: 16px;
-                color: #6b7280;
-                display: inline-block;
-                width: 100%;
-                text-align: center;
-            }
-            header.header-mobile #mainmenu > li > span.active::before {
-                content: "\f106";
-                color: #111827;
+            header.header-mobile #mainmenu > li > ul > li > span {
+                display: none !important;
             }
             .menu-mobile-only {
                 display: block;
@@ -500,6 +565,14 @@
             .author_list.alt-2 li {
                 width: 100%;
             }
+            .reserve-table-card {
+                padding: 8px 10px;
+            }
+            .reserve-table-card .table th,
+            .reserve-table-card .table td {
+                padding: 8px;
+                font-size: 13px;
+            }
         }
 
         .hero-actions {
@@ -510,13 +583,13 @@
             margin-top: 18px;
         }
         .hero-card {
-            background: rgba(255, 255, 255, 0.7);
+            background: linear-gradient(135deg, rgba(var(--secondary-color-rgb), 0.2) 0%, rgba(var(--secondary-color-rgb-2), 0.2) 100%);
             border-radius: 18px;
             padding: 28px;
             box-shadow: 0 14px 30px rgba(0, 0, 0, 0.08);
         }
         .dark-scheme .hero-card {
-            background: rgba(13, 13, 20, 0.65);
+            background: linear-gradient(135deg, rgba(var(--primary-color-rgb), 0.85) 0%, rgba(var(--primary-color-2-rgb), 0.85) 100%);
             box-shadow: 0 14px 30px rgba(0, 0, 0, 0.28);
         }
         @media (max-width: 991.98px) {
@@ -537,7 +610,7 @@
     </style>
 </head>
 
-<body class="switch-scheme">
+<body class="switch-scheme{{ $themeMode === 'dark' ? ' dark-scheme' : '' }}">
     <div id="wrapper">
         <!-- header begin -->
         @include('frontend.partials.header')

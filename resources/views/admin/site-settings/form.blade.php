@@ -146,6 +146,37 @@
                     </div>
                 </div>
 
+                <div class="mb-4">
+                    <h5 class="mb-2">Theme Colors</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label" for="theme_primary_color">Primary Color</label>
+                            <input id="theme_primary_color" name="theme_primary_color" class="form-control" placeholder="#0B0814" value="{{ old('theme_primary_color', $setting->theme_primary_color) }}">
+                            <div class="form-text">Leave blank to use the default theme color.</div>
+                            @error('theme_primary_color') <div class="text-danger">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label" for="theme_secondary_color">Secondary (Accent) Color</label>
+                            <input id="theme_secondary_color" name="theme_secondary_color" class="form-control" placeholder="#F5B04C" value="{{ old('theme_secondary_color', $setting->theme_secondary_color) }}">
+                            <div class="form-text">Leave blank to use the default accent color.</div>
+                            @error('theme_secondary_color') <div class="text-danger">{{ $message }}</div> @enderror
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="theme_mode">Default Theme Mode</label>
+                        <select id="theme_mode" name="theme_mode" class="form-select">
+                            @php
+                                $currentThemeMode = old('theme_mode', $setting->theme_mode ?? 'auto');
+                            @endphp
+                            <option value="auto" @selected($currentThemeMode === 'auto')>Auto (use user preference)</option>
+                            <option value="light" @selected($currentThemeMode === 'light')>Light</option>
+                            <option value="dark" @selected($currentThemeMode === 'dark')>Dark</option>
+                        </select>
+                        <div class="form-text">Applies when a user has not selected a theme yet.</div>
+                        @error('theme_mode') <div class="text-danger">{{ $message }}</div> @enderror
+                    </div>
+                </div>
+
                 <div class="mb-3">
                     <label class="form-label" for="min_deposit_usdt">Minimum Deposit (USDT)</label>
                     <input id="min_deposit_usdt" name="min_deposit_usdt" type="number" step="0.0001" class="form-control" value="{{ old('min_deposit_usdt', $setting->min_deposit_usdt ?? 50) }}" required>

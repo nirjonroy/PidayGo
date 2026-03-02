@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\BlogPost;
 use App\Models\HomeSlide;
+use App\Models\UserReserve;
+use Illuminate\Support\Facades\Schema;
 use App\Models\NftItem;
 use App\Models\Seller;
 use App\Models\SiteSetting;
@@ -23,6 +25,30 @@ class FrontendController extends Controller
         $sellersEnabled = $features->isEnabled('sellers_enabled');
         $nftEnabled = $features->isEnabled('nft_enabled');
         $bidsEnabled = $features->isEnabled('bids_enabled');
+        $reserveEnabled = $features->isEnabled('reserve_enabled');
+
+        $reserveStats = [
+            'active_count' => 0,
+            'today_count' => 0,
+            'total_reserved' => 0,
+        ];
+        $recentReserves = collect();
+
+        if ($reserveEnabled && Schema::hasTable('user_reserves')) {
+            $reserveStats = [
+                'active_count' => UserReserve::where('status', 'confirmed')->count(),
+                'today_count' => UserReserve::where('status', 'confirmed')
+                    ->whereDate('confirmed_at', now()->toDateString())
+                    ->count(),
+                'total_reserved' => (float) UserReserve::where('status', 'confirmed')->sum('amount'),
+            ];
+
+            $recentReserves = UserReserve::with(['user', 'level', 'plan'])
+                ->where('status', 'confirmed')
+                ->orderByDesc('confirmed_at')
+                ->limit(6)
+                ->get();
+        }
 
         return view('frontend.home', [
             'siteSetting' => $siteSetting,
@@ -55,6 +81,8 @@ class FrontendController extends Controller
                 ->orderByDesc('id')
                 ->limit(3)
                 ->get(),
+            'reserveStats' => $reserveStats,
+            'recentReserves' => $recentReserves,
             'featureFlags' => [
                 'sellers_enabled' => $sellersEnabled,
                 'nft_enabled' => $nftEnabled,

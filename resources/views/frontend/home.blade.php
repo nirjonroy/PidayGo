@@ -11,7 +11,7 @@
                                     {{ $heroSubtitle ?? 'Welcome to the future, you can buy and sell awesome artworks form here. The world largest digital marketplace for non-fungible tokens.' }}
                                 </p>
                                 <div class="hero-actions">
-                                    <a href="{{ route('explore') }}" class="btn-main btn-lg">Explore</a>
+                                    <a href="{{ auth()->check() ? route('reserve.index') : route('login') }}" class="btn-main btn-lg">Reserve</a>
                                     <a href="{{ auth()->check() ? route('stake.index') : route('login') }}" class="btn-main btn-lg btn-light">Stake</a>
                                 </div>
                             </div>
@@ -100,6 +100,82 @@
                     </div>
                 </div>
             </section>
+
+            @if (feature('reserve_enabled'))
+            <section id="section-reserve" class="pt40 no-bottom">
+                <div class="container">
+                    <div class="row align-items-center mb-3">
+                        <div class="col-lg-8">
+                            <h2>Reservations</h2>
+                            <p class="lead">Live reserve activity and totals.</p>
+                        </div>
+                        <div class="col-lg-4 text-lg-end">
+                            <a href="{{ auth()->check() ? route('reserve.index') : route('login') }}" class="btn-main">Reserve Now</a>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-4 mb-3">
+                            <div class="nft__item s2">
+                                <div class="nft__item_info">
+                                    <div class="nft__item_price">Active Reserves</div>
+                                    <h4>{{ $reserveStats['active_count'] ?? 0 }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="nft__item s2">
+                                <div class="nft__item_info">
+                                    <div class="nft__item_price">Today’s Reserves</div>
+                                    <h4>{{ $reserveStats['today_count'] ?? 0 }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="nft__item s2">
+                                <div class="nft__item_info">
+                                    <div class="nft__item_price">Total Reserved</div>
+                                    <h4>{{ number_format($reserveStats['total_reserved'] ?? 0, 4) }} USDT</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="table-responsive reserve-table-card">
+                                <table class="table table-striped align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>User ID</th>
+                                            <th>Level</th>
+                                            <th>Plan</th>
+                                            <th>Amount</th>
+                                            <th>Confirmed</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse ($recentReserves as $reserve)
+                                            <tr>
+                                                <td>{{ $reserve->user?->user_code ?? ('#' . $reserve->user_id) }}</td>
+                                                <td>{{ $reserve->level?->code ?? '-' }}</td>
+                                                <td>{{ $reserve->plan?->reserve_amount ? number_format($reserve->plan->reserve_amount, 4) . ' USDT' : '-' }}</td>
+                                                <td>{{ number_format($reserve->amount ?? 0, 4) }} USDT</td>
+                                                <td>{{ $reserve->confirmed_at?->format('Y-m-d H:i') ?? '-' }}</td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="5" class="text-center text-muted">No reservations yet.</td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            @endif
 
             @if (feature('sellers_enabled'))
             <section id="section-collections" class="no-top no-bottom">
