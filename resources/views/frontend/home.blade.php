@@ -317,65 +317,45 @@
                 </div>
             </section>
 
-            <section id="section-news" class="pt40" data-bgimage="url({{ asset('frontend/images/background/23.jpg') }}) top" data-bgimage-alt="url({{ asset('frontend/images/background/23-alt.jpg') }}) top">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <h2>Latest News</h2>
+            @php
+                $newsPosts = $latestPosts ?? collect();
+            @endphp
+            @if ($newsPosts->isNotEmpty())
+                <section id="section-news" class="pt40" data-bgimage="url({{ asset('frontend/images/background/23.jpg') }}) top" data-bgimage-alt="url({{ asset('frontend/images/background/23-alt.jpg') }}) top">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <h2>Latest News</h2>
+                            </div>
+                        </div>
+
+                        <div class="row wow fadeIn">
+                            @foreach ($newsPosts as $post)
+                                @php
+                                    $image = $post->image_path ? asset('storage/' . $post->image_path) : asset('frontend/images/news/news-b1.jpg');
+                                    $excerpt = $post->excerpt ?: \Illuminate\Support\Str::limit(strip_tags($post->content ?? ''), 140);
+                                    $published = $post->published_at?->format('F d, Y') ?? $post->created_at?->format('F d, Y');
+                                @endphp
+                                <div class="col-lg-4 col-md-6 mb-sm-30">
+                                    <div class="bloglist item">
+                                        <div class="post-content">
+                                            <div class="post-image">
+                                                <img alt="{{ $post->title }}" src="{{ $image }}" class="lazy">
+                                            </div>
+                                            <div class="post-text">
+                                                <span class="p-tagline">{{ $post->category ?? 'News' }}</span>
+                                                <span class="p-date">{{ $published }}</span>
+                                                <h4><a href="{{ route('blog.show', $post->slug) }}">{{ $post->title }}<span></span></a></h4>
+                                                <p>{{ $excerpt }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
                         </div>
                     </div>
-
-                    <div class="row wow fadeIn">
-                        <div class="col-lg-4 col-md-6 mb-sm-30">
-                            <div class="bloglist item">
-                                <div class="post-content">
-                                    <div class="post-image">
-                                        <img alt="" src="{{ asset('frontend/images/news/news-b1.jpg') }}" class="lazy">
-                                    </div>
-                                    <div class="post-text">
-                                        <span class="p-tagline">Tips &amp; Tricks</span>
-                                        <span class="p-date">October 28, 2020</span>
-                                        <h4><a href="#">How to create NFT item<span></span></a></h4>
-                                        <p>The NFT can be associated with a particular digital or physical asset such as images, art, music, and sport highlights and may confer licensing rights....</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-lg-4 col-md-6 mb-sm-30">
-                            <div class="bloglist item">
-                                <div class="post-content">
-                                    <div class="post-image">
-                                        <img alt="" src="{{ asset('frontend/images/news/news-b2.jpg') }}" class="lazy">
-                                    </div>
-                                    <div class="post-text">
-                                        <span class="p-tagline">Tips &amp; Tricks</span>
-                                        <span class="p-date">October 28, 2020</span>
-                                        <h4><a href="#">How to sell NFT item<span></span></a></h4>
-                                        <p>NFTs function like cryptographic tokens, but unlike cryptocurrencies such as Bitcoin or Ethereum, NFTs are not mutually interchangeable...</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-lg-4 col-md-6 mb-sm-30">
-                            <div class="bloglist item">
-                                <div class="post-content">
-                                    <div class="post-image">
-                                        <img alt="" src="{{ asset('frontend/images/news/news-b3.jpg') }}" class="lazy">
-                                    </div>
-                                    <div class="post-text">
-                                        <span class="p-tagline">Tips &amp; Tricks</span>
-                                        <span class="p-date">October 28, 2020</span>
-                                        <h4><a href="#">Where to sell NFT item<span></span></a></h4>
-                                        <p>The ownership of an NFT as defined by the blockchain has no inherent legal meaning, and does not necessarily grant copyright, intellectual property...</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
+                </section>
+            @endif
 
 @endsection
 

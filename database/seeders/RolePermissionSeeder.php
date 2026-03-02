@@ -33,6 +33,16 @@ class RolePermissionSeeder extends Seeder
             'guard_name' => 'admin',
         ]);
 
+        $blogPermission = Permission::firstOrCreate([
+            'name' => 'blog.manage',
+            'guard_name' => 'admin',
+        ]);
+
+        $footerPermission = Permission::firstOrCreate([
+            'name' => 'footer.manage',
+            'guard_name' => 'admin',
+        ]);
+
         $rolePermission = Permission::firstOrCreate([
             'name' => 'role.manage',
             'guard_name' => 'admin',
@@ -126,6 +136,8 @@ class RolePermissionSeeder extends Seeder
         $role->givePermissionTo($permission);
         $role->givePermissionTo($sitePermission);
         $role->givePermissionTo($homeSlidePermission);
+        $role->givePermissionTo($blogPermission);
+        $role->givePermissionTo($footerPermission);
         $role->givePermissionTo($rolePermission);
         $role->givePermissionTo($permPermission);
         $role->givePermissionTo($userPermission);

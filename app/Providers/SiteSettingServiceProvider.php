@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\FooterLink;
 use App\Services\FeatureFlagService;
 use App\Services\SiteSettingService;
 use Illuminate\Support\Facades\Schema;
@@ -30,12 +31,22 @@ class SiteSettingServiceProvider extends ServiceProvider
                         'bids_enabled' => true,
                         'two_factor_enabled' => true,
                     ],
+                    'footerLinks' => collect(),
                 ]);
                 return;
             }
 
             $setting = app(SiteSettingService::class)->get();
             $featureFlags = app(FeatureFlagService::class)->all();
+
+            $footerLinks = collect();
+            if (Schema::hasTable('footer_links')) {
+                $footerLinks = FooterLink::active()
+                    ->orderBy('section')
+                    ->orderBy('sort_order')
+                    ->get()
+                    ->groupBy('section');
+            }
 
             $view->with([
                 'siteName' => $setting?->site_name ?? 'PidayGo',
@@ -48,6 +59,7 @@ class SiteSettingServiceProvider extends ServiceProvider
                 'siteMinDepositUsdt' => $setting?->min_deposit_usdt ?? 50,
                 'siteDepositReviewHours' => $setting?->deposit_review_hours ?? 24,
                 'featureFlags' => $featureFlags,
+                'footerLinks' => $footerLinks,
             ]);
         });
     }

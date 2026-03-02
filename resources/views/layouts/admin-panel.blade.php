@@ -145,6 +145,22 @@
                   </a>
                 </li>
               @endif
+              @if (auth('admin')->user()?->can('blog.manage'))
+                <li class="nav-item">
+                  <a href="{{ route('admin.blog-posts.index') }}" class="nav-link {{ request()->routeIs('admin.blog-posts.*') ? 'active' : '' }}">
+                    <i class="nav-icon bi bi-journal-text"></i>
+                    <p>Blog Posts</p>
+                  </a>
+                </li>
+              @endif
+              @if (auth('admin')->user()?->can('footer.manage'))
+                <li class="nav-item">
+                  <a href="{{ route('admin.footer-links.index') }}" class="nav-link {{ request()->routeIs('admin.footer-links.*') ? 'active' : '' }}">
+                    <i class="nav-icon bi bi-link-45deg"></i>
+                    <p>Footer Links</p>
+                  </a>
+                </li>
+              @endif
               @if (auth('admin')->user()?->can('user.manage'))
                 <li class="nav-item">
                   <a href="{{ route('admin.users.index') }}" class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">

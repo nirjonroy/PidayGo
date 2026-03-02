@@ -29,6 +29,15 @@ class SiteSetting extends Model
         'bids_enabled',
         'reserve_enabled',
         'two_factor_enabled',
+        'footer_newsletter_title',
+        'footer_newsletter_text',
+        'footer_newsletter_placeholder',
+        'footer_social_facebook',
+        'footer_social_twitter',
+        'footer_social_instagram',
+        'footer_social_youtube',
+        'footer_social_email',
+        'footer_copyright_text',
     ];
 
     protected $casts = [

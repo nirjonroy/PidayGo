@@ -552,15 +552,55 @@
 
         <!-- footer begin -->
         <footer>
+            @php
+                $settings = $settings ?? $siteSetting ?? null;
+                $footerLinks = $footerLinks ?? collect();
+                $defaults = [
+                    'marketplace' => [
+                        ['label' => 'All NFTs', 'url' => route('explore')],
+                        ['label' => 'Art', 'url' => route('explore')],
+                        ['label' => 'Music', 'url' => route('explore')],
+                        ['label' => 'Domain Names', 'url' => route('explore')],
+                        ['label' => 'Virtual World', 'url' => route('explore')],
+                        ['label' => 'Collectibles', 'url' => route('explore')],
+                    ],
+                    'resources' => [
+                        ['label' => 'Help Center', 'url' => '#'],
+                        ['label' => 'Partners', 'url' => '#'],
+                        ['label' => 'Suggestions', 'url' => '#'],
+                        ['label' => 'Discord', 'url' => '#'],
+                        ['label' => 'Docs', 'url' => '#'],
+                        ['label' => 'Newsletter', 'url' => '#'],
+                    ],
+                    'community' => [
+                        ['label' => 'Community', 'url' => '#'],
+                        ['label' => 'Documentation', 'url' => '#'],
+                        ['label' => 'Brand Assets', 'url' => '#'],
+                        ['label' => 'Blog', 'url' => route('blog.index')],
+                        ['label' => 'Forum', 'url' => '#'],
+                        ['label' => 'Mailing List', 'url' => '#'],
+                    ],
+                ];
+                $newsletterTitle = $settings?->footer_newsletter_title ?: 'Get the latest updates';
+                $newsletterText = $settings?->footer_newsletter_text ?: 'Signup for our newsletter to get the latest updates in your inbox.';
+                $newsletterPlaceholder = $settings?->footer_newsletter_placeholder ?: 'enter your email';
+                $socials = [
+                    ['url' => $settings?->footer_social_facebook, 'icon' => 'fa-facebook'],
+                    ['url' => $settings?->footer_social_twitter, 'icon' => 'fa-twitter'],
+                    ['url' => $settings?->footer_social_instagram, 'icon' => 'fa-instagram'],
+                    ['url' => $settings?->footer_social_youtube, 'icon' => 'fa-youtube'],
+                    ['url' => $settings?->footer_social_email ? 'mailto:' . $settings->footer_social_email : ($siteEmail ? 'mailto:' . $siteEmail : null), 'icon' => 'fa-envelope-o'],
+                ];
+            @endphp
             <div class="container">
                 <div class="row">
                     <div class="col-lg-3 col-sm-6 col-xs-1">
                         <div class="widget">
-                            <h5>Get the latest updates</h5>
-                            <p>Signup for our newsletter to get the latest updates in your inbox.</p>
+                            <h5>{{ $newsletterTitle }}</h5>
+                            <p>{{ $newsletterText }}</p>
                             <form action="#" class="row form-dark" id="form_subscribe" method="post" name="form_subscribe">
                                 <div class="col text-center">
-                                    <input class="form-control" id="txt_subscribe" name="txt_subscribe" placeholder="enter your email" type="text" />
+                                    <input class="form-control" id="txt_subscribe" name="txt_subscribe" placeholder="{{ $newsletterPlaceholder }}" type="text" />
                                     <a href="#" id="btn-subscribe"><i class="arrow_right bg-color-secondary"></i></a>
                                     <div class="clearfix"></div>
                                 </div>
@@ -574,12 +614,19 @@
                                 <div class="widget">
                                     <h5>Marketplace</h5>
                                     <ul>
-                                        <li><a href="#">All NFTs</a></li>
-                                        <li><a href="#">Art</a></li>
-                                        <li><a href="#">Music</a></li>
-                                        <li><a href="#">Domain Names</a></li>
-                                        <li><a href="#">Virtual World</a></li>
-                                        <li><a href="#">Collectibles</a></li>
+                                        @php
+                                            $links = $footerLinks->get('marketplace', collect());
+                                            if ($links->isEmpty()) {
+                                                $links = collect($defaults['marketplace']);
+                                            }
+                                        @endphp
+                                        @foreach ($links as $link)
+                                            @php
+                                                $label = is_array($link) ? $link['label'] : $link->label;
+                                                $url = is_array($link) ? $link['url'] : $link->url;
+                                            @endphp
+                                            <li><a href="{{ $url }}">{{ $label }}</a></li>
+                                        @endforeach
                                     </ul>
                                 </div>
                             </div>
@@ -588,12 +635,19 @@
                                 <div class="widget">
                                     <h5>Resources</h5>
                                     <ul>
-                                        <li><a href="#">Help Center</a></li>
-                                        <li><a href="#">Partners</a></li>
-                                        <li><a href="#">Suggestions</a></li>
-                                        <li><a href="#">Discord</a></li>
-                                        <li><a href="#">Docs</a></li>
-                                        <li><a href="#">Newsletter</a></li>
+                                        @php
+                                            $links = $footerLinks->get('resources', collect());
+                                            if ($links->isEmpty()) {
+                                                $links = collect($defaults['resources']);
+                                            }
+                                        @endphp
+                                        @foreach ($links as $link)
+                                            @php
+                                                $label = is_array($link) ? $link['label'] : $link->label;
+                                                $url = is_array($link) ? $link['url'] : $link->url;
+                                            @endphp
+                                            <li><a href="{{ $url }}">{{ $label }}</a></li>
+                                        @endforeach
                                     </ul>
                                 </div>
                             </div>
@@ -602,12 +656,19 @@
                                 <div class="widget">
                                     <h5>Community</h5>
                                     <ul>
-                                        <li><a href="#">Community</a></li>
-                                        <li><a href="#">Documentation</a></li>
-                                        <li><a href="#">Brand Assets</a></li>
-                                        <li><a href="#">Blog</a></li>
-                                        <li><a href="#">Forum</a></li>
-                                        <li><a href="#">Mailing List</a></li>
+                                        @php
+                                            $links = $footerLinks->get('community', collect());
+                                            if ($links->isEmpty()) {
+                                                $links = collect($defaults['community']);
+                                            }
+                                        @endphp
+                                        @foreach ($links as $link)
+                                            @php
+                                                $label = is_array($link) ? $link['label'] : $link->label;
+                                                $url = is_array($link) ? $link['url'] : $link->url;
+                                            @endphp
+                                            <li><a href="{{ $url }}">{{ $label }}</a></li>
+                                        @endforeach
                                     </ul>
                                 </div>
                             </div>
@@ -618,11 +679,11 @@
                         <div class="widget">
                             <h5>Join the community</h5>
                             <div class="social-icons">
-                                <a href="#"><i class="fa fa-facebook fa-lg"></i></a>
-                                <a href="#"><i class="fa fa-twitter fa-lg"></i></a>
-                                <a href="#"><i class="fa fa-instagram fa-lg"></i></a>
-                                <a href="#"><i class="fa fa-youtube fa-lg"></i></a>
-                                <a href="#"><i class="fa fa-envelope-o fa-lg"></i></a>
+                                @foreach ($socials as $social)
+                                    @if (!empty($social['url']))
+                                        <a href="{{ $social['url'] }}" target="_blank" rel="noopener"><i class="fa {{ $social['icon'] }} fa-lg"></i></a>
+                                    @endif
+                                @endforeach
                             </div>
                         </div>
                     </div>
@@ -633,7 +694,9 @@
                     <div class="row">
                         <div class="col-md-12 text-center">
                             <a href="{{ route('home') }}">
-                                <span class="copy">&copy; Copyright 2026 - PidayGo</span>
+                                <span class="copy">
+                                    {{ $settings?->footer_copyright_text ?: ('© Copyright ' . now()->year . ' - ' . ($siteName ?? 'PidayGo')) }}
+                                </span>
                             </a>
                         </div>
                     </div>

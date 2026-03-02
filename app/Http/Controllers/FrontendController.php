@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BlogPost;
 use App\Models\HomeSlide;
 use App\Models\NftItem;
 use App\Models\Seller;
@@ -49,6 +50,11 @@ class FrontendController extends Controller
             'plans' => StakePlan::where('is_active', true)->orderBy('min_amount')->get(),
             'heroHeadline' => $siteSetting?->hero_headline,
             'heroSubtitle' => $siteSetting?->hero_subtitle,
+            'latestPosts' => BlogPost::visible()
+                ->orderByDesc('published_at')
+                ->orderByDesc('id')
+                ->limit(3)
+                ->get(),
             'featureFlags' => [
                 'sellers_enabled' => $sellersEnabled,
                 'nft_enabled' => $nftEnabled,

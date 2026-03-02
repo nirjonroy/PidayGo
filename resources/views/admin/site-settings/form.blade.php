@@ -95,6 +95,57 @@
                     @error('description') <div class="text-danger">{{ $message }}</div> @enderror
                 </div>
 
+                <div class="mb-4">
+                    <h5 class="mb-2">Footer Settings</h5>
+                    <div class="mb-3">
+                        <label class="form-label" for="footer_newsletter_title">Newsletter Title</label>
+                        <input id="footer_newsletter_title" name="footer_newsletter_title" class="form-control" value="{{ old('footer_newsletter_title', $setting->footer_newsletter_title) }}">
+                        @error('footer_newsletter_title') <div class="text-danger">{{ $message }}</div> @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="footer_newsletter_text">Newsletter Text</label>
+                        <textarea id="footer_newsletter_text" name="footer_newsletter_text" class="form-control" rows="3">{{ old('footer_newsletter_text', $setting->footer_newsletter_text) }}</textarea>
+                        @error('footer_newsletter_text') <div class="text-danger">{{ $message }}</div> @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="footer_newsletter_placeholder">Newsletter Placeholder</label>
+                        <input id="footer_newsletter_placeholder" name="footer_newsletter_placeholder" class="form-control" value="{{ old('footer_newsletter_placeholder', $setting->footer_newsletter_placeholder) }}">
+                        @error('footer_newsletter_placeholder') <div class="text-danger">{{ $message }}</div> @enderror
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label" for="footer_social_facebook">Facebook URL</label>
+                            <input id="footer_social_facebook" name="footer_social_facebook" class="form-control" value="{{ old('footer_social_facebook', $setting->footer_social_facebook) }}">
+                            @error('footer_social_facebook') <div class="text-danger">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label" for="footer_social_twitter">Twitter URL</label>
+                            <input id="footer_social_twitter" name="footer_social_twitter" class="form-control" value="{{ old('footer_social_twitter', $setting->footer_social_twitter) }}">
+                            @error('footer_social_twitter') <div class="text-danger">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label" for="footer_social_instagram">Instagram URL</label>
+                            <input id="footer_social_instagram" name="footer_social_instagram" class="form-control" value="{{ old('footer_social_instagram', $setting->footer_social_instagram) }}">
+                            @error('footer_social_instagram') <div class="text-danger">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label" for="footer_social_youtube">YouTube URL</label>
+                            <input id="footer_social_youtube" name="footer_social_youtube" class="form-control" value="{{ old('footer_social_youtube', $setting->footer_social_youtube) }}">
+                            @error('footer_social_youtube') <div class="text-danger">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label" for="footer_social_email">Email (mailto)</label>
+                            <input id="footer_social_email" name="footer_social_email" class="form-control" value="{{ old('footer_social_email', $setting->footer_social_email) }}">
+                            @error('footer_social_email') <div class="text-danger">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label" for="footer_copyright_text">Copyright Text</label>
+                            <input id="footer_copyright_text" name="footer_copyright_text" class="form-control" value="{{ old('footer_copyright_text', $setting->footer_copyright_text) }}">
+                            @error('footer_copyright_text') <div class="text-danger">{{ $message }}</div> @enderror
+                        </div>
+                    </div>
+                </div>
+
                 <div class="mb-3">
                     <label class="form-label" for="min_deposit_usdt">Minimum Deposit (USDT)</label>
                     <input id="min_deposit_usdt" name="min_deposit_usdt" type="number" step="0.0001" class="form-control" value="{{ old('min_deposit_usdt', $setting->min_deposit_usdt ?? 50) }}" required>

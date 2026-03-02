@@ -24,8 +24,11 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\SellerController;
 use App\Http\Controllers\Admin\NftItemController;
 use App\Http\Controllers\Admin\BidController;
+use App\Http\Controllers\Admin\BlogPostController;
 use App\Http\Controllers\Admin\ReservePlanController;
 use App\Http\Controllers\Admin\ChainBonusSettingController;
+use App\Http\Controllers\Admin\FooterLinkController;
+use App\Http\Controllers\BlogController;
 use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
@@ -54,6 +57,9 @@ use Illuminate\Support\Facades\Artisan;
 Route::get('/', function () {
     return app(FrontendController::class)->home();
 })->name('home');
+
+Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
+Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
 Route::get('/explore', [FrontendController::class, 'explore'])->middleware('feature:nft_enabled')->name('explore');
 Route::get('/item/{slug}', [FrontendController::class, 'itemDetails'])->middleware('feature:nft_enabled')->name('item.details');
@@ -201,6 +207,26 @@ Route::prefix('admin')->name('admin.')->middleware('admin.ip')->group(function (
             Route::post('/home-slides/{homeSlide}/update', [HomeSlideController::class, 'update'])->name('home-slides.update');
             Route::post('/home-slides/{homeSlide}/toggle', [HomeSlideController::class, 'toggle'])->name('home-slides.toggle');
             Route::post('/home-slides/{homeSlide}/delete', [HomeSlideController::class, 'destroy'])->name('home-slides.delete');
+        });
+
+        Route::middleware('permission:blog.manage')->group(function () {
+            Route::get('/blog-posts', [BlogPostController::class, 'index'])->name('blog-posts.index');
+            Route::get('/blog-posts/create', [BlogPostController::class, 'create'])->name('blog-posts.create');
+            Route::post('/blog-posts', [BlogPostController::class, 'store'])->name('blog-posts.store');
+            Route::get('/blog-posts/{blogPost}/edit', [BlogPostController::class, 'edit'])->name('blog-posts.edit');
+            Route::post('/blog-posts/{blogPost}/update', [BlogPostController::class, 'update'])->name('blog-posts.update');
+            Route::post('/blog-posts/{blogPost}/toggle', [BlogPostController::class, 'toggle'])->name('blog-posts.toggle');
+            Route::post('/blog-posts/{blogPost}/delete', [BlogPostController::class, 'destroy'])->name('blog-posts.delete');
+        });
+
+        Route::middleware('permission:footer.manage')->group(function () {
+            Route::get('/footer-links', [FooterLinkController::class, 'index'])->name('footer-links.index');
+            Route::get('/footer-links/create', [FooterLinkController::class, 'create'])->name('footer-links.create');
+            Route::post('/footer-links', [FooterLinkController::class, 'store'])->name('footer-links.store');
+            Route::get('/footer-links/{footerLink}/edit', [FooterLinkController::class, 'edit'])->name('footer-links.edit');
+            Route::post('/footer-links/{footerLink}/update', [FooterLinkController::class, 'update'])->name('footer-links.update');
+            Route::post('/footer-links/{footerLink}/toggle', [FooterLinkController::class, 'toggle'])->name('footer-links.toggle');
+            Route::post('/footer-links/{footerLink}/delete', [FooterLinkController::class, 'destroy'])->name('footer-links.delete');
         });
 
         Route::middleware('permission:role.manage')->group(function () {
