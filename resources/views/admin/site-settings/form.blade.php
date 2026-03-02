@@ -124,6 +124,16 @@
                         <input class="form-check-input" type="checkbox" id="bids_enabled" name="bids_enabled" value="1" {{ old('bids_enabled', $setting->bids_enabled ?? true) ? 'checked' : '' }}>
                         <label class="form-check-label" for="bids_enabled">Enable Bids</label>
                     </div>
+                    <div class="form-check mb-2">
+                        <input type="hidden" name="reserve_enabled" value="0">
+                        <input class="form-check-input" type="checkbox" id="reserve_enabled" name="reserve_enabled" value="1" {{ old('reserve_enabled', $setting->reserve_enabled ?? true) ? 'checked' : '' }}>
+                        <label class="form-check-label" for="reserve_enabled">Enable Reserve</label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input type="hidden" name="two_factor_enabled" value="0">
+                        <input class="form-check-input" type="checkbox" id="two_factor_enabled" name="two_factor_enabled" value="1" {{ old('two_factor_enabled', $setting->two_factor_enabled ?? true) ? 'checked' : '' }}>
+                        <label class="form-check-label" for="two_factor_enabled">Enable Google Auth (2FA)</label>
+                    </div>
                 </div>
 
                 <button type="submit" class="btn btn-success">Save</button>

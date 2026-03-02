@@ -29,6 +29,14 @@
                             @endif
                         </div>
                         <div class="nft__item_price">
+                            Daily Limit:
+                            @if ($dailyLimit === null)
+                                Unlimited
+                            @else
+                                {{ $dailyCount }} / {{ $dailyLimit }} used ({{ $dailyRemaining }} left today)
+                            @endif
+                        </div>
+                        <div class="nft__item_price">
                             Unlock Policy: {{ ucfirst(str_replace('_', ' ', $plan?->unlock_policy ?? 'never')) }}
                         </div>
                     </div>
@@ -45,6 +53,8 @@
                             <div class="text-muted">No NFTs available to sell right now.</div>
                         @elseif ($sellLimit !== null && $sellsRemaining <= 0)
                             <div class="text-muted">You have reached the sell limit for this reserve.</div>
+                        @elseif ($dailyLimit !== null && $dailyRemaining <= 0)
+                            <div class="text-muted">You have reached the daily sell limit for this reserve.</div>
                         @else
                             <form method="POST" action="{{ route('reserve.sell.submit') }}" class="form-border">
                                 @csrf

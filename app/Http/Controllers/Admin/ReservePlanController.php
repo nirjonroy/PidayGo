@@ -92,6 +92,7 @@ class ReservePlanController extends Controller
             'profit_min_percent' => ['required', 'numeric', 'min:0'],
             'profit_max_percent' => ['required', 'numeric', 'min:0', 'gte:profit_min_percent'],
             'max_sells' => ['nullable', 'integer', 'min:1', 'required_if:unlock_policy,after_sells'],
+            'max_sells_per_day' => ['nullable', 'integer', 'min:1'],
             'unlock_policy' => ['required', Rule::in(['never', 'after_sells', 'manual'])],
             'is_active' => ['nullable', 'boolean'],
         ]);

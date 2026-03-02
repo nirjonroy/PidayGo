@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\UserReserve;
 use App\Services\ReferralChainService;
 use App\Services\MailSettingsService;
+use App\Services\FeatureFlagService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -24,7 +25,7 @@ class RegisteredUserController extends Controller
         ]);
     }
 
-    public function store(Request $request, MailSettingsService $mailSettings, ReferralChainService $chainService): RedirectResponse
+    public function store(Request $request, MailSettingsService $mailSettings, ReferralChainService $chainService, FeatureFlagService $featureFlags): RedirectResponse
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -59,6 +60,11 @@ class RegisteredUserController extends Controller
 
         if ($mailSettings->isActive()) {
             return redirect()->route('verification.notice');
+        }
+
+        if (!$featureFlags->isEnabled('two_factor_enabled')) {
+            $request->session()->put('two_factor_passed', true);
+            return redirect()->route('kyc.form');
         }
 
         return redirect()->route('two-factor.setup');

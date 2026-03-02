@@ -22,6 +22,7 @@ class FeatureFlagService
                 'nft_enabled' => (bool) ($setting?->nft_enabled ?? true),
                 'bids_enabled' => (bool) ($setting?->bids_enabled ?? true),
                 'reserve_enabled' => (bool) ($setting?->reserve_enabled ?? true),
+                'two_factor_enabled' => (bool) ($setting?->two_factor_enabled ?? true),
             ];
         });
     }

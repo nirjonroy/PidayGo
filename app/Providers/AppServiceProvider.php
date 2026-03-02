@@ -36,6 +36,7 @@ class AppServiceProvider extends ServiceProvider
                         'sellers_enabled' => true,
                         'nft_enabled' => true,
                         'bids_enabled' => true,
+                        'two_factor_enabled' => true,
                     ],
                 ]);
                 return;

@@ -48,6 +48,11 @@
 
                 <div class="row">
                     <div class="col-md-4 mb-2">
+                        <label class="form-label">Max Sells Per Day</label>
+                        <input name="max_sells_per_day" class="form-control" type="number" min="1" value="{{ old('max_sells_per_day', $plan->max_sells_per_day) }}" placeholder="Leave empty for unlimited">
+                        @error('max_sells_per_day') <div class="text-danger">{{ $message }}</div> @enderror
+                    </div>
+                    <div class="col-md-4 mb-2">
                         <label class="form-label">Unlock Policy</label>
                         <select name="unlock_policy" class="form-select" required>
                             @php($selectedPolicy = old('unlock_policy', $plan->unlock_policy ?? 'never'))

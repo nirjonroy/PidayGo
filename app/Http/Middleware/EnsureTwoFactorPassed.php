@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use App\Services\FeatureFlagService;
 use Symfony\Component\HttpFoundation\Response;
 
 class EnsureTwoFactorPassed
@@ -11,6 +12,11 @@ class EnsureTwoFactorPassed
     public function handle(Request $request, Closure $next): Response
     {
         if ($request->routeIs('two-factor.*')) {
+            return $next($request);
+        }
+
+        $twoFactorEnabled = app(FeatureFlagService::class)->isEnabled('two_factor_enabled');
+        if (!$twoFactorEnabled) {
             return $next($request);
         }
 

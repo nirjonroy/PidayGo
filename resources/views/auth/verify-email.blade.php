@@ -10,6 +10,10 @@
     </form>
 
     <p class="muted">
-        Once verified, continue to <a href="{{ route('two-factor.setup') }}">set up 2FA</a>.
+        @if (feature('two_factor_enabled'))
+            Once verified, continue to <a href="{{ route('two-factor.setup') }}">set up 2FA</a>.
+        @else
+            Once verified, continue to complete your KYC.
+        @endif
     </p>
 @endsection

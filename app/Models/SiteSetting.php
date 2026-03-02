@@ -28,5 +28,14 @@ class SiteSetting extends Model
         'nft_enabled',
         'bids_enabled',
         'reserve_enabled',
+        'two_factor_enabled',
+    ];
+
+    protected $casts = [
+        'sellers_enabled' => 'boolean',
+        'nft_enabled' => 'boolean',
+        'bids_enabled' => 'boolean',
+        'reserve_enabled' => 'boolean',
+        'two_factor_enabled' => 'boolean',
     ];
 }

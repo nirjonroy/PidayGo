@@ -15,6 +15,7 @@ class ReservePlan extends Model
         'profit_min_percent',
         'profit_max_percent',
         'max_sells',
+        'max_sells_per_day',
         'unlock_policy',
         'is_active',
     ];
@@ -24,6 +25,7 @@ class ReservePlan extends Model
         'profit_min_percent' => 'decimal:3',
         'profit_max_percent' => 'decimal:3',
         'max_sells' => 'integer',
+        'max_sells_per_day' => 'integer',
         'unlock_policy' => 'string',
         'is_active' => 'boolean',
     ];

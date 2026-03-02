@@ -153,6 +153,11 @@ class ReserveController extends Controller
         $sellCount = NftSale::where('user_reserve_id', $reserve->id)->count();
         $sellLimit = $reserve->plan?->max_sells;
         $sellsRemaining = $sellLimit === null ? null : max(0, (int) $sellLimit - (int) $sellCount);
+        $dailyLimit = $reserve->plan?->max_sells_per_day;
+        $dailyCount = NftSale::where('user_reserve_id', $reserve->id)
+            ->whereDate('created_at', now()->toDateString())
+            ->count();
+        $dailyRemaining = $dailyLimit === null ? null : max(0, (int) $dailyLimit - (int) $dailyCount);
 
         return view('reserve.sell', [
             'reserve' => $reserve,
@@ -163,6 +168,9 @@ class ReserveController extends Controller
             'sellLimit' => $sellLimit,
             'sellCount' => $sellCount,
             'sellsRemaining' => $sellsRemaining,
+            'dailyLimit' => $dailyLimit,
+            'dailyCount' => $dailyCount,
+            'dailyRemaining' => $dailyRemaining,
         ]);
     }
 
@@ -190,6 +198,15 @@ class ReserveController extends Controller
             $sellCount = NftSale::where('user_reserve_id', $reserve->id)->count();
             if ($sellCount >= (int) $sellLimit) {
                 return back()->withErrors(['sale_amount' => 'Sell limit reached for this reserve.']);
+            }
+        }
+        $dailyLimit = $reserve->plan?->max_sells_per_day;
+        if ($dailyLimit !== null) {
+            $dailyCount = NftSale::where('user_reserve_id', $reserve->id)
+                ->whereDate('created_at', now()->toDateString())
+                ->count();
+            if ($dailyCount >= (int) $dailyLimit) {
+                return back()->withErrors(['sale_amount' => 'Daily sell limit reached for this reserve.']);
             }
         }
 

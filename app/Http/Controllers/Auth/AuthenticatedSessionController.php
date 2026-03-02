@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Services\MailSettingsService;
+use App\Services\FeatureFlagService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,7 +17,7 @@ class AuthenticatedSessionController extends Controller
         return view('auth.login');
     }
 
-    public function store(LoginRequest $request, MailSettingsService $mailSettings): RedirectResponse
+    public function store(LoginRequest $request, MailSettingsService $mailSettings, FeatureFlagService $featureFlags): RedirectResponse
     {
         $request->authenticate();
 
@@ -27,6 +28,11 @@ class AuthenticatedSessionController extends Controller
 
         if ($mailSettings->isActive() && !$user->hasVerifiedEmail()) {
             return redirect()->route('verification.notice');
+        }
+
+        if (!$featureFlags->isEnabled('two_factor_enabled')) {
+            $request->session()->put('two_factor_passed', true);
+            return redirect()->intended('/dashboard');
         }
 
         if (!$user->hasTwoFactorEnabled()) {

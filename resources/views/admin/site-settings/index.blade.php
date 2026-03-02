@@ -71,7 +71,14 @@
                         <span class="badge {{ $setting->sellers_enabled ? 'bg-success' : 'bg-secondary' }}">Sellers {{ $setting->sellers_enabled ? 'On' : 'Off' }}</span>
                         <span class="badge {{ $setting->nft_enabled ? 'bg-success' : 'bg-secondary' }}">NFTs {{ $setting->nft_enabled ? 'On' : 'Off' }}</span>
                         <span class="badge {{ $setting->bids_enabled ? 'bg-success' : 'bg-secondary' }}">Bids {{ $setting->bids_enabled ? 'On' : 'Off' }}</span>
+                        <span class="badge {{ $setting->reserve_enabled ? 'bg-success' : 'bg-secondary' }}">Reserve {{ $setting->reserve_enabled ? 'On' : 'Off' }}</span>
                     </div>
+                </div>
+                <div class="mb-3">
+                    <strong>Google Auth (2FA):</strong>
+                    <span class="badge {{ ($setting->two_factor_enabled ?? true) ? 'bg-success' : 'bg-secondary' }}">
+                        {{ ($setting->two_factor_enabled ?? true) ? 'On' : 'Off' }}
+                    </span>
                 </div>
 
                 <a href="{{ route('admin.site-settings.edit') }}" class="btn btn-primary">Edit Settings</a>
