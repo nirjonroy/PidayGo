@@ -135,7 +135,18 @@
             min-width: 220px;
         }
         .menu-mobile-only {
-            display: none;
+            display: none !important;
+        }
+        .menu-icon {
+            display: inline-block;
+            width: 18px;
+            margin-right: 8px;
+            opacity: 0.75;
+        }
+        .dropdown-caret {
+            margin-left: 8px;
+            font-size: 14px;
+            opacity: 0.7;
         }
         .menu-logout-btn {
             background: none;
@@ -143,6 +154,18 @@
             padding: 0;
             color: inherit;
             font: inherit;
+            cursor: pointer;
+        }
+        .mobile-theme-btn {
+            display: none;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: 1px solid rgba(17, 24, 39, 0.12);
+            align-items: center;
+            justify-content: center;
+            color: #111827;
+            background: #ffffff;
             cursor: pointer;
         }
         .notif-badge {
@@ -355,6 +378,10 @@
                 position: relative;
                 padding-right: 48px;
             }
+            header.scroll-dark {
+                background: #f5f1ff;
+                box-shadow: 0 6px 18px rgba(23, 23, 33, 0.08);
+            }
             .header-left {
                 width: 100%;
                 justify-content: flex-start;
@@ -387,6 +414,9 @@
             .header-right #switch_scheme {
                 display: none;
             }
+            .header-right .mobile-theme-btn {
+                display: inline-flex;
+            }
             .header-center {
                 width: 100%;
                 order: 3;
@@ -407,6 +437,31 @@
                 gap: 0;
                 white-space: normal;
             }
+            #mainmenu li > a.has-submenu {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+            header.header-mobile #mainmenu > li > span {
+                background: none !important;
+                width: 28px;
+                height: 28px;
+                right: 0;
+                margin-top: 8px;
+            }
+            header.header-mobile #mainmenu > li > span::before {
+                content: "\f107";
+                font-family: "FontAwesome";
+                font-size: 16px;
+                color: #6b7280;
+                display: inline-block;
+                width: 100%;
+                text-align: center;
+            }
+            header.header-mobile #mainmenu > li > span.active::before {
+                content: "\f106";
+                color: #111827;
+            }
             .menu-mobile-only {
                 display: block;
             }
@@ -416,6 +471,12 @@
             }
             #menu-btn:before {
                 font-size: 22px;
+            }
+            #mainmenu li a {
+                padding: 10px 0;
+            }
+            #mainmenu li ul li a {
+                padding-left: 18px;
             }
             .seller-card {
                 flex-wrap: wrap;
@@ -587,6 +648,38 @@
     ================================================== -->
     <script src="{{ asset('frontend/js/plugins.js') }}"></script>
     <script src="{{ asset('frontend/js/designesia.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const mobileToggle = document.getElementById('mobile-theme-toggle');
+            const desktopToggle = document.getElementById('switch_scheme');
+            const mobileSwitch = document.getElementById('mobile-switch-scheme');
+            if (mobileToggle && desktopToggle) {
+                mobileToggle.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    desktopToggle.click();
+                });
+            }
+            if (mobileSwitch && desktopToggle) {
+                mobileSwitch.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    desktopToggle.click();
+                });
+            }
+
+            const submenuLinks = document.querySelectorAll('#mainmenu > li > a.has-submenu');
+            submenuLinks.forEach(function (link) {
+                link.addEventListener('click', function (event) {
+                    if (window.innerWidth <= 991) {
+                        event.preventDefault();
+                        const toggle = link.parentElement.querySelector(':scope > span');
+                        if (toggle) {
+                            toggle.click();
+                        }
+                    }
+                });
+            });
+        });
+    </script>
 
     @if (!empty($popupNotification) && $popupNotification->notification)
         <div class="popup-backdrop" id="notif-modal">
