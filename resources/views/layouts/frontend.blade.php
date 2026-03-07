@@ -208,7 +208,7 @@
             min-width: 220px;
         }
         .menu-mobile-only {
-            display: none !important;
+            display: none;
         }
         .menu-icon {
             display: inline-block;
@@ -529,7 +529,7 @@
                 display: none !important;
             }
             .menu-mobile-only {
-                display: block;
+                display: block !important;
             }
             .menu-logout-btn {
                 width: 100%;
