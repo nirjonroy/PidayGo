@@ -5,6 +5,9 @@
     RewriteRule ^public/?$ / [R=301,L]
     RewriteRule ^public/(.*)$ /$1 [R=301,L]
 
+    # Serve site root from /public (avoid 403 on directory root)
+    RewriteRule ^$ public/ [L]
+
     # Send all requests to /public (Laravel front controller)
     RewriteCond %{REQUEST_URI} !^/public/
     RewriteCond %{REQUEST_FILENAME} !-f
