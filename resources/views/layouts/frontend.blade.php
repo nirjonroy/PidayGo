@@ -94,7 +94,7 @@
         @media (max-width: 991.98px) {
             #logo img.logo,
             #logo img.logo-2 {
-                height: 52px;
+                height: 58px;
             }
         }
         .dark-scheme .table,
@@ -457,9 +457,10 @@
                 position: relative;
                 padding-right: 48px;
             }
-            header.scroll-dark {
-                background: #f5f1ff;
-                box-shadow: 0 6px 18px rgba(23, 23, 33, 0.08);
+            header.scroll-dark,
+            header.header-mobile {
+                background: #000000;
+                box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
             }
             .header-left {
                 width: 100%;
@@ -610,7 +611,7 @@
     </style>
 </head>
 
-<body class="switch-scheme{{ $themeMode === 'dark' ? ' dark-scheme' : '' }}">
+<body class="switch-scheme">
     <div id="wrapper">
         <!-- header begin -->
         @include('frontend.partials.header')
