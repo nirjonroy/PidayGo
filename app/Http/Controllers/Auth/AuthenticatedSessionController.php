@@ -23,6 +23,7 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
         $request->session()->put('two_factor_passed', false);
+        $request->session()->put('login_at', time());
 
         $user = $request->user();
 

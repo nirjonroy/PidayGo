@@ -57,6 +57,7 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
         $request->session()->put('two_factor_passed', false);
+        $request->session()->put('login_at', time());
 
         if ($mailSettings->isActive()) {
             return redirect()->route('verification.notice');

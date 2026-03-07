@@ -24,7 +24,12 @@
 
                         <div class="field-set">
                             <label>Password</label>
-                            <input type="password" name="password" class="form-control" required>
+                            <div class="password-input">
+                                <input type="password" name="password" class="form-control" required>
+                                <button type="button" class="password-toggle" data-password-toggle aria-label="Show password">
+                                    <i class="fa fa-eye" aria-hidden="true"></i>
+                                </button>
+                            </div>
                             @error('password')
                                 <div class="text-danger">{{ $message }}</div>
                             @enderror

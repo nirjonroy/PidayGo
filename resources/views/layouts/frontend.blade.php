@@ -229,6 +229,27 @@
             font: inherit;
             cursor: pointer;
         }
+        .password-input {
+            position: relative;
+        }
+        .password-input .form-control {
+            padding-right: 44px;
+        }
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            padding: 0;
+            color: inherit;
+            cursor: pointer;
+            opacity: 0.75;
+        }
+        .password-toggle:hover {
+            opacity: 1;
+        }
         .mobile-theme-btn {
             display: none;
             width: 38px;
@@ -812,6 +833,25 @@
                         if (toggle) {
                             toggle.click();
                         }
+                    }
+                });
+            });
+
+            const passwordToggles = document.querySelectorAll('[data-password-toggle]');
+            passwordToggles.forEach(function (toggle) {
+                toggle.addEventListener('click', function () {
+                    const wrapper = toggle.closest('.password-input');
+                    const input = wrapper ? wrapper.querySelector('input') : null;
+                    if (!input) {
+                        return;
+                    }
+                    const isPassword = input.type === 'password';
+                    input.type = isPassword ? 'text' : 'password';
+                    toggle.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+                    const icon = toggle.querySelector('i');
+                    if (icon) {
+                        icon.classList.toggle('fa-eye', !isPassword);
+                        icon.classList.toggle('fa-eye-slash', isPassword);
                     }
                 });
             });
