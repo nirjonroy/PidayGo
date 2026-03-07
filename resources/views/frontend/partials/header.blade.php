@@ -18,9 +18,6 @@
                     </a>
                 </div>
                 <span id="menu-btn"></span>
-                <div class="header-search xs-hide">
-                    <input id="quick_search" name="quick_search" placeholder="search item here..." type="text" />
-                </div>
             </div>
 
             <div class="header-center">
