@@ -1,26 +1,70 @@
-@extends('layouts.app')
+@extends('layouts.frontend')
 
 @section('content')
-    <h1>Reset Password</h1>
-    <form method="POST" action="{{ route('password.update') }}">
-        @csrf
-        <input type="hidden" name="token" value="{{ $request->route('token') }}">
+    @include('frontend.partials.page-banner', [
+        'title' => 'Reset Password',
+        'subtitle' => 'Choose a strong new password for your account.',
+    ])
 
-        <label for="email">Email</label>
-        <input id="email" type="email" name="email" value="{{ old('email', $request->email) }}" required autofocus>
-        @error('email')
-            <div class="error">{{ $message }}</div>
-        @enderror
+    <section aria-label="section">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-5 col-md-7">
+                    <form method="POST" action="{{ route('password.update') }}" class="form-border">
+                        @csrf
+                        <input type="hidden" name="token" value="{{ $request->route('token') }}">
 
-        <label for="password">New Password</label>
-        <input id="password" type="password" name="password" required>
-        @error('password')
-            <div class="error">{{ $message }}</div>
-        @enderror
+                        <h3>Create a new password</h3>
+                        <p class="text-muted">Your reset link is valid for a limited time.</p>
 
-        <label for="password_confirmation">Confirm Password</label>
-        <input id="password_confirmation" type="password" name="password_confirmation" required>
+                        <div class="field-set">
+                            <label for="email">Email Address</label>
+                            <input
+                                id="email"
+                                type="email"
+                                name="email"
+                                class="form-control"
+                                value="{{ old('email', $request->email) }}"
+                                placeholder="Enter your email"
+                                required
+                                autofocus
+                            >
+                            @error('email')
+                                <div class="text-danger">{{ $message }}</div>
+                            @enderror
+                        </div>
 
-        <button type="submit">Reset password</button>
-    </form>
+                        <div class="field-set">
+                            <label for="password">New Password</label>
+                            <div class="password-input">
+                                <input id="password" type="password" name="password" class="form-control" required>
+                                <button type="button" class="password-toggle" data-password-toggle aria-label="Show password">
+                                    <i class="fa fa-eye" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                            @error('password')
+                                <div class="text-danger">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="field-set">
+                            <label for="password_confirmation">Confirm Password</label>
+                            <div class="password-input">
+                                <input id="password_confirmation" type="password" name="password_confirmation" class="form-control" required>
+                                <button type="button" class="password-toggle" data-password-toggle aria-label="Show password">
+                                    <i class="fa fa-eye" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="submit">
+                            <button type="submit" class="btn btn-main color-2">Reset Password</button>
+                            <div class="spacer-single"></div>
+                            <a href="{{ route('login') }}">Back to login</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
 @endsection

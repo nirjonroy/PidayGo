@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Notifications\CustomVerifyEmail;
+use App\Notifications\CustomResetPassword;
 use App\Models\UserProfile;
 use App\Models\UserBankAccount;
 use App\Models\UserReserve;
@@ -134,6 +135,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function sendEmailVerificationNotification()
     {
         $this->notify(new CustomVerifyEmail());
+    }
+
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new CustomResetPassword($token));
     }
 
     public function stakes()
