@@ -879,6 +879,8 @@
                 bottom: 14px;
                 transform: translateX(-50%);
                 width: min(360px, calc(100vw - 20px));
+                height: auto;
+                min-height: 78px;
                 display: grid;
                 grid-template-columns: repeat(4, minmax(0, 1fr));
                 gap: 8px;
@@ -887,6 +889,8 @@
                 background: rgba(7, 8, 18, 0.92);
                 border: 1px solid rgba(255, 255, 255, 0.1);
                 box-shadow: 0 20px 44px rgba(0, 0, 0, 0.28);
+                overflow: visible;
+                box-sizing: border-box;
                 backdrop-filter: blur(18px);
                 -webkit-backdrop-filter: blur(18px);
                 z-index: 1200;
@@ -987,7 +991,7 @@
         <!-- content close -->
 
         @auth
-            <nav class="mobile-quick-actions" aria-label="Quick actions">
+            <div class="mobile-quick-actions" role="navigation" aria-label="Quick actions">
                 <a href="{{ route('reserve.index') }}" class="mobile-quick-actions__item {{ request()->routeIs('reserve.*') ? 'is-active' : '' }}">
                     <i class="fa fa-lock" aria-hidden="true"></i>
                     <span>Reserve</span>
@@ -1004,7 +1008,7 @@
                     <i class="fa fa-wallet" aria-hidden="true"></i>
                     <span>Wallet</span>
                 </a>
-            </nav>
+            </div>
         @endauth
 
         <a href="#" id="back-to-top"></a>
