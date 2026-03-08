@@ -208,7 +208,7 @@
             min-width: 220px;
         }
         .menu-mobile-only {
-            display: none;
+            display: none !important;
         }
         .menu-icon {
             display: inline-block;
@@ -598,7 +598,9 @@
             header.header-mobile #mainmenu > li > ul > li > span {
                 display: none !important;
             }
-            .menu-mobile-only {
+            header.header-mobile .menu-mobile-only,
+            header.scroll-light.header-mobile .menu-mobile-only,
+            header.scroll-dark.header-mobile .menu-mobile-only {
                 display: block !important;
             }
             .menu-logout-btn {
