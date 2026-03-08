@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class UserProfile extends Model
@@ -67,6 +66,6 @@ class UserProfile extends Model
             return $path;
         }
 
-        return Storage::disk('public')->url(ltrim($path, '/'));
+        return asset('storage/' . ltrim($path, '/'));
     }
 }
