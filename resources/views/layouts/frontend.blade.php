@@ -309,6 +309,9 @@
             display: none;
             text-decoration: none;
         }
+        .mobile-quick-actions {
+            display: none;
+        }
         .mobile-profile-btn {
             border: 0;
             background: transparent;
@@ -554,6 +557,9 @@
             padding: 4px 8px;
         }
         @media (max-width: 991.98px) {
+            body.has-mobile-quick-nav #wrapper {
+                padding-bottom: 94px;
+            }
             header.header-mobile .container {
                 width: 100%;
                 max-width: none;
@@ -867,6 +873,55 @@
             .top-sellers-filter {
                 margin-top: 6px;
             }
+            .mobile-quick-actions {
+                position: fixed;
+                left: 50%;
+                bottom: 14px;
+                transform: translateX(-50%);
+                width: min(360px, calc(100vw - 20px));
+                display: grid;
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+                gap: 8px;
+                padding: 10px;
+                border-radius: 22px;
+                background: rgba(7, 8, 18, 0.92);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                box-shadow: 0 20px 44px rgba(0, 0, 0, 0.28);
+                backdrop-filter: blur(18px);
+                -webkit-backdrop-filter: blur(18px);
+                z-index: 1200;
+            }
+            .mobile-quick-actions__item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 4px;
+                min-height: 58px;
+                padding: 8px 4px;
+                border-radius: 16px;
+                color: rgba(255, 255, 255, 0.78);
+                text-decoration: none;
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: 0.01em;
+                line-height: 1.15;
+                transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease;
+            }
+            .mobile-quick-actions__item i {
+                font-size: 17px;
+            }
+            .mobile-quick-actions__item:hover,
+            .mobile-quick-actions__item:focus {
+                color: #ffffff;
+                background: rgba(255, 255, 255, 0.08);
+                transform: translateY(-1px);
+            }
+            .mobile-quick-actions__item.is-active {
+                color: #ffffff;
+                background: linear-gradient(135deg, rgba(240, 168, 58, 0.92), rgba(111, 51, 204, 0.92));
+                box-shadow: 0 10px 24px rgba(111, 51, 204, 0.28);
+            }
         }
         @media (max-width: 575.98px) {
             .author_list.alt-2.d-col-3 {
@@ -920,7 +975,7 @@
     </style>
 </head>
 
-<body class="switch-scheme">
+<body class="switch-scheme{{ auth()->check() ? ' has-mobile-quick-nav' : '' }}">
     <div id="wrapper">
         <!-- header begin -->
         @include('frontend.partials.header')
@@ -930,6 +985,27 @@
             @yield('content')
         </div>
         <!-- content close -->
+
+        @auth
+            <nav class="mobile-quick-actions" aria-label="Quick actions">
+                <a href="{{ route('reserve.index') }}" class="mobile-quick-actions__item {{ request()->routeIs('reserve.*') ? 'is-active' : '' }}">
+                    <i class="fa fa-lock" aria-hidden="true"></i>
+                    <span>Reserve</span>
+                </a>
+                <a href="{{ route('stake.index') }}" class="mobile-quick-actions__item {{ request()->routeIs('stake.*', 'staking.*') ? 'is-active' : '' }}">
+                    <i class="fa fa-line-chart" aria-hidden="true"></i>
+                    <span>Stake</span>
+                </a>
+                <a href="{{ route('wallet.deposit') }}" class="mobile-quick-actions__item {{ request()->routeIs('wallet.deposit*') ? 'is-active' : '' }}">
+                    <i class="fa fa-arrow-circle-down" aria-hidden="true"></i>
+                    <span>Deposit</span>
+                </a>
+                <a href="{{ route('wallet.index') }}" class="mobile-quick-actions__item {{ request()->routeIs('wallet.*') && !request()->routeIs('wallet.deposit*', 'wallet.withdrawals*') ? 'is-active' : '' }}">
+                    <i class="fa fa-wallet" aria-hidden="true"></i>
+                    <span>Wallet</span>
+                </a>
+            </nav>
+        @endauth
 
         <a href="#" id="back-to-top"></a>
 
