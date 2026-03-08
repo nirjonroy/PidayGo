@@ -37,8 +37,8 @@
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Profile Photo</label>
                                     <div class="mb-2">
-                                        @if ($profile->photo_path)
-                                            <img src="{{ asset('storage/' . $profile->photo_path) }}" alt="Profile Photo" style="width:120px;height:120px;object-fit:cover;border-radius:8px;">
+                                        @if ($profile->photo_url)
+                                            <img src="{{ $profile->photo_url }}" alt="Profile Photo" style="width:120px;height:120px;object-fit:cover;border-radius:8px;">
                                         @else
                                             <div class="text-muted">No photo uploaded.</div>
                                         @endif
@@ -51,8 +51,8 @@
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Profile Banner</label>
                                     <div class="mb-2">
-                                        @if ($profile->banner_path)
-                                            <img src="{{ asset('storage/' . $profile->banner_path) }}" alt="Profile Banner" style="width:100%;max-height:120px;object-fit:cover;border-radius:8px;">
+                                        @if ($profile->banner_url)
+                                            <img src="{{ $profile->banner_url }}" alt="Profile Banner" style="width:100%;max-height:120px;object-fit:cover;border-radius:8px;">
                                         @else
                                             <div class="text-muted">No banner uploaded.</div>
                                         @endif

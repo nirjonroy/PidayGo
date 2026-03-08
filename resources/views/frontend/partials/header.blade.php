@@ -6,7 +6,7 @@
     $logoDark = $logoDarkPath ? asset('storage/' . $logoDarkPath) : asset('frontend/images/logo-7.png');
     $notificationCount = $userNotificationCount ?? 0;
     $currentUser = auth()->user();
-    $mobileProfilePhoto = $currentUser?->profile?->photo_path ? asset('storage/' . $currentUser->profile->photo_path) : null;
+    $mobileProfilePhoto = $currentUser?->profile?->photo_url;
     $mobileProfileInitial = $currentUser ? strtoupper(\Illuminate\Support\Str::substr($currentUser->name, 0, 1)) : 'U';
 @endphp
 
