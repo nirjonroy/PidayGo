@@ -5,6 +5,9 @@
     $logoLight = $logoLightPath ? asset('storage/' . $logoLightPath) : asset('frontend/images/logo-7-light.png');
     $logoDark = $logoDarkPath ? asset('storage/' . $logoDarkPath) : asset('frontend/images/logo-7.png');
     $notificationCount = $userNotificationCount ?? 0;
+    $currentUser = auth()->user();
+    $mobileProfilePhoto = $currentUser?->profile?->photo_path ? asset('storage/' . $currentUser->profile->photo_path) : null;
+    $mobileProfileInitial = $currentUser ? strtoupper(\Illuminate\Support\Str::substr($currentUser->name, 0, 1)) : 'U';
 @endphp
 
 <header class="scroll-dark">
@@ -18,6 +21,24 @@
                     </a>
                 </div>
                 @auth
+                    <div class="mobile-profile-dropdown-shell">
+                        <button type="button" id="mobile-profile-toggle" class="mobile-profile-btn" aria-label="Profile menu" aria-expanded="false">
+                            @if ($mobileProfilePhoto)
+                                <img src="{{ $mobileProfilePhoto }}" alt="{{ $currentUser->name }}" class="mobile-profile-avatar">
+                            @else
+                                <span class="mobile-profile-fallback">{{ $mobileProfileInitial }}</span>
+                            @endif
+                            <i class="fa fa-angle-down mobile-profile-caret" aria-hidden="true"></i>
+                        </button>
+                        <div id="mobile-profile-menu" class="mobile-profile-menu">
+                            <a href="{{ route('dashboard') }}"><i class="fa fa-dashboard menu-icon" aria-hidden="true"></i>Dashboard</a>
+                            <a href="{{ route('wallet.index') }}"><i class="fa fa-wallet menu-icon" aria-hidden="true"></i>Wallet</a>
+                            <a href="{{ route('stake.index') }}"><i class="fa fa-line-chart menu-icon" aria-hidden="true"></i>Stake</a>
+                            <a href="{{ route('reserve.index') }}"><i class="fa fa-lock menu-icon" aria-hidden="true"></i>Reserve</a>
+                            <a href="{{ route('support.index') }}"><i class="fa fa-life-ring menu-icon" aria-hidden="true"></i>Support</a>
+                            <a href="{{ route('profile.edit') }}"><i class="fa fa-cog menu-icon" aria-hidden="true"></i>Profile Settings</a>
+                        </div>
+                    </div>
                     <a href="{{ route('notifications.index') }}" class="mobile-notification-btn" aria-label="Notifications">
                         <i class="fa fa-bell" aria-hidden="true"></i>
                         @if ($notificationCount > 0)
@@ -48,18 +69,24 @@
                         </li>
                     @endguest
                     @auth
-                        <li>
+                        <li class="menu-profile-dropdown">
                             <a href="#" class="has-submenu">
-                                Profile
+                                @if ($mobileProfilePhoto)
+                                    <img src="{{ $mobileProfilePhoto }}" alt="{{ $currentUser->name }}" class="desktop-profile-avatar">
+                                @else
+                                    <span class="desktop-profile-fallback">{{ $mobileProfileInitial }}</span>
+                                @endif
+                                <span class="menu-label">Profile</span>
+                                <span class="mobile-dropdown-hint">Tap to open</span>
                                 <i class="fa fa-angle-down dropdown-caret" aria-hidden="true"></i>
-                                <span></span>
+                                <span class="menu-underline"></span>
                             </a>
                             <ul>
                                 <li><a href="{{ route('dashboard') }}"><i class="fa fa-dashboard menu-icon" aria-hidden="true"></i>Dashboard</a></li>
                                 <li><a href="{{ route('wallet.index') }}"><i class="fa fa-wallet menu-icon" aria-hidden="true"></i>Wallet</a></li>
                                 <li><a href="{{ route('stake.index') }}"><i class="fa fa-line-chart menu-icon" aria-hidden="true"></i>Stake</a></li>
                                 <li><a href="{{ route('reserve.index') }}"><i class="fa fa-lock menu-icon" aria-hidden="true"></i>Reserve</a></li>
-                                <li>
+                                <li class="menu-notifications-item">
                                     <a href="{{ route('notifications.index') }}">
                                         <i class="fa fa-bell menu-icon" aria-hidden="true"></i>
                                         Notifications
@@ -71,11 +98,6 @@
                                 <li><a href="{{ route('support.index') }}"><i class="fa fa-life-ring menu-icon" aria-hidden="true"></i>Support</a></li>
                                 <li><a href="{{ route('profile.edit') }}"><i class="fa fa-cog menu-icon" aria-hidden="true"></i>Profile Settings</a></li>
                             </ul>
-                        </li>
-                        <li class="menu-mobile-only">
-                            <a href="{{ route('wallet.index') }}">
-                                <i class="fa fa-wallet menu-icon" aria-hidden="true"></i>Wallet
-                            </a>
                         </li>
                         <li class="menu-mobile-only">
                             <a href="#" id="mobile-theme-toggle">
