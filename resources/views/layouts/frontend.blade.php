@@ -262,6 +262,10 @@
             background: #ffffff;
             cursor: pointer;
         }
+        .mobile-notification-btn {
+            display: none;
+            text-decoration: none;
+        }
         .notif-badge {
             display: inline-flex;
             align-items: center;
@@ -276,6 +280,16 @@
             font-size: 11px;
             line-height: 1;
             font-weight: 600;
+        }
+        .notif-badge--floating {
+            position: absolute;
+            top: -4px;
+            right: -6px;
+            margin-left: 0;
+            min-width: 16px;
+            height: 16px;
+            padding: 0 4px;
+            font-size: 10px;
         }
         .page-banner {
             position: relative;
@@ -476,7 +490,7 @@
                 flex-wrap: wrap;
                 gap: 10px;
                 position: relative;
-                padding-right: 48px;
+                padding-right: 104px;
             }
             header.scroll-dark,
             header.header-mobile {
@@ -491,6 +505,41 @@
             }
             .header-left #menu-btn {
                 display: inline-flex;
+            }
+            .mobile-notification-btn {
+                position: absolute;
+                top: 14px;
+                right: 60px;
+                width: 38px;
+                height: 38px;
+                border-radius: 50%;
+                display: inline-flex !important;
+                align-items: center;
+                justify-content: center;
+                color: #111827;
+                background: rgba(255, 255, 255, 0.92);
+                border: 1px solid rgba(17, 24, 39, 0.14);
+                box-shadow: 0 8px 18px rgba(17, 24, 39, 0.12);
+                z-index: 6;
+            }
+            header.scroll-dark .mobile-notification-btn,
+            header.header-mobile .mobile-notification-btn {
+                color: #111827;
+                background: rgba(255, 255, 255, 0.92);
+                border: 1px solid rgba(17, 24, 39, 0.14);
+            }
+            header.header-mobile:not(.header-light) .mobile-notification-btn {
+                color: #ffffff;
+                background: rgba(255, 255, 255, 0.08);
+                border: 1px solid rgba(255, 255, 255, 0.14);
+                box-shadow: none;
+            }
+            .mobile-notification-btn i {
+                font-size: 16px;
+            }
+            .mobile-notification-btn .notif-badge--floating {
+                top: -3px;
+                right: -3px;
             }
             #logo img.logo,
             #logo img.logo-2 {
@@ -516,7 +565,7 @@
                 display: none;
             }
             .header-right .mobile-theme-btn {
-                display: inline-flex;
+                display: none !important;
             }
             .header-center {
                 width: 100%;

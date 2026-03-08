@@ -17,6 +17,14 @@
                         <img alt="" class="logo-2" src="{{ $logoDark }}" />
                     </a>
                 </div>
+                @auth
+                    <a href="{{ route('notifications.index') }}" class="mobile-notification-btn" aria-label="Notifications">
+                        <i class="fa fa-bell" aria-hidden="true"></i>
+                        @if ($notificationCount > 0)
+                            <span class="notif-badge notif-badge--floating">{{ $notificationCount }}</span>
+                        @endif
+                    </a>
+                @endauth
                 <span id="menu-btn"></span>
             </div>
 
