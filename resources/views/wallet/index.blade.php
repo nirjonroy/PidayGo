@@ -21,6 +21,7 @@
                         <div class="nft__item_price">{{ number_format($balance, 4) }} USDT</div>
                         <div class="mt-3">
                             <a href="{{ route('wallet.deposit') }}" class="btn-main btn-light btn-sm">Deposit</a>
+                            <a href="{{ route('wallet.withdrawals') }}" class="btn-main btn-sm">Withdraw</a>
                             <a href="{{ route('reserve.index') }}" class="btn-main btn-sm">Reserve</a>
                             @if ($canSell)
                                 <a href="{{ route('sell.index') }}" class="btn-main btn-sm btn-light">Sell</a>
@@ -138,54 +139,6 @@
                             @empty
                                 <tr>
                                     <td colspan="5" class="text-center text-muted">No stakes yet.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <div class="spacer-30"></div>
-
-        <div class="row">
-            <div class="col-lg-12">
-                <h2>Withdrawals</h2>
-            </div>
-            <div class="col-lg-6 mb30">
-                <form method="POST" action="{{ route('withdrawals.store') }}" class="form-border">
-                    @csrf
-                    <div class="field-set">
-                        <h5>Request Withdrawal</h5>
-                        <input id="withdraw_amount" name="amount" type="number" step="0.0001" class="form-control" placeholder="Amount" required>
-                        @error('amount') <div class="text-danger">{{ $message }}</div> @enderror
-                        <div class="spacer-20"></div>
-                        <button type="submit" class="btn-main">Submit</button>
-                    </div>
-                </form>
-            </div>
-            <div class="col-lg-6">
-                <div class="table-responsive">
-                    <table class="table table-borderless table-striped align-middle">
-                        <thead>
-                            <tr>
-                                <th>Amount</th>
-                                <th>Status</th>
-                                <th>Requested</th>
-                                <th>Eligible At</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse ($withdrawals as $withdrawal)
-                                <tr>
-                                    <td>{{ number_format($withdrawal->amount, 4) }}</td>
-                                    <td>{{ ucfirst($withdrawal->status) }}</td>
-                                    <td>{{ $withdrawal->requested_at }}</td>
-                                    <td>{{ $withdrawal->eligible_at }}</td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="4" class="text-center text-muted">No withdrawals yet.</td>
                                 </tr>
                             @endforelse
                         </tbody>

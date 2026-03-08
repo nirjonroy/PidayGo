@@ -33,6 +33,8 @@
                         <div id="mobile-profile-menu" class="mobile-profile-menu">
                             <a href="{{ route('dashboard') }}"><i class="fa fa-dashboard menu-icon" aria-hidden="true"></i>Dashboard</a>
                             <a href="{{ route('wallet.index') }}"><i class="fa fa-wallet menu-icon" aria-hidden="true"></i>Wallet</a>
+                            <a href="{{ route('wallet.deposit') }}"><i class="fa fa-arrow-circle-down menu-icon" aria-hidden="true"></i>Deposit</a>
+                            <a href="{{ route('wallet.withdrawals') }}"><i class="fa fa-arrow-circle-up menu-icon" aria-hidden="true"></i>Withdrawals</a>
                             <a href="{{ route('stake.index') }}"><i class="fa fa-line-chart menu-icon" aria-hidden="true"></i>Stake</a>
                             <a href="{{ route('reserve.index') }}"><i class="fa fa-lock menu-icon" aria-hidden="true"></i>Reserve</a>
                             <a href="{{ route('support.index') }}"><i class="fa fa-life-ring menu-icon" aria-hidden="true"></i>Support</a>
@@ -84,6 +86,8 @@
                             <ul>
                                 <li><a href="{{ route('dashboard') }}"><i class="fa fa-dashboard menu-icon" aria-hidden="true"></i>Dashboard</a></li>
                                 <li><a href="{{ route('wallet.index') }}"><i class="fa fa-wallet menu-icon" aria-hidden="true"></i>Wallet</a></li>
+                                <li><a href="{{ route('wallet.deposit') }}"><i class="fa fa-arrow-circle-down menu-icon" aria-hidden="true"></i>Deposit</a></li>
+                                <li><a href="{{ route('wallet.withdrawals') }}"><i class="fa fa-arrow-circle-up menu-icon" aria-hidden="true"></i>Withdrawals</a></li>
                                 <li><a href="{{ route('stake.index') }}"><i class="fa fa-line-chart menu-icon" aria-hidden="true"></i>Stake</a></li>
                                 <li><a href="{{ route('reserve.index') }}"><i class="fa fa-lock menu-icon" aria-hidden="true"></i>Reserve</a></li>
                                 <li class="menu-notifications-item">

@@ -8,9 +8,21 @@ use App\Services\NotificationService;
 use App\Services\WalletService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class WithdrawalController extends Controller
 {
+    public function index(Request $request): View
+    {
+        $user = $request->user();
+
+        return view('wallet.withdrawals', [
+            'balance' => (float) $user->walletLedgers()->sum('amount'),
+            'withdrawals' => WithdrawalRequest::where('user_id', $user->id)->latest()->get(),
+            'reviewHours' => 72,
+        ]);
+    }
+
     public function store(Request $request, WalletService $walletService, NotificationService $notifications): RedirectResponse
     {
         $validated = $request->validate([
@@ -59,6 +71,6 @@ class WithdrawalController extends Controller
             ['withdrawal_request_id' => $withdrawal->id]
         );
 
-        return back()->with('status', 'Withdrawal requested. Approval takes 72–96 hours.');
+        return redirect()->route('wallet.withdrawals')->with('status', 'Withdrawal requested. Approval takes 72-96 hours.');
     }
 }

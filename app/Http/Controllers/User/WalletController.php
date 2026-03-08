@@ -3,9 +3,8 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
-use App\Models\StakePlan;
 use App\Models\Stake;
-use App\Models\WithdrawalRequest;
+use App\Models\StakePlan;
 use App\Services\UserReserveService;
 use App\Services\UserLevelResolver;
 use Illuminate\Http\Request;
@@ -36,7 +35,6 @@ class WalletController extends Controller
             'canSell' => $canSell,
             'plans' => StakePlan::where('is_active', true)->get(),
             'stakes' => Stake::where('user_id', $user->id)->latest()->get(),
-            'withdrawals' => WithdrawalRequest::where('user_id', $user->id)->latest()->get(),
         ]);
     }
 }

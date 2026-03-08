@@ -144,6 +144,7 @@ Route::middleware(['auth', 'verified.if.mail', '2fa.enabled', '2fa.passed', 'kyc
     Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
     Route::get('/wallet/deposit', [DepositController::class, 'create'])->name('wallet.deposit');
     Route::post('/wallet/deposit', [DepositController::class, 'store'])->name('wallet.deposit.store');
+    Route::get('/wallet/withdrawals', [UserWithdrawalController::class, 'index'])->name('wallet.withdrawals');
     Route::get('/reserve', [UserReserveController::class, 'index'])->name('reserve.index');
     Route::post('/reserve/confirm', [UserReserveController::class, 'confirm'])->name('reserve.confirm');
     Route::get('/reserve/sell', [UserReserveController::class, 'sellForm'])->name('reserve.sell.form');
