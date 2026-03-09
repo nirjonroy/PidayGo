@@ -66,6 +66,6 @@ class UserProfile extends Model
             return $path;
         }
 
-        return asset('storage/' . ltrim($path, '/'));
+        return route('media.public', ['path' => ltrim($path, '/')]);
     }
 }
