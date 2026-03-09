@@ -1046,7 +1046,6 @@
                 ];
                 $newsletterTitle = $settings?->footer_newsletter_title ?: 'Get the latest updates';
                 $newsletterText = $settings?->footer_newsletter_text ?: 'Signup for our newsletter to get the latest updates in your inbox.';
-                $newsletterPlaceholder = $settings?->footer_newsletter_placeholder ?: 'enter your email';
                 $socials = [
                     ['url' => $settings?->footer_social_facebook, 'icon' => 'fa-facebook'],
                     ['url' => $settings?->footer_social_twitter, 'icon' => 'fa-twitter'],
@@ -1061,13 +1060,6 @@
                         <div class="widget">
                             <h5>{{ $newsletterTitle }}</h5>
                             <p>{{ $newsletterText }}</p>
-                            <form action="#" class="row form-dark" id="form_subscribe" method="post" name="form_subscribe">
-                                <div class="col text-center">
-                                    <input class="form-control" id="txt_subscribe" name="txt_subscribe" placeholder="{{ $newsletterPlaceholder }}" type="text" />
-                                    <a href="#" id="btn-subscribe"><i class="arrow_right bg-color-secondary"></i></a>
-                                    <div class="clearfix"></div>
-                                </div>
-                            </form>
                         </div>
                     </div>
 
