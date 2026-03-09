@@ -30,8 +30,8 @@
                     <h5 class="mb-3">Profile</h5>
                     <div class="row">
                         <div class="col-md-4">
-                            @if ($profile && $profile->photo_path)
-                                <img src="{{ asset('storage/' . $profile->photo_path) }}" alt="Profile Photo" style="width:140px;height:140px;object-fit:cover;border-radius:8px;">
+                            @if ($profile && $profile->photo_url)
+                                <img src="{{ $profile->photo_url }}" alt="Profile Photo" style="width:140px;height:140px;object-fit:cover;border-radius:8px;">
                             @else
                                 <div class="text-muted">No photo</div>
                             @endif
