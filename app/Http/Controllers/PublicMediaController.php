@@ -18,6 +18,7 @@ class PublicMediaController extends Controller
 
         $roots = array_filter([
             storage_path('app/public'),
+            storage_path('app'),
             public_path('storage'),
         ]);
 
