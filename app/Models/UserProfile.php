@@ -4,7 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use SplFileInfo;
 
 class UserProfile extends Model
 {
@@ -66,6 +70,71 @@ class UserProfile extends Model
             return $path;
         }
 
+        if (!$this->publicMediaExists($path)) {
+            return null;
+        }
+
         return route('media.public', ['path' => ltrim($path, '/')]);
+    }
+
+    protected function publicMediaExists(string $path): bool
+    {
+        $path = ltrim($path, '/');
+
+        foreach ($this->publicMediaRoots() as $root) {
+            if ($this->exactMediaMatch($root, $path) !== null) {
+                return true;
+            }
+        }
+
+        $filename = basename($path);
+
+        if ($filename === '') {
+            return false;
+        }
+
+        foreach ($this->publicMediaRoots() as $root) {
+            if ($this->findMediaByFilename($root, $filename) !== null) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    protected function publicMediaRoots(): array
+    {
+        return array_filter([
+            storage_path('app/public'),
+            storage_path('app'),
+            public_path('storage'),
+        ], static fn ($root) => is_dir($root));
+    }
+
+    protected function exactMediaMatch(string $root, string $path): ?string
+    {
+        $candidate = $root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);
+
+        if (!File::isFile($candidate)) {
+            return null;
+        }
+
+        return $candidate;
+    }
+
+    protected function findMediaByFilename(string $root, string $filename): ?string
+    {
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($root, RecursiveDirectoryIterator::SKIP_DOTS)
+        );
+
+        /** @var SplFileInfo $file */
+        foreach ($iterator as $file) {
+            if ($file->isFile() && $file->getFilename() === $filename) {
+                return $file->getRealPath() ?: null;
+            }
+        }
+
+        return null;
     }
 }
