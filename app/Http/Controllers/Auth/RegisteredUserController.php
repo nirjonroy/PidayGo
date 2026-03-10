@@ -63,7 +63,7 @@ class RegisteredUserController extends Controller
 
         if (!$featureFlags->isEnabled('two_factor_enabled')) {
             $request->session()->put('two_factor_passed', true);
-            return redirect()->route('kyc.form');
+            return redirect()->route($featureFlags->isEnabled('kyc_enabled') ? 'kyc.form' : 'dashboard');
         }
 
         return redirect()->route('two-factor.setup');

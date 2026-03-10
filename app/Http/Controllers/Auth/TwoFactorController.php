@@ -11,8 +11,10 @@ class TwoFactorController extends Controller
 {
     public function showSetup(Request $request)
     {
-        if (!app(FeatureFlagService::class)->isEnabled('two_factor_enabled')) {
-            return redirect()->route('kyc.form');
+        $featureFlags = app(FeatureFlagService::class);
+
+        if (!$featureFlags->isEnabled('two_factor_enabled')) {
+            return redirect()->route($featureFlags->isEnabled('kyc_enabled') ? 'kyc.form' : 'dashboard');
         }
 
         $user = $request->user();
@@ -36,8 +38,10 @@ class TwoFactorController extends Controller
 
     public function storeSetup(Request $request): RedirectResponse
     {
-        if (!app(FeatureFlagService::class)->isEnabled('two_factor_enabled')) {
-            return redirect()->route('kyc.form');
+        $featureFlags = app(FeatureFlagService::class);
+
+        if (!$featureFlags->isEnabled('two_factor_enabled')) {
+            return redirect()->route($featureFlags->isEnabled('kyc_enabled') ? 'kyc.form' : 'dashboard');
         }
 
         $request->validate([
@@ -59,7 +63,7 @@ class TwoFactorController extends Controller
 
         $request->session()->put('two_factor_passed', true);
 
-        return redirect()->route('kyc.form');
+        return redirect()->route($featureFlags->isEnabled('kyc_enabled') ? 'kyc.form' : 'dashboard');
     }
 
     public function showChallenge()

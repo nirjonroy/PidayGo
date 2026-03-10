@@ -12,16 +12,20 @@ class VerifyEmailController extends Controller
 {
     public function __invoke(EmailVerificationRequest $request): RedirectResponse
     {
-        $twoFactorEnabled = app(FeatureFlagService::class)->isEnabled('two_factor_enabled');
+        $featureFlags = app(FeatureFlagService::class);
+        $twoFactorEnabled = $featureFlags->isEnabled('two_factor_enabled');
+        $postVerifyRoute = $twoFactorEnabled
+            ? 'two-factor.setup'
+            : ($featureFlags->isEnabled('kyc_enabled') ? 'kyc.form' : 'dashboard');
 
         if ($request->user()->hasVerifiedEmail()) {
-            return redirect()->route($twoFactorEnabled ? 'two-factor.setup' : 'kyc.form');
+            return redirect()->route($postVerifyRoute);
         }
 
         if ($request->user()->markEmailAsVerified()) {
             event(new Verified($request->user()));
         }
 
-        return redirect()->route($twoFactorEnabled ? 'two-factor.setup' : 'kyc.form')->with('verified', true);
+        return redirect()->route($postVerifyRoute)->with('verified', true);
     }
 }

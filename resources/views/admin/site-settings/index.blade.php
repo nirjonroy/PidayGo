@@ -88,6 +88,12 @@
                         {{ ($setting->two_factor_enabled ?? true) ? 'On' : 'Off' }}
                     </span>
                 </div>
+                <div class="mb-3">
+                    <strong>KYC Requirement:</strong>
+                    <span class="badge {{ ($setting->kyc_enabled ?? true) ? 'bg-success' : 'bg-secondary' }}">
+                        {{ ($setting->kyc_enabled ?? true) ? 'On' : 'Off' }}
+                    </span>
+                </div>
 
                 <a href="{{ route('admin.site-settings.edit') }}" class="btn btn-primary">Edit Settings</a>
             </div>

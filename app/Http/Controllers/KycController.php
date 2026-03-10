@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\KycRequest;
+use App\Services\FeatureFlagService;
 use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -11,6 +12,10 @@ class KycController extends Controller
 {
     public function create(Request $request)
     {
+        if (!app(FeatureFlagService::class)->isEnabled('kyc_enabled')) {
+            return redirect()->route('dashboard');
+        }
+
         return view('kyc.form', [
             'latestKyc' => $request->user()->latestKycRequest,
         ]);
@@ -18,6 +23,10 @@ class KycController extends Controller
 
     public function store(Request $request, NotificationService $notifications): RedirectResponse
     {
+        if (!app(FeatureFlagService::class)->isEnabled('kyc_enabled')) {
+            return redirect()->route('dashboard');
+        }
+
         $validated = $request->validate([
             'document_front' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
             'document_back' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
@@ -87,6 +96,10 @@ class KycController extends Controller
 
     public function status(Request $request)
     {
+        if (!app(FeatureFlagService::class)->isEnabled('kyc_enabled')) {
+            return redirect()->route('dashboard');
+        }
+
         return view('kyc.status', [
             'latestKyc' => $request->user()->latestKycRequest,
         ]);

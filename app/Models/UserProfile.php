@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Admin;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\File;
@@ -24,6 +25,11 @@ class UserProfile extends Model
         'address',
         'dob',
         'photo_path',
+        'pending_photo_path',
+        'photo_status',
+        'photo_submitted_at',
+        'photo_reviewed_at',
+        'photo_reviewed_by_admin_id',
         'banner_path',
         'bio',
         'social_twitter',
@@ -33,6 +39,8 @@ class UserProfile extends Model
 
     protected $casts = [
         'dob' => 'date',
+        'photo_submitted_at' => 'datetime',
+        'photo_reviewed_at' => 'datetime',
     ];
 
     public function user()
@@ -40,14 +48,34 @@ class UserProfile extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function reviewedByAdmin()
+    {
+        return $this->belongsTo(Admin::class, 'photo_reviewed_by_admin_id');
+    }
+
     public function getPhotoUrlAttribute(): ?string
     {
         return $this->resolvePublicMediaUrl($this->photo_path);
     }
 
+    public function getPendingPhotoUrlAttribute(): ?string
+    {
+        return $this->resolvePublicMediaUrl($this->pending_photo_path);
+    }
+
     public function getBannerUrlAttribute(): ?string
     {
         return $this->resolvePublicMediaUrl($this->banner_path);
+    }
+
+    public function getPhotoReviewDeadlineAttribute()
+    {
+        return $this->photo_submitted_at?->copy()->addHours(24);
+    }
+
+    public function hasPendingPhotoApproval(): bool
+    {
+        return $this->photo_status === 'pending' && !empty($this->pending_photo_path);
     }
 
     protected function resolvePublicMediaUrl(?string $path): ?string

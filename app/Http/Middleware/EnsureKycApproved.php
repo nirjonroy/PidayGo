@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\FeatureFlagService;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -10,6 +11,10 @@ class EnsureKycApproved
 {
     public function handle(Request $request, Closure $next): Response
     {
+        if (!app(FeatureFlagService::class)->isEnabled('kyc_enabled')) {
+            return $next($request);
+        }
+
         if ($request->routeIs('kyc.*')) {
             return $next($request);
         }

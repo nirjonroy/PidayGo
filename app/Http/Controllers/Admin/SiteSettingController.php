@@ -42,6 +42,7 @@ class SiteSettingController extends Controller
         $validated['bids_enabled'] = $request->boolean('bids_enabled');
         $validated['reserve_enabled'] = $request->boolean('reserve_enabled');
         $validated['two_factor_enabled'] = $request->boolean('two_factor_enabled');
+        $validated['kyc_enabled'] = $request->boolean('kyc_enabled');
 
         $setting = new SiteSetting($validated);
 
@@ -85,6 +86,7 @@ class SiteSettingController extends Controller
         $validated['bids_enabled'] = $request->boolean('bids_enabled');
         $validated['reserve_enabled'] = $request->boolean('reserve_enabled');
         $validated['two_factor_enabled'] = $request->boolean('two_factor_enabled');
+        $validated['kyc_enabled'] = $request->boolean('kyc_enabled');
 
         $setting->fill($validated);
 
@@ -155,6 +157,7 @@ class SiteSettingController extends Controller
             'bids_enabled' => ['nullable', 'boolean'],
             'reserve_enabled' => ['nullable', 'boolean'],
             'two_factor_enabled' => ['nullable', 'boolean'],
+            'kyc_enabled' => ['nullable', 'boolean'],
         ]);
     }
 

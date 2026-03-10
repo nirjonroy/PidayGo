@@ -216,6 +216,11 @@
                         <input class="form-check-input" type="checkbox" id="two_factor_enabled" name="two_factor_enabled" value="1" {{ old('two_factor_enabled', $setting->two_factor_enabled ?? true) ? 'checked' : '' }}>
                         <label class="form-check-label" for="two_factor_enabled">Enable Google Auth (2FA)</label>
                     </div>
+                    <div class="form-check mb-2">
+                        <input type="hidden" name="kyc_enabled" value="0">
+                        <input class="form-check-input" type="checkbox" id="kyc_enabled" name="kyc_enabled" value="1" {{ old('kyc_enabled', $setting->kyc_enabled ?? true) ? 'checked' : '' }}>
+                        <label class="form-check-label" for="kyc_enabled">Require KYC for users</label>
+                    </div>
                 </div>
 
                 <button type="submit" class="btn btn-success">Save</button>

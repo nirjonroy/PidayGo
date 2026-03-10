@@ -8,6 +8,7 @@ use App\Models\ChainCommission;
 use App\Models\User;
 use App\Models\WalletLedger;
 use App\Models\UserNotificationSetting;
+use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -61,7 +62,7 @@ class ProfileController extends Controller
         ]);
     }
 
-    public function update(Request $request): RedirectResponse
+    public function update(Request $request, NotificationService $notifications): RedirectResponse
     {
         $user = $request->user();
         $profile = $user->profile;
@@ -83,11 +84,31 @@ class ProfileController extends Controller
         ]);
 
         $photoPath = $profile?->photo_path;
+        $pendingPhotoPath = $profile?->pending_photo_path;
+        $photoStatus = $profile?->photo_status ?? 'approved';
+        $photoSubmittedAt = $profile?->photo_submitted_at;
+        $photoReviewedAt = $profile?->photo_reviewed_at;
+        $photoReviewedByAdminId = $profile?->photo_reviewed_by_admin_id;
+
         if ($request->hasFile('photo')) {
-            if ($photoPath && Storage::disk('public')->exists($photoPath)) {
-                Storage::disk('public')->delete($photoPath);
+            if ($pendingPhotoPath && $pendingPhotoPath !== $photoPath && Storage::disk('public')->exists($pendingPhotoPath)) {
+                Storage::disk('public')->delete($pendingPhotoPath);
             }
-            $photoPath = $request->file('photo')->store('users', 'public');
+
+            $pendingPhotoPath = $request->file('photo')->store('users/pending', 'public');
+            $photoStatus = 'pending';
+            $photoSubmittedAt = now();
+            $photoReviewedAt = null;
+            $photoReviewedByAdminId = null;
+
+            $notifications->notifyAdminsByRoleOrPermission(
+                'user.manage',
+                'profile_photo_submitted',
+                'New selfie approval request',
+                "{$user->name} uploaded a new profile selfie that requires review within 24 hours.",
+                'warning',
+                ['user_id' => $user->id]
+            );
         }
 
         $bannerPath = $profile?->banner_path;
@@ -102,6 +123,11 @@ class ProfileController extends Controller
         unset($data['photo']);
         unset($data['banner']);
         $data['photo_path'] = $photoPath;
+        $data['pending_photo_path'] = $pendingPhotoPath;
+        $data['photo_status'] = $photoStatus;
+        $data['photo_submitted_at'] = $photoSubmittedAt;
+        $data['photo_reviewed_at'] = $photoReviewedAt;
+        $data['photo_reviewed_by_admin_id'] = $photoReviewedByAdminId;
         $data['banner_path'] = $bannerPath;
 
         UserProfile::updateOrCreate(
@@ -109,7 +135,9 @@ class ProfileController extends Controller
             $data
         );
 
-        return back()->with('status', 'Profile updated.');
+        return back()->with('status', $request->hasFile('photo')
+            ? 'Profile updated. Your new selfie was submitted for admin approval within 24 hours.'
+            : 'Profile updated.');
     }
 
     public function updateNotifications(Request $request): RedirectResponse

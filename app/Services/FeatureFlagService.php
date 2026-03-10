@@ -23,6 +23,7 @@ class FeatureFlagService
                 'bids_enabled' => (bool) ($setting?->bids_enabled ?? true),
                 'reserve_enabled' => (bool) ($setting?->reserve_enabled ?? true),
                 'two_factor_enabled' => (bool) ($setting?->two_factor_enabled ?? true),
+                'kyc_enabled' => (bool) ($setting?->kyc_enabled ?? true),
             ];
         });
     }

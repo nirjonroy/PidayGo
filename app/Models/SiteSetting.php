@@ -29,6 +29,7 @@ class SiteSetting extends Model
         'bids_enabled',
         'reserve_enabled',
         'two_factor_enabled',
+        'kyc_enabled',
         'footer_newsletter_title',
         'footer_newsletter_text',
         'footer_newsletter_placeholder',
@@ -49,5 +50,6 @@ class SiteSetting extends Model
         'bids_enabled' => 'boolean',
         'reserve_enabled' => 'boolean',
         'two_factor_enabled' => 'boolean',
+        'kyc_enabled' => 'boolean',
     ];
 }
