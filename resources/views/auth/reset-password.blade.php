@@ -3,7 +3,7 @@
 @section('content')
     @include('frontend.partials.page-banner', [
         'title' => 'Reset Password',
-        'subtitle' => 'Choose a strong new password for your account.',
+        'subtitle' => 'Choose a new password with at least 8 characters.',
     ])
 
     <section aria-label="section">
@@ -37,11 +37,12 @@
                         <div class="field-set">
                             <label for="password">New Password</label>
                             <div class="password-input">
-                                <input id="password" type="password" name="password" class="form-control" required>
+                                <input id="password" type="password" name="password" class="form-control" minlength="8" required>
                                 <button type="button" class="password-toggle" data-password-toggle aria-label="Show password">
                                     <i class="fa fa-eye" aria-hidden="true"></i>
                                 </button>
                             </div>
+                            <small class="text-muted d-block mt-1">Use at least 8 characters.</small>
                             @error('password')
                                 <div class="text-danger">{{ $message }}</div>
                             @enderror
@@ -50,7 +51,7 @@
                         <div class="field-set">
                             <label for="password_confirmation">Confirm Password</label>
                             <div class="password-input">
-                                <input id="password_confirmation" type="password" name="password_confirmation" class="form-control" required>
+                                <input id="password_confirmation" type="password" name="password_confirmation" class="form-control" minlength="8" required>
                                 <button type="button" class="password-toggle" data-password-toggle aria-label="Show password">
                                     <i class="fa fa-eye" aria-hidden="true"></i>
                                 </button>

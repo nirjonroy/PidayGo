@@ -41,11 +41,12 @@
                         <div class="field-set">
                             <label>Password</label>
                             <div class="password-input">
-                                <input type="password" name="password" class="form-control" required>
+                                <input type="password" name="password" class="form-control" minlength="8" required>
                                 <button type="button" class="password-toggle" data-password-toggle aria-label="Show password">
                                     <i class="fa fa-eye" aria-hidden="true"></i>
                                 </button>
                             </div>
+                            <small class="text-muted d-block mt-1">Use at least 8 characters.</small>
                             @error('password')
                                 <div class="text-danger">{{ $message }}</div>
                             @enderror
@@ -54,7 +55,7 @@
                         <div class="field-set">
                             <label>Confirm Password</label>
                             <div class="password-input">
-                                <input type="password" name="password_confirmation" class="form-control" required>
+                                <input type="password" name="password_confirmation" class="form-control" minlength="8" required>
                                 <button type="button" class="password-toggle" data-password-toggle aria-label="Show password">
                                     <i class="fa fa-eye" aria-hidden="true"></i>
                                 </button>
