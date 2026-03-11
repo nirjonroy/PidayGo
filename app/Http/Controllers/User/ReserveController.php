@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ReservePlan;
 use App\Models\NftItem;
 use App\Models\UserReserve;
+use App\Models\UserReserveLedger;
 use App\Models\NftSale;
 use App\Services\FeatureFlagService;
 use App\Services\UserLevelResolver;
@@ -33,6 +34,11 @@ class ReserveController extends Controller
             ->first();
         $level = $levelResolver->resolve($user);
         $reserveEnabled = $featureFlagService->isEnabled('reserve_enabled');
+        $recentReserveLedgers = UserReserveLedger::query()
+            ->where('user_id', $user->id)
+            ->orderByDesc('created_at')
+            ->limit(20)
+            ->get();
 
         $plans = collect();
         if ($level) {
@@ -55,6 +61,7 @@ class ReserveController extends Controller
             'plans' => $plans,
             'selectedPlanId' => $selectedPlanId,
             'activeReserve' => $activeReserve,
+            'recentReserveLedgers' => $recentReserveLedgers,
         ]);
     }
 

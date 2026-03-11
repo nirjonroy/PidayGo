@@ -70,6 +70,50 @@
                 </div>
             </div>
         </div>
+
+        <div class="row">
+            <div class="col-lg-12 mb30">
+                <div class="nft__item s2">
+                    <div class="nft__item_info">
+                        <h4>Recent Reserve Ledger</h4>
+                        @if ($recentReserveLedgers->isEmpty())
+                            <div class="text-muted">No reserve ledger entries found yet.</div>
+                        @else
+                            <div class="table-responsive reserve-table-card mb-0">
+                                <table class="table table-borderless table-striped align-middle mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Change</th>
+                                            <th>Reason</th>
+                                            <th>Reference</th>
+                                            <th>Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($recentReserveLedgers as $ledger)
+                                            <tr>
+                                                <td class="{{ (float) $ledger->change < 0 ? 'text-danger' : 'text-success' }}">
+                                                    {{ number_format((float) $ledger->change, 8) }}
+                                                </td>
+                                                <td>{{ \Illuminate\Support\Str::headline(str_replace('_', ' ', $ledger->reason)) }}</td>
+                                                <td>
+                                                    @if ($ledger->ref_type && $ledger->ref_id)
+                                                        {{ \Illuminate\Support\Str::headline(str_replace('_', ' ', $ledger->ref_type)) }} #{{ $ledger->ref_id }}
+                                                    @else
+                                                        -
+                                                    @endif
+                                                </td>
+                                                <td>{{ optional($ledger->created_at)->format('M d, Y h:i A') }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 @endsection
