@@ -23,6 +23,10 @@ class WalletController extends Controller
         $cumulativeIncome = (float) $user->walletLedgers()
             ->whereIn('type', ['nft_profit', 'chain_income'])
             ->sum('amount');
+        $recentWalletLedgers = $user->walletLedgers()
+            ->orderByDesc('created_at')
+            ->limit(20)
+            ->get();
         $level = $levelResolver->resolve($user);
         $canSell = $reservedBalance > 0;
 
@@ -31,6 +35,7 @@ class WalletController extends Controller
             'reservedBalance' => $reservedBalance,
             'todayEarnings' => $todayEarnings,
             'cumulativeIncome' => $cumulativeIncome,
+            'recentWalletLedgers' => $recentWalletLedgers,
             'level' => $level,
             'canSell' => $canSell,
             'plans' => StakePlan::where('is_active', true)->get(),
