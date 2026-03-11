@@ -39,6 +39,12 @@ class ReserveController extends Controller
             ->orderByDesc('created_at')
             ->limit(20)
             ->get();
+        $recentReserveSales = NftSale::query()
+            ->where('user_id', $user->id)
+            ->with(['nftItem'])
+            ->orderByDesc('created_at')
+            ->limit(20)
+            ->get();
 
         $plans = collect();
         if ($level) {
@@ -62,6 +68,7 @@ class ReserveController extends Controller
             'selectedPlanId' => $selectedPlanId,
             'activeReserve' => $activeReserve,
             'recentReserveLedgers' => $recentReserveLedgers,
+            'recentReserveSales' => $recentReserveSales,
         ]);
     }
 

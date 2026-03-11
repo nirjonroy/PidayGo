@@ -114,6 +114,46 @@
                 </div>
             </div>
         </div>
+
+        <div class="row">
+            <div class="col-lg-12 mb30">
+                <div class="nft__item s2">
+                    <div class="nft__item_info">
+                        <h4>Recent Reserve Sell Income</h4>
+                        @if ($recentReserveSales->isEmpty())
+                            <div class="text-muted">No reserve sell income found yet.</div>
+                        @else
+                            <div class="table-responsive reserve-table-card mb-0">
+                                <table class="table table-borderless table-striped align-middle mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>NFT Item</th>
+                                            <th>Sell Amount</th>
+                                            <th>Profit %</th>
+                                            <th>Income</th>
+                                            <th>Status</th>
+                                            <th>Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($recentReserveSales as $sale)
+                                            <tr>
+                                                <td>{{ $sale->nftItem?->title ?: ('NFT #' . $sale->nft_item_id) }}</td>
+                                                <td>{{ number_format((float) $sale->sale_amount, 8) }}</td>
+                                                <td>{{ number_format((float) $sale->profit_percent, 3) }}%</td>
+                                                <td class="text-success">{{ number_format((float) $sale->profit_amount, 8) }}</td>
+                                                <td>{{ \Illuminate\Support\Str::headline((string) $sale->status) }}</td>
+                                                <td>{{ optional($sale->created_at)->format('M d, Y h:i A') }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 @endsection
