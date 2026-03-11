@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Stake;
 use App\Models\StakePlan;
 use App\Services\NotificationService;
+use App\Services\StakeRewardService;
 use App\Services\WalletService;
 use App\Services\UserReserveService;
 use Illuminate\Http\RedirectResponse;
@@ -79,19 +80,32 @@ class StakingController extends Controller
         return back()->with('status', 'Stake created.');
     }
 
-    public function unstake(Request $request, Stake $stake, WalletService $walletService, UserReserveService $userReserveService): RedirectResponse
+    public function unstake(Request $request, Stake $stake, WalletService $walletService, UserReserveService $userReserveService, StakeRewardService $stakeRewardService): RedirectResponse
     {
         if ($stake->user_id !== $request->user()->id) {
             abort(403);
         }
 
-        if ($stake->status !== 'active') {
-            return back()->withErrors(['stake' => 'Stake is not active.']);
+        if (!in_array($stake->status, ['active', 'completed'], true)) {
+            return back()->withErrors(['stake' => 'Stake is not available for unstake.']);
         }
 
         if (now()->lt($stake->ends_at)) {
             return back()->withErrors(['stake' => 'Stake is still locked.']);
         }
+
+        $alreadyUnlocked = $request->user()->walletLedgers()
+            ->where('type', 'stake_unlocked')
+            ->where('reference_type', $stake->getMorphClass())
+            ->where('reference_id', $stake->id)
+            ->exists();
+
+        if ($alreadyUnlocked) {
+            return back()->withErrors(['stake' => 'Stake already unstaked.']);
+        }
+
+        $stakeRewardService->creditDueRewardsForStake($stake, $walletService);
+        $stake->refresh();
 
         $plan = $stake->stakePlan;
         $principal = (float) $stake->principal_amount;
@@ -101,9 +115,10 @@ class StakingController extends Controller
 
         $maxPayout = $principal * (float) ($plan->max_payout_multiplier ?? 2);
         $maxReward = max(0, $maxPayout - $principal);
-        $reward = min($rawReward, $maxReward);
+        $totalEligibleReward = min($rawReward, $maxReward);
+        $remainingReward = max(0, round($totalEligibleReward - (float) $stake->total_reward_paid, 8));
 
-        DB::transaction(function () use ($request, $stake, $principal, $reward, $walletService, $userReserveService) {
+        DB::transaction(function () use ($request, $stake, $principal, $remainingReward, $walletService, $userReserveService) {
             $userReserveService->debitUserReserve(
                 $request->user(),
                 $principal,
@@ -113,13 +128,14 @@ class StakingController extends Controller
             );
 
             $walletService->credit($request->user(), 'stake_unlocked', $principal, [], $stake);
-            if ($reward > 0) {
-                $walletService->credit($request->user(), 'reward_credit', $reward, [], $stake);
+            if ($remainingReward > 0) {
+                $walletService->credit($request->user(), 'reward_credit', $remainingReward, [], $stake);
             }
 
             $stake->update([
                 'status' => 'completed',
-                'total_reward_paid' => $reward,
+                'total_reward_paid' => round((float) $stake->total_reward_paid + $remainingReward, 8),
+                'last_reward_at' => $stake->ends_at ?? now(),
             ]);
         });
 

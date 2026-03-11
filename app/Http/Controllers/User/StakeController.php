@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Models\Stake;
 use App\Models\StakePlan;
+use App\Services\StakeRewardService;
 use App\Services\WalletService;
 use App\Services\UserReserveService;
 use Illuminate\Http\RedirectResponse;
@@ -15,9 +16,10 @@ use RuntimeException;
 
 class StakeController extends Controller
 {
-    public function index(Request $request, WalletService $walletService): View
+    public function index(Request $request, WalletService $walletService, StakeRewardService $stakeRewardService): View
     {
         $user = $request->user();
+        $stakeRewardService->creditDueRewardsForUser($user, $walletService);
         $recentStakeIncome = $user->walletLedgers()
             ->where('type', 'reward_credit')
             ->where('reference_type', (new Stake())->getMorphClass())

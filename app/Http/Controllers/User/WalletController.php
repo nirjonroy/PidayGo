@@ -5,23 +5,26 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Models\Stake;
 use App\Models\StakePlan;
+use App\Services\StakeRewardService;
 use App\Services\UserReserveService;
 use App\Services\UserLevelResolver;
+use App\Services\WalletService;
 use Illuminate\Http\Request;
 
 class WalletController extends Controller
 {
-    public function index(Request $request, UserReserveService $userReserveService, UserLevelResolver $levelResolver)
+    public function index(Request $request, UserReserveService $userReserveService, UserLevelResolver $levelResolver, WalletService $walletService, StakeRewardService $stakeRewardService)
     {
         $user = $request->user();
+        $stakeRewardService->creditDueRewardsForUser($user, $walletService);
         $balance = (float) $user->walletLedgers()->sum('amount');
         $reservedBalance = (float) $user->reserves()->where('status', 'confirmed')->sum('amount');
         $todayEarnings = (float) $user->walletLedgers()
-            ->whereIn('type', ['nft_profit', 'chain_income'])
+            ->whereIn('type', ['nft_profit', 'chain_income', 'reward_credit'])
             ->whereDate('created_at', now()->toDateString())
             ->sum('amount');
         $cumulativeIncome = (float) $user->walletLedgers()
-            ->whereIn('type', ['nft_profit', 'chain_income'])
+            ->whereIn('type', ['nft_profit', 'chain_income', 'reward_credit'])
             ->sum('amount');
         $recentWalletLedgers = $user->walletLedgers()
             ->orderByDesc('created_at')
