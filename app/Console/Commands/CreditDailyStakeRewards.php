@@ -50,7 +50,7 @@ class CreditDailyStakeRewards extends Command
 
                         $principal = (float) $lockedStake->principal_amount;
                         $dailyRate = (float) $plan->daily_rate;
-                        $perDayReward = round($principal * $dailyRate, 8);
+                        $perDayReward = round(($principal * $dailyRate) / 100, 8);
 
                         $maxPayout = $principal * (float) ($plan->max_payout_multiplier ?? 0);
                         $remaining = $maxPayout - (float) $lockedStake->total_reward_paid;

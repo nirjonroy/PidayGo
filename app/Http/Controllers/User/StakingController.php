@@ -97,7 +97,7 @@ class StakingController extends Controller
         $principal = (float) $stake->principal_amount;
         $dailyRate = (float) $plan->daily_rate;
         $days = (int) $plan->duration_days;
-        $rawReward = $principal * $dailyRate * $days;
+        $rawReward = ($principal * $dailyRate * $days) / 100;
 
         $maxPayout = $principal * (float) ($plan->max_payout_multiplier ?? 2);
         $maxReward = max(0, $maxPayout - $principal);
