@@ -96,6 +96,50 @@
                 </div>
             </div>
         </div>
+
+        <div class="spacer-30"></div>
+
+        <div class="row">
+            <div class="col-lg-12">
+                <h2>Daily Stake Income</h2>
+            </div>
+            <div class="col-lg-12">
+                @if ($recentStakeIncome->isEmpty())
+                    <div class="text-muted">No daily stake income credited yet.</div>
+                @else
+                    <div class="table-responsive reserve-table-card">
+                        <table class="table table-borderless table-striped align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Plan</th>
+                                    <th>Principal</th>
+                                    <th>Reward Day</th>
+                                    <th>Rate</th>
+                                    <th>Income</th>
+                                    <th>Credited At</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($recentStakeIncome as $ledger)
+                                    @php
+                                        $stakeRef = $stakeReferences->get($ledger->reference_id);
+                                        $meta = is_array($ledger->meta) ? $ledger->meta : [];
+                                    @endphp
+                                    <tr>
+                                        <td>{{ $stakeRef?->stakePlan?->name ?: ('Stake #' . $ledger->reference_id) }}</td>
+                                        <td>{{ $stakeRef ? number_format((float) $stakeRef->principal_amount, 4) : '-' }}</td>
+                                        <td>{{ $meta['day'] ?? '-' }}</td>
+                                        <td>{{ isset($meta['rate']) ? number_format((float) $meta['rate'], 6) . '%' : '-' }}</td>
+                                        <td class="text-success">{{ number_format((float) $ledger->amount, 8) }}</td>
+                                        <td>{{ optional($ledger->created_at)->format('M d, Y h:i A') }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            </div>
+        </div>
     </div>
 </section>
 @endsection

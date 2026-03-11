@@ -18,6 +18,17 @@ class StakeController extends Controller
     public function index(Request $request, WalletService $walletService): View
     {
         $user = $request->user();
+        $recentStakeIncome = $user->walletLedgers()
+            ->where('type', 'reward_credit')
+            ->where('reference_type', (new Stake())->getMorphClass())
+            ->orderByDesc('created_at')
+            ->limit(30)
+            ->get();
+        $stakeReferences = Stake::query()
+            ->with('stakePlan')
+            ->whereIn('id', $recentStakeIncome->pluck('reference_id')->filter()->unique())
+            ->get()
+            ->keyBy('id');
 
         return view('stake.index', [
             'balance' => $walletService->getBalance($user),
@@ -27,6 +38,8 @@ class StakeController extends Controller
                 ->where('status', 'active')
                 ->orderByDesc('started_at')
                 ->get(),
+            'recentStakeIncome' => $recentStakeIncome,
+            'stakeReferences' => $stakeReferences,
         ]);
     }
 
