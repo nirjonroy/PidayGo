@@ -109,7 +109,7 @@ class StakeRewardService
                 $lockedStake->last_reward_at = $base->copy()->addDays($daysCredited);
             }
 
-            if (($lockedStake->ends_at && $now->gte($lockedStake->ends_at)) || $remaining <= 0) {
+            if ($remaining <= 0) {
                 $lockedStake->status = 'completed';
             }
 
