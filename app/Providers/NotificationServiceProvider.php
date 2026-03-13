@@ -49,12 +49,8 @@ class NotificationServiceProvider extends ServiceProvider
             $popup = (clone $baseQuery)
                 ->whereNull('read_at')
                 ->whereNull('dismissed_at')
-                ->whereNull('shown_popup_at')
-                ->whereHas('notification', function ($query) {
-                    $query->where('is_popup', true);
-                })
                 ->with('notification')
-                ->orderBy('id')
+                ->orderByDesc('id')
                 ->first();
 
             $view->with([
@@ -100,12 +96,8 @@ class NotificationServiceProvider extends ServiceProvider
             $popup = (clone $baseQuery)
                 ->whereNull('read_at')
                 ->whereNull('dismissed_at')
-                ->whereNull('shown_popup_at')
-                ->whereHas('notification', function ($query) {
-                    $query->where('is_popup', true);
-                })
                 ->with('notification')
-                ->orderBy('id')
+                ->orderByDesc('id')
                 ->first();
 
             $view->with([
@@ -121,6 +113,7 @@ class NotificationServiceProvider extends ServiceProvider
                 $view->with([
                     'adminNotificationCount' => 0,
                     'adminNotificationsPreview' => collect(),
+                    'adminPopupNotification' => null,
                 ]);
                 return;
             }
@@ -129,6 +122,7 @@ class NotificationServiceProvider extends ServiceProvider
                 $view->with([
                     'adminNotificationCount' => 0,
                     'adminNotificationsPreview' => collect(),
+                    'adminPopupNotification' => null,
                 ]);
                 return;
             }
@@ -155,9 +149,17 @@ class NotificationServiceProvider extends ServiceProvider
                 ->limit(5)
                 ->get();
 
+            $popup = (clone $baseQuery)
+                ->whereNull('read_at')
+                ->whereNull('dismissed_at')
+                ->with('notification')
+                ->orderByDesc('id')
+                ->first();
+
             $view->with([
                 'adminNotificationCount' => $count,
                 'adminNotificationsPreview' => $preview,
+                'adminPopupNotification' => $popup,
             ]);
         });
     }

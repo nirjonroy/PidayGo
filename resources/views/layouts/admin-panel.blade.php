@@ -28,6 +28,131 @@
       crossorigin="anonymous"
     />
     <link rel="stylesheet" href="{{ asset('adminlte/css/adminlte.css') }}" />
+    <style>
+      .admin-popup-backdrop {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: rgba(17, 24, 39, 0.54);
+        backdrop-filter: blur(6px);
+        z-index: 2000;
+      }
+      .admin-popup-card {
+        width: min(100%, 520px);
+        border-radius: 24px;
+        border: 0;
+        background: #ffffff;
+        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28);
+        overflow: hidden;
+      }
+      .admin-popup-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 20px 22px 14px;
+        border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+      }
+      .admin-popup-kicker {
+        margin: 0 0 6px;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #64748b;
+      }
+      .admin-popup-title {
+        margin: 0;
+        font-size: 24px;
+        line-height: 1.1;
+        font-weight: 800;
+        color: #0f172a;
+      }
+      .admin-popup-close {
+        width: 40px;
+        height: 40px;
+        border: 0;
+        border-radius: 12px;
+        background: rgba(15, 23, 42, 0.06);
+        color: #334155;
+      }
+      .admin-popup-body {
+        padding: 20px 22px 12px;
+      }
+      .admin-popup-alert {
+        border-radius: 18px;
+        padding: 16px 18px;
+        margin-bottom: 16px;
+      }
+      .admin-popup-alert h4 {
+        margin: 0 0 8px;
+        font-size: 20px;
+        font-weight: 800;
+      }
+      .admin-popup-alert p {
+        margin: 0;
+        font-size: 15px;
+        color: #334155;
+      }
+      .admin-popup-alert.is-info {
+        background: rgba(59, 130, 246, 0.12);
+      }
+      .admin-popup-alert.is-success {
+        background: rgba(16, 185, 129, 0.14);
+      }
+      .admin-popup-alert.is-warning {
+        background: rgba(245, 158, 11, 0.16);
+      }
+      .admin-popup-alert.is-error {
+        background: rgba(239, 68, 68, 0.14);
+      }
+      .admin-popup-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        flex-wrap: wrap;
+        color: #64748b;
+        font-size: 14px;
+      }
+      .admin-popup-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        padding: 0 22px 22px;
+      }
+      .admin-popup-actions form,
+      .admin-popup-actions a,
+      .admin-popup-actions button {
+        flex: 1 1 140px;
+      }
+      .admin-popup-actions .btn {
+        width: 100%;
+        border-radius: 14px;
+        padding: 11px 16px;
+        font-weight: 700;
+      }
+      @media (max-width: 575.98px) {
+        .admin-popup-backdrop {
+          padding: 14px;
+        }
+        .admin-popup-card {
+          border-radius: 20px;
+        }
+        .admin-popup-head,
+        .admin-popup-body,
+        .admin-popup-actions {
+          padding-left: 18px;
+          padding-right: 18px;
+        }
+        .admin-popup-title {
+          font-size: 22px;
+        }
+      }
+    </style>
     @stack('styles')
   </head>
   <body class="layout-fixed sidebar-expand-lg sidebar-open bg-body-tertiary">
@@ -371,8 +496,74 @@
             scrollbars: { theme: Default.scrollbarTheme, autoHide: Default.scrollbarAutoHide, clickScroll: Default.scrollbarClickScroll },
           });
         }
+
+        const adminPopup = document.getElementById('admin-notif-modal');
+        if (adminPopup) {
+          adminPopup.style.display = 'flex';
+          adminPopup.addEventListener('click', function (event) {
+            if (event.target === adminPopup) {
+              adminPopup.style.display = 'none';
+            }
+          });
+        }
+
+        document.querySelectorAll('[data-admin-popup-close]').forEach(function (button) {
+          button.addEventListener('click', function () {
+            const modal = document.getElementById('admin-notif-modal');
+            if (modal) {
+              modal.style.display = 'none';
+            }
+          });
+        });
       });
     </script>
+
+    @if (!empty($adminPopupNotification) && $adminPopupNotification->notification)
+      @php
+        $adminPopupLevel = $adminPopupNotification->notification->level ?? 'info';
+        $adminPopupClass = match ($adminPopupLevel) {
+          'success' => 'is-success',
+          'warning' => 'is-warning',
+          'error' => 'is-error',
+          default => 'is-info',
+        };
+      @endphp
+      <div class="admin-popup-backdrop" id="admin-notif-modal">
+        <div class="admin-popup-card">
+          <div class="admin-popup-head">
+            <div>
+              <p class="admin-popup-kicker">Unread Notification</p>
+              <h3 class="admin-popup-title">Admin Alert</h3>
+            </div>
+            <button type="button" class="admin-popup-close" data-admin-popup-close aria-label="Close notification popup">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+          <div class="admin-popup-body">
+            <div class="admin-popup-alert {{ $adminPopupClass }}">
+              <h4>{{ $adminPopupNotification->notification->title }}</h4>
+              <p>{{ $adminPopupNotification->notification->message }}</p>
+            </div>
+            <div class="admin-popup-meta">
+              <span>{{ optional($adminPopupNotification->created_at)->format('M d, Y h:i A') }}</span>
+              <span>{{ ucfirst($adminPopupLevel) }}</span>
+            </div>
+          </div>
+          <div class="admin-popup-actions">
+            <form method="POST" action="{{ route('admin.alerts.dismiss', $adminPopupNotification->notification) }}">
+              @csrf
+              <button type="submit" class="btn btn-outline-secondary">Dismiss</button>
+            </form>
+            <form method="POST" action="{{ route('admin.alerts.read', $adminPopupNotification->notification) }}">
+              @csrf
+              <button type="submit" class="btn btn-primary">Mark Read</button>
+            </form>
+            <a href="{{ route('admin.alerts.index') }}" class="btn btn-light border">View All</a>
+          </div>
+        </div>
+      </div>
+    @endif
+
     @stack('scripts')
   </body>
 </html>
