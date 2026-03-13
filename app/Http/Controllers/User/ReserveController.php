@@ -28,7 +28,7 @@ class ReserveController extends Controller
             ->where('status', 'confirmed')
             ->sum('amount');
         $activeReserve = UserReserve::where('user_id', $user->id)
-            ->whereIn('status', ['pending', 'confirmed'])
+            ->where('status', 'confirmed')
             ->with(['plan', 'level'])
             ->orderByDesc('updated_at')
             ->first();
@@ -102,7 +102,7 @@ class ReserveController extends Controller
         }
 
         $hasActive = UserReserve::where('user_id', $user->id)
-            ->whereIn('status', ['pending', 'confirmed'])
+            ->where('status', 'confirmed')
             ->exists();
         if ($hasActive) {
             return redirect()->route('reserve.sell.form')->withErrors(['reserve_plan_id' => 'You already have an active reserve.']);
