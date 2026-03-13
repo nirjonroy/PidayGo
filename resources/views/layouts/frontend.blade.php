@@ -465,6 +465,19 @@
             justify-content: flex-end;
             margin-top: 16px;
         }
+        .popup-actions form {
+            flex: 1 1 0;
+            margin: 0;
+        }
+        .popup-actions .btn-main {
+            width: 100%;
+            min-height: 54px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 18px;
+            white-space: nowrap;
+        }
         .top-sellers-grid {
             margin: 0;
         }
