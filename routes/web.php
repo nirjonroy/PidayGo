@@ -41,6 +41,7 @@ use App\Http\Controllers\Auth\TwoFactorController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\KycController;
 use App\Http\Controllers\PublicMediaController;
+use App\Http\Controllers\User\DashboardController;
 use App\Http\Controllers\User\DepositController;
 use App\Http\Controllers\User\UserNotificationController;
 use App\Http\Controllers\User\StakeController;
@@ -142,9 +143,7 @@ Route::middleware(['auth', 'verified.if.mail', '2fa.enabled', '2fa.passed'])->gr
 });
 
 Route::middleware(['auth', 'verified.if.mail', '2fa.enabled', '2fa.passed', 'kyc.approved'])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', DashboardController::class)->name('dashboard');
 
     Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
     Route::get('/wallet/deposit', [DepositController::class, 'create'])->name('wallet.deposit');

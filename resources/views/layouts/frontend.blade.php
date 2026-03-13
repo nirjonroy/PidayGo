@@ -977,6 +977,7 @@
             }
         }
     </style>
+    @stack('styles')
 </head>
 
 <body class="switch-scheme{{ auth()->check() ? ' has-mobile-quick-nav' : '' }}">
@@ -1299,6 +1300,7 @@
             });
         });
     </script>
+    @stack('scripts')
 
     @if (!empty($popupNotification) && $popupNotification->notification)
         <div class="popup-backdrop" id="notif-modal">
