@@ -467,6 +467,7 @@
     .dark-scheme .dashboard-team-stat,
     .dark-scheme .dashboard-team-tab,
     .dark-scheme .dashboard-team-member,
+    .dark-scheme .dashboard-team-member__item,
     .dark-scheme .dashboard-ledger-wrap,
     .dark-scheme .dashboard-ledger-mobile-card,
     .dark-scheme .dashboard-empty {
@@ -522,6 +523,9 @@
     }
     .dark-scheme .dashboard-team-member__value.is-earn {
         color: #86efac;
+    }
+    .dark-scheme .dashboard-team-member__label {
+        color: #f8fafc;
     }
     .dark-scheme .dashboard-ledger-table thead th,
     .dark-scheme .dashboard-ledger-mobile-meta {
