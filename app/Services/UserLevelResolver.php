@@ -14,19 +14,28 @@ class UserLevelResolver
     public function resolve(User $user): ?Level
     {
         $depositTotal = (float) $user->walletLedgers()->where('type', 'deposit')->sum('amount');
+        $reservedTotal = (float) $user->reserves()
+            ->where('status', 'confirmed')
+            ->sum('amount');
+        $counts = $this->referralChainService->getReferralDepthCounts($user);
 
         $levels = Level::query()
             ->where('is_active', true)
-            ->orderBy('min_deposit')
+            ->orderByDesc('min_deposit')
+            ->orderByDesc('min_reservation')
+            ->orderByDesc('id')
             ->get();
 
         foreach ($levels as $level) {
-            $within = $depositTotal >= (float) $level->min_deposit && $depositTotal <= (float) $level->max_deposit;
-            if (!$within) {
+            // Levels act as unlock thresholds. Once a user exceeds a lower tier's max range,
+            // they should still keep the highest tier whose minimum requirements they meet.
+            if ($depositTotal < (float) $level->min_deposit) {
                 continue;
             }
 
-            $counts = $this->referralChainService->getReferralDepthCounts($user);
+            if ($reservedTotal < (float) $level->min_reservation) {
+                continue;
+            }
 
             if ($counts['A'] < (int) $level->req_chain_a) {
                 continue;
@@ -41,6 +50,6 @@ class UserLevelResolver
             return $level;
         }
 
-        return $levels->first();
+        return null;
     }
 }
