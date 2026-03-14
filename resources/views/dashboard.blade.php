@@ -319,80 +319,38 @@
         gap: 14px;
     }
     .dashboard-team-member {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        padding: 18px;
         border-radius: 20px;
         border: 1px solid rgba(15, 23, 42, 0.08);
         background: rgba(255, 255, 255, 0.76);
-        overflow: hidden;
     }
-    .dashboard-team-member summary {
-        list-style: none;
-        cursor: pointer;
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 16px;
-        padding: 18px;
-    }
-    .dashboard-team-member summary::-webkit-details-marker {
-        display: none;
-    }
-    .dashboard-team-member summary::after {
-        content: "\f107";
-        font-family: FontAwesome;
-        font-size: 18px;
-        color: #64748b;
-        transition: transform 0.2s ease;
-    }
-    .dashboard-team-member[open] summary::after {
-        transform: rotate(180deg);
-    }
-    .dashboard-team-member__name {
-        font-size: 18px;
-        font-weight: 800;
-        color: #0f172a;
-    }
-    .dashboard-team-member__meta {
-        margin-top: 6px;
-        font-size: 13px;
-        color: #64748b;
-        word-break: break-word;
-    }
-    .dashboard-team-member__earn {
-        min-width: 130px;
-        text-align: right;
-    }
-    .dashboard-team-member__earn-value {
-        font-size: 20px;
-        font-weight: 800;
-        color: #059669;
-        white-space: nowrap;
-    }
-    .dashboard-team-details {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px;
-        padding: 0 18px 18px;
-    }
-    .dashboard-team-detail {
-        padding: 12px 14px;
-        border-radius: 14px;
-        background: rgba(255, 255, 255, 0.72);
+    .dashboard-team-member__item {
+        padding: 14px 16px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.58);
         border: 1px solid rgba(15, 23, 42, 0.08);
     }
-    .dashboard-team-detail__label {
+    .dashboard-team-member__label {
         display: block;
+        margin-bottom: 8px;
         font-size: 12px;
         font-weight: 700;
-        letter-spacing: 0.06em;
+        letter-spacing: 0.08em;
         text-transform: uppercase;
         color: #64748b;
-        margin-bottom: 6px;
     }
-    .dashboard-team-detail__value {
-        font-size: 15px;
-        font-weight: 700;
+    .dashboard-team-member__value {
+        font-size: 18px;
+        font-weight: 800;
         color: #0f172a;
         word-break: break-word;
+    }
+    .dashboard-team-member__value.is-earn {
+        color: #059669;
+        white-space: nowrap;
     }
     .dashboard-section-head {
         display: flex;
@@ -509,7 +467,6 @@
     .dark-scheme .dashboard-team-stat,
     .dark-scheme .dashboard-team-tab,
     .dark-scheme .dashboard-team-member,
-    .dark-scheme .dashboard-team-detail,
     .dark-scheme .dashboard-ledger-wrap,
     .dark-scheme .dashboard-ledger-mobile-card,
     .dark-scheme .dashboard-empty {
@@ -528,9 +485,7 @@
     .dark-scheme .dashboard-metric__label,
     .dark-scheme .dashboard-metric__caption,
     .dark-scheme .dashboard-team-stat__label,
-    .dark-scheme .dashboard-team-detail__label,
-    .dark-scheme .dashboard-team-member summary::after,
-    .dark-scheme .dashboard-team-member__meta,
+    .dark-scheme .dashboard-team-member__label,
     .dark-scheme .dashboard-section-copy,
     .dark-scheme .dashboard-ledger-subtext,
     .dark-scheme .dashboard-income-table thead th,
@@ -542,9 +497,14 @@
     }
     .dark-scheme .dashboard-income-table__label,
     .dark-scheme .dashboard-income-table__value,
+    .dark-scheme .dashboard-name,
+    .dark-scheme .dashboard-section-title,
+    .dark-scheme .dashboard-uid,
+    .dark-scheme .dashboard-team-tab,
     .dark-scheme .dashboard-team-stat__value,
-    .dark-scheme .dashboard-team-member__name,
-    .dark-scheme .dashboard-team-detail__value {
+    .dark-scheme .dashboard-team-member__value,
+    .dark-scheme .dashboard-ledger-type,
+    .dark-scheme .dashboard-ledger-mobile-meta strong {
         color: #f8fafc;
     }
     .dark-scheme .dashboard-chip {
@@ -560,7 +520,7 @@
         background: linear-gradient(135deg, rgba(var(--secondary-color-rgb), 0.9), rgba(var(--primary-color-rgb), 0.9));
         border-color: transparent;
     }
-    .dark-scheme .dashboard-team-member__earn-value {
+    .dark-scheme .dashboard-team-member__value.is-earn {
         color: #86efac;
     }
     .dark-scheme .dashboard-ledger-table thead th,
@@ -595,7 +555,7 @@
         .dashboard-summary-grid,
         .dashboard-team-summary,
         .dashboard-team-tabs,
-        .dashboard-team-details {
+        .dashboard-team-member {
             grid-template-columns: 1fr;
         }
         .dashboard-section-head {
@@ -635,7 +595,6 @@
             font-size: 28px;
         }
         .dashboard-uid-row,
-        .dashboard-team-member summary,
         .dashboard-ledger-mobile-top,
         .dashboard-ledger-mobile-meta {
             flex-direction: column;
@@ -646,10 +605,6 @@
         .dashboard-chip {
             width: 100%;
             justify-content: flex-start;
-        }
-        .dashboard-team-member__earn {
-            width: 100%;
-            text-align: left;
         }
         .dashboard-income-table thead th,
         .dashboard-income-table tbody td {
@@ -794,7 +749,7 @@
                     <div>
                         <div class="dashboard-meta-label">Community</div>
                         <h2 class="dashboard-section-title">My Team</h2>
-                        <p class="dashboard-section-copy">Browse your A, B, and C branches and open a member to see what they generated for you.</p>
+                        <p class="dashboard-section-copy">Browse your A, B, and C branches and see each member's username, user ID, and your total earn.</p>
                     </div>
                 </div>
 
@@ -839,67 +794,20 @@
                         @else
                             <div class="dashboard-team-list">
                                 @foreach ($branch['members'] as $member)
-                                    <details class="dashboard-team-member">
-                                        <summary>
-                                            <div>
-                                                <div class="dashboard-team-member__name">{{ $member['display_name'] }}</div>
-                                                <div class="dashboard-team-member__meta">
-                                                    {{ $member['uid'] }} | {{ \Illuminate\Support\Str::limit($member['email'] ?: 'No email', 28) }}
-                                                </div>
-                                            </div>
-                                            <div class="dashboard-team-member__earn">
-                                                <div class="dashboard-metric__label">You Earned</div>
-                                                <div class="dashboard-team-member__earn-value">{{ number_format((float) $member['total_earned'], 4) }}</div>
-                                            </div>
-                                        </summary>
-
-                                        <div class="dashboard-team-details">
-                                            <div class="dashboard-team-detail">
-                                                <span class="dashboard-team-detail__label">Email</span>
-                                                <span class="dashboard-team-detail__value">{{ $member['email'] ?: 'N/A' }}</span>
-                                            </div>
-                                            <div class="dashboard-team-detail">
-                                                <span class="dashboard-team-detail__label">Phone</span>
-                                                <span class="dashboard-team-detail__value">{{ $member['phone'] ?: 'N/A' }}</span>
-                                            </div>
-                                            <div class="dashboard-team-detail">
-                                                <span class="dashboard-team-detail__label">UID</span>
-                                                <span class="dashboard-team-detail__value">{{ $member['uid'] }}</span>
-                                            </div>
-                                            <div class="dashboard-team-detail">
-                                                <span class="dashboard-team-detail__label">Referral Code</span>
-                                                <span class="dashboard-team-detail__value">{{ $member['ref_code'] }}</span>
-                                            </div>
-                                            <div class="dashboard-team-detail">
-                                                <span class="dashboard-team-detail__label">Joined</span>
-                                                <span class="dashboard-team-detail__value">{{ $member['joined_at'] ?: 'N/A' }}</span>
-                                            </div>
-                                            <div class="dashboard-team-detail">
-                                                <span class="dashboard-team-detail__label">Today's Earn From Member</span>
-                                                <span class="dashboard-team-detail__value">{{ number_format((float) $member['daily_earned'], 4) }}</span>
-                                            </div>
-                                            <div class="dashboard-team-detail">
-                                                <span class="dashboard-team-detail__label">Commission Events</span>
-                                                <span class="dashboard-team-detail__value">{{ $member['commission_count'] }}</span>
-                                            </div>
-                                            <div class="dashboard-team-detail">
-                                                <span class="dashboard-team-detail__label">Reserve Sales</span>
-                                                <span class="dashboard-team-detail__value">{{ $member['sales_count'] }}</span>
-                                            </div>
-                                            <div class="dashboard-team-detail">
-                                                <span class="dashboard-team-detail__label">Sales Volume</span>
-                                                <span class="dashboard-team-detail__value">{{ number_format((float) $member['sales_amount'], 4) }}</span>
-                                            </div>
-                                            <div class="dashboard-team-detail">
-                                                <span class="dashboard-team-detail__label">Member Profit</span>
-                                                <span class="dashboard-team-detail__value">{{ number_format((float) $member['profit_amount'], 4) }}</span>
-                                            </div>
-                                            <div class="dashboard-team-detail">
-                                                <span class="dashboard-team-detail__label">Last Activity</span>
-                                                <span class="dashboard-team-detail__value">{{ $member['last_activity'] ?: 'No activity yet' }}</span>
-                                            </div>
+                                    <div class="dashboard-team-member">
+                                        <div class="dashboard-team-member__item">
+                                            <span class="dashboard-team-member__label">User Name</span>
+                                            <span class="dashboard-team-member__value">{{ $member['display_name'] }}</span>
                                         </div>
-                                    </details>
+                                        <div class="dashboard-team-member__item">
+                                            <span class="dashboard-team-member__label">User ID</span>
+                                            <span class="dashboard-team-member__value">{{ $member['uid'] }}</span>
+                                        </div>
+                                        <div class="dashboard-team-member__item">
+                                            <span class="dashboard-team-member__label">My Earn</span>
+                                            <span class="dashboard-team-member__value is-earn">{{ number_format((float) $member['total_earned'], 4) }}</span>
+                                        </div>
+                                    </div>
                                 @endforeach
                             </div>
                         @endif
