@@ -7,6 +7,10 @@ use App\Models\User;
 
 class UserLevelResolver
 {
+    public function __construct(private ReferralChainService $referralChainService)
+    {
+    }
+
     public function resolve(User $user): ?Level
     {
         $depositTotal = (float) $user->walletLedgers()->where('type', 'deposit')->sum('amount');
@@ -22,11 +26,7 @@ class UserLevelResolver
                 continue;
             }
 
-            $counts = [
-                'A' => $user->referrals()->where('chain_slot', 'A')->count(),
-                'B' => $user->referrals()->where('chain_slot', 'B')->count(),
-                'C' => $user->referrals()->where('chain_slot', 'C')->count(),
-            ];
+            $counts = $this->referralChainService->getReferralDepthCounts($user);
 
             if ($counts['A'] < (int) $level->req_chain_a) {
                 continue;

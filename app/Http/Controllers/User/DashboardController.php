@@ -4,13 +4,11 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\ChainCommission;
-use App\Models\NftSale;
 use App\Models\User;
+use App\Services\ReferralChainService;
 use App\Services\StakeRewardService;
 use App\Services\UserLevelResolver;
 use App\Services\WalletService;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Collection;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -51,6 +49,7 @@ class DashboardController extends Controller
 
     public function __invoke(
         Request $request,
+        ReferralChainService $referralChainService,
         UserLevelResolver $levelResolver,
         WalletService $walletService,
         StakeRewardService $stakeRewardService
@@ -91,7 +90,7 @@ class DashboardController extends Controller
 
         $dailyIncome = (float) $incomeBreakdown->firstWhere('label', 'Comprehensive')['daily'];
         $totalIncome = (float) $incomeBreakdown->firstWhere('label', 'Comprehensive')['total'];
-        [$teamSummary, $teamBranches, $teamDefaultBranch] = $this->buildTeamData($user);
+        [$teamSummary, $teamBranches, $teamDefaultBranch] = $this->buildTeamData($user, $referralChainService);
 
         return view('dashboard', [
             'user' => $user,
@@ -118,97 +117,45 @@ class DashboardController extends Controller
         ]);
     }
 
-    private function buildTeamData(User $user): array
+    private function buildTeamData(User $user, ReferralChainService $referralChainService): array
     {
-        $teamMembers = User::query()
-            ->with('profile')
-            ->where('id', '!=', $user->id)
-            ->where(function ($query) use ($user) {
-                $query->where('chain_path', 'like', $user->id . '/%')
-                    ->orWhere('chain_path', 'like', '%/' . $user->id . '/%');
-            })
-            ->orderBy('created_at')
-            ->get();
+        $referralLayers = $referralChainService->getReferralLayers($user, 3, ['profile']);
 
-        $directBranchRoots = $teamMembers
-            ->filter(function (User $member) use ($user) {
-                return $this->lastChainAncestorId($member->chain_path) === $user->id
-                    && in_array($member->chain_slot, ['A', 'B', 'C'], true);
-            })
-            ->unique('chain_slot')
-            ->keyBy('chain_slot');
+        $branchModels = [
+            'A' => $referralLayers->get(1, collect()),
+            'B' => $referralLayers->get(2, collect()),
+            'C' => $referralLayers->get(3, collect()),
+        ];
 
-        $memberIds = $teamMembers->modelKeys();
+        $memberIds = collect($branchModels)
+            ->flatMap(fn ($members) => $members->pluck('id'))
+            ->values();
+
         $commissionSummaries = collect();
-        $dailyCommissionTotals = collect();
-        $saleSummaries = collect();
 
-        if (!empty($memberIds)) {
+        if ($memberIds->isNotEmpty()) {
             $commissionSummaries = ChainCommission::query()
-                ->selectRaw('source_user_id, SUM(amount) as total_amount, COUNT(*) as commission_count, MAX(created_at) as last_commission_at')
+                ->selectRaw('source_user_id, SUM(amount) as total_amount')
                 ->where('target_user_id', $user->id)
-                ->whereIn('source_user_id', $memberIds)
+                ->whereIn('source_user_id', $memberIds->all())
                 ->groupBy('source_user_id')
                 ->get()
                 ->keyBy('source_user_id');
-
-            $dailyCommissionTotals = ChainCommission::query()
-                ->selectRaw('source_user_id, SUM(amount) as total_amount')
-                ->where('target_user_id', $user->id)
-                ->whereIn('source_user_id', $memberIds)
-                ->whereDate('created_at', today())
-                ->groupBy('source_user_id')
-                ->pluck('total_amount', 'source_user_id');
-
-            $saleSummaries = NftSale::query()
-                ->selectRaw('user_id, COUNT(*) as sales_count, SUM(sale_amount) as total_sales_amount, SUM(profit_amount) as total_profit_amount, MAX(created_at) as last_sale_at')
-                ->whereIn('user_id', $memberIds)
-                ->groupBy('user_id')
-                ->get()
-                ->keyBy('user_id');
-        }
-
-        $membersByBranch = [
-            'A' => collect(),
-            'B' => collect(),
-            'C' => collect(),
-        ];
-
-        foreach ($teamMembers as $member) {
-            $branchSlot = $this->detectBranchSlot($member, $directBranchRoots, $user->id);
-            if (!$branchSlot) {
-                continue;
-            }
-
-            $commissionSummary = $commissionSummaries->get($member->id);
-            $saleSummary = $saleSummaries->get($member->id);
-
-            $lastActivity = collect([
-                $commissionSummary?->last_commission_at,
-                $saleSummary?->last_sale_at,
-            ])->filter()->map(fn ($value) => Carbon::parse($value))->sortDesc()->first();
-
-            $membersByBranch[$branchSlot]->push([
-                'id' => $member->id,
-                'display_name' => filled($member->profile?->username) ? $member->profile->username : $member->name,
-                'email' => $member->email,
-                'phone' => $member->profile?->phone,
-                'uid' => $member->user_code,
-                'ref_code' => $member->ref_code,
-                'joined_at' => optional($member->created_at)->format('M d, Y'),
-                'total_earned' => (float) ($commissionSummary?->total_amount ?? 0),
-                'daily_earned' => (float) ($dailyCommissionTotals[$member->id] ?? 0),
-                'commission_count' => (int) ($commissionSummary?->commission_count ?? 0),
-                'sales_count' => (int) ($saleSummary?->sales_count ?? 0),
-                'sales_amount' => (float) ($saleSummary?->total_sales_amount ?? 0),
-                'profit_amount' => (float) ($saleSummary?->total_profit_amount ?? 0),
-                'last_activity' => $lastActivity?->format('M d, Y h:i A'),
-            ]);
         }
 
         $teamBranches = collect(['A', 'B', 'C'])
-            ->map(function (string $slot) use ($membersByBranch) {
-                $members = $membersByBranch[$slot]
+            ->map(function (string $slot) use ($branchModels, $commissionSummaries) {
+                $members = $branchModels[$slot]
+                    ->map(function (User $member) use ($commissionSummaries) {
+                        $commissionSummary = $commissionSummaries->get($member->id);
+
+                        return [
+                            'id' => $member->id,
+                            'display_name' => filled($member->profile?->username) ? $member->profile->username : $member->name,
+                            'uid' => $member->user_code,
+                            'total_earned' => (float) ($commissionSummary?->total_amount ?? 0),
+                        ];
+                    })
                     ->sortByDesc('total_earned')
                     ->values();
 
@@ -231,38 +178,5 @@ class DashboardController extends Controller
             'b_members' => (int) ($teamBranches->firstWhere('slot', 'B')['count'] ?? 0),
             'c_members' => (int) ($teamBranches->firstWhere('slot', 'C')['count'] ?? 0),
         ], $teamBranches, $defaultBranch];
-    }
-
-    private function detectBranchSlot(User $member, Collection $directBranchRoots, int $currentUserId): ?string
-    {
-        if ($this->lastChainAncestorId($member->chain_path) === $currentUserId && in_array($member->chain_slot, ['A', 'B', 'C'], true)) {
-            return $member->chain_slot;
-        }
-
-        $path = '/' . trim((string) $member->chain_path, '/') . '/';
-
-        foreach (['A', 'B', 'C'] as $slot) {
-            $root = $directBranchRoots->get($slot);
-            if (!$root) {
-                continue;
-            }
-
-            if ($member->id === $root->id || str_contains($path, '/' . $root->id . '/')) {
-                return $slot;
-            }
-        }
-
-        return null;
-    }
-
-    private function lastChainAncestorId(?string $chainPath): ?int
-    {
-        $segments = array_values(array_filter(explode('/', trim((string) $chainPath, '/'))));
-
-        if (empty($segments)) {
-            return null;
-        }
-
-        return (int) end($segments);
     }
 }

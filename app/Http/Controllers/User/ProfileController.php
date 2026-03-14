@@ -5,10 +5,10 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Models\UserProfile;
 use App\Models\ChainCommission;
-use App\Models\User;
 use App\Models\WalletLedger;
 use App\Models\UserNotificationSetting;
 use App\Services\NotificationService;
+use App\Services\ReferralChainService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -17,20 +17,11 @@ use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
-    public function edit(Request $request): View
+    public function edit(Request $request, ReferralChainService $referralChainService): View
     {
         $user = $request->user();
-        $directA = $user->referrals()->where('chain_slot', 'A')->count();
-        $directB = $user->referrals()->where('chain_slot', 'B')->count();
-        $directC = $user->referrals()->where('chain_slot', 'C')->count();
-
-        $userId = $user->id;
-        $downlineCount = User::query()
-            ->where(function ($query) use ($userId) {
-                $query->where('chain_path', 'like', $userId . '/%')
-                    ->orWhere('chain_path', 'like', '%/' . $userId . '/%');
-            })
-            ->count();
+        $depthCounts = $referralChainService->getReferralDepthCounts($user);
+        $downlineCount = $referralChainService->getDownlineCount($user);
 
         $chainIncomeTotal = (float) WalletLedger::query()
             ->where('user_id', $user->id)
@@ -55,7 +46,7 @@ class ProfileController extends Controller
                 'price_change' => true,
                 'successful_purchase' => true,
             ]),
-            'directCounts' => ['A' => $directA, 'B' => $directB, 'C' => $directC],
+            'directCounts' => $depthCounts,
             'downlineCount' => $downlineCount,
             'chainIncomeTotal' => $chainIncomeTotal,
             'recentChain' => $recentChain,

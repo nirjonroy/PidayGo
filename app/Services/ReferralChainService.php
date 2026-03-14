@@ -60,6 +60,62 @@ class ReferralChainService
         ];
     }
 
+    public function getReferralLayers(User $user, int $maxDepth = 3, array $with = []): Collection
+    {
+        $layers = collect();
+        $parentIds = collect([$user->id]);
+
+        for ($depth = 1; $depth <= $maxDepth; $depth++) {
+            if ($parentIds->isEmpty()) {
+                $layers->put($depth, collect());
+                continue;
+            }
+
+            $query = User::query();
+
+            if (!empty($with)) {
+                $query->with($with);
+            }
+
+            $members = $query->whereIn('referred_by_id', $parentIds->all())
+                ->orderBy('created_at')
+                ->get();
+
+            $layers->put($depth, $members);
+            $parentIds = $members->pluck('id');
+        }
+
+        return $layers;
+    }
+
+    public function getReferralDepthCounts(User $user, int $maxDepth = 3): array
+    {
+        $layers = $this->getReferralLayers($user, $maxDepth);
+
+        return [
+            'A' => $layers->get(1, collect())->count(),
+            'B' => $layers->get(2, collect())->count(),
+            'C' => $layers->get(3, collect())->count(),
+        ];
+    }
+
+    public function getDownlineCount(User $user): int
+    {
+        $count = 0;
+        $parentIds = collect([$user->id]);
+
+        while ($parentIds->isNotEmpty()) {
+            $children = User::query()
+                ->whereIn('referred_by_id', $parentIds->all())
+                ->pluck('id');
+
+            $count += $children->count();
+            $parentIds = $children;
+        }
+
+        return $count;
+    }
+
     public function getAncestors(User $user, int $maxDepth): Collection
     {
         $ancestors = collect();
