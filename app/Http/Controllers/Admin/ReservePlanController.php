@@ -34,9 +34,6 @@ class ReservePlanController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $this->validatePayload($request, null);
-        $validated['max_sells'] = 1;
-        $validated['max_sells_per_day'] = 1;
-        $validated['unlock_policy'] = 'after_sells';
         $validated['is_active'] = (bool) ($validated['is_active'] ?? false);
 
         $plan = ReservePlan::create($validated);
@@ -56,9 +53,6 @@ class ReservePlanController extends Controller
     public function update(Request $request, ReservePlan $reservePlan): RedirectResponse
     {
         $validated = $this->validatePayload($request, $reservePlan);
-        $validated['max_sells'] = 1;
-        $validated['max_sells_per_day'] = 1;
-        $validated['unlock_policy'] = 'after_sells';
         $validated['is_active'] = (bool) ($validated['is_active'] ?? false);
 
         $reservePlan->update($validated);
@@ -97,6 +91,9 @@ class ReservePlanController extends Controller
             ],
             'profit_min_percent' => ['required', 'numeric', 'min:0'],
             'profit_max_percent' => ['required', 'numeric', 'min:0', 'gte:profit_min_percent'],
+            'max_sells' => ['nullable', 'integer', 'min:1', 'required_if:unlock_policy,after_sells'],
+            'max_sells_per_day' => ['nullable', 'integer', 'min:1'],
+            'unlock_policy' => ['required', Rule::in(['never', 'after_sells', 'manual'])],
             'is_active' => ['nullable', 'boolean'],
         ]);
     }
