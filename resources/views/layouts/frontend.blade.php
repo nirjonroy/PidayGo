@@ -891,13 +891,13 @@
                 left: 50%;
                 bottom: 14px;
                 transform: translateX(-50%);
-                width: min(360px, calc(100vw - 20px));
+                width: min(420px, calc(100vw - 16px));
                 height: auto;
                 min-height: 78px;
                 display: grid;
-                grid-template-columns: repeat(4, minmax(0, 1fr));
-                gap: 8px;
-                padding: 10px;
+                grid-template-columns: repeat(5, minmax(0, 1fr));
+                gap: 6px;
+                padding: 8px;
                 border-radius: 22px;
                 background: rgba(7, 8, 18, 0.92);
                 border: 1px solid rgba(255, 255, 255, 0.1);
@@ -919,7 +919,7 @@
                 border-radius: 16px;
                 color: rgba(255, 255, 255, 0.78);
                 text-decoration: none;
-                font-size: 11px;
+                font-size: 10px;
                 font-weight: 700;
                 letter-spacing: 0.01em;
                 line-height: 1.15;
@@ -1006,6 +1006,10 @@
 
         @auth
             <div class="mobile-quick-actions" role="navigation" aria-label="Quick actions">
+                <a href="{{ route('dashboard') }}" class="mobile-quick-actions__item {{ request()->routeIs('dashboard') ? 'is-active' : '' }}">
+                    <i class="fa fa-th-large" aria-hidden="true"></i>
+                    <span>PI</span>
+                </a>
                 <a href="{{ route('reserve.index') }}" class="mobile-quick-actions__item {{ request()->routeIs('reserve.*') ? 'is-active' : '' }}">
                     <i class="fa fa-lock" aria-hidden="true"></i>
                     <span>Reserve</span>
