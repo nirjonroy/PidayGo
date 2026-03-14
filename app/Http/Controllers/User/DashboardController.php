@@ -98,9 +98,7 @@ class DashboardController extends Controller
             'avatarUrl' => $user->profile?->photo_url,
             'level' => $levelResolver->resolve($user),
             'walletBalance' => (float) $walletService->getBalance($user),
-            'reserveBalance' => (float) $user->reserves()
-                ->where('status', 'confirmed')
-                ->sum('amount'),
+            'reserveBalance' => (float) ($user->reserve?->reserved_balance ?? 0),
             'dailyIncome' => $dailyIncome,
             'totalIncome' => $totalIncome,
             'incomeBreakdown' => $incomeBreakdown,

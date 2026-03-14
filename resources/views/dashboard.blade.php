@@ -699,7 +699,7 @@
                                 <div>
                                     <div class="dashboard-metric__label">Reserve Balance</div>
                                     <p class="dashboard-metric__value">{{ number_format($reserveBalance, 4) }}</p>
-                                    <div class="dashboard-metric__caption">USDT currently locked in reserve</div>
+                                    <div class="dashboard-metric__caption">Current reserve account balance</div>
                                 </div>
                                 <span class="dashboard-metric__icon is-alt">
                                     <i class="fa fa-lock" aria-hidden="true"></i>

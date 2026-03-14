@@ -33,7 +33,7 @@
             <div class="col-lg-3 col-md-6 mb30" id="reservation">
                 <div class="nft__item s2">
                     <div class="nft__item_info">
-                        <h4>Reservation Balance</h4>
+                        <h4>Reserve Account Balance</h4>
                         <div class="nft__item_price">{{ number_format($reservedBalance, 4) }} USDT</div>
                     </div>
                 </div>

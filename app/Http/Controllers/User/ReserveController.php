@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Models\Level;
 use App\Models\ReservePlan;
 use App\Models\NftItem;
 use App\Models\UserReserve;
@@ -16,6 +17,7 @@ use App\Services\ReferralChainService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
 class ReserveController extends Controller
@@ -24,9 +26,7 @@ class ReserveController extends Controller
     {
         $user = $request->user();
         $walletBalance = (float) $walletService->getBalance($user);
-        $reservedBalance = (float) UserReserve::where('user_id', $user->id)
-            ->where('status', 'confirmed')
-            ->sum('amount');
+        $reserveAccountBalance = (float) $userReserveService->getBalance($user);
         $activeReserve = UserReserve::where('user_id', $user->id)
             ->where('status', 'confirmed')
             ->with(['plan', 'level'])
@@ -46,33 +46,26 @@ class ReserveController extends Controller
             ->limit(20)
             ->get();
 
-        $plans = collect();
-        if ($level) {
-            $plans = ReservePlan::where('level_id', $level->id)->where('is_active', true)->orderBy('reserve_amount')->get();
-        }
-
-        $selectedPlanId = null;
-        if ($plans->count() === 1) {
-            $selectedPlanId = $plans->first()->id;
-        } elseif ($plans->count() > 1) {
-            $selectedPlan = $plans->where('reserve_amount', '<=', $walletBalance)->last();
-            $selectedPlanId = $selectedPlan?->id ?? $plans->first()->id;
-        }
+        $plans = $this->eligibleReservePlans($level);
+        $reservedToday = UserReserve::query()
+            ->where('user_id', $user->id)
+            ->whereDate('confirmed_at', now()->toDateString())
+            ->exists();
 
         return view('reserve.index', [
             'walletBalance' => $walletBalance,
-            'reservedBalance' => $reservedBalance,
+            'reserveAccountBalance' => $reserveAccountBalance,
             'level' => $level,
             'reserveEnabled' => $reserveEnabled,
             'plans' => $plans,
-            'selectedPlanId' => $selectedPlanId,
+            'reservedToday' => $reservedToday,
             'activeReserve' => $activeReserve,
             'recentReserveLedgers' => $recentReserveLedgers,
             'recentReserveSales' => $recentReserveSales,
         ]);
     }
 
-    public function confirm(Request $request, UserReserveService $userReserveService, UserLevelResolver $levelResolver, WalletService $walletService, FeatureFlagService $featureFlagService): RedirectResponse
+    public function confirm(Request $request, UserLevelResolver $levelResolver, FeatureFlagService $featureFlagService): RedirectResponse
     {
         if (!$featureFlagService->isEnabled('reserve_enabled')) {
             return back()->withErrors(['reserve_plan_id' => 'Reserve is currently disabled.']);
@@ -88,58 +81,56 @@ class ReserveController extends Controller
             'reserve_plan_id' => ['required', 'exists:reserve_plans,id'],
         ]);
 
-        $plan = ReservePlan::where('id', $data['reserve_plan_id'])
-            ->where('level_id', $level->id)
-            ->where('is_active', true)
-            ->first();
+        $eligiblePlans = $this->eligibleReservePlans($level);
+        $plan = $eligiblePlans->firstWhere('id', (int) $data['reserve_plan_id']);
         if (!$plan) {
             return back()->withErrors(['reserve_plan_id' => 'Invalid reserve plan.']);
         }
 
-        $walletBalance = (float) $walletService->getBalance($user);
-        if ($walletBalance < (float) $plan->reserve_amount) {
-            return back()->withErrors(['reserve_plan_id' => 'Insufficient wallet balance.']);
-        }
-
-        $hasActive = UserReserve::where('user_id', $user->id)
+        $activeReserve = UserReserve::where('user_id', $user->id)
             ->where('status', 'confirmed')
-            ->exists();
-        if ($hasActive) {
-            return redirect()->route('reserve.sell.form')->withErrors(['reserve_plan_id' => 'You already have an active reserve.']);
+            ->first();
+        if ($activeReserve) {
+            return redirect()->route('reserve.sell.form')->withErrors(['reserve_plan_id' => 'You already have an active reserve. Please complete the PI sell first.']);
         }
 
-        DB::transaction(function () use ($user, $plan, $level, $walletService, $userReserveService) {
-            $reserve = UserReserve::updateOrCreate(
+        $reservedToday = UserReserve::query()
+            ->where('user_id', $user->id)
+            ->whereDate('confirmed_at', now()->toDateString())
+            ->exists();
+        if ($reservedToday) {
+            return back()->withErrors(['reserve_plan_id' => 'You can reserve only once per day. Please try again tomorrow.']);
+        }
+
+        DB::transaction(function () use ($user, $plan) {
+            UserReserve::updateOrCreate(
                 ['user_id' => $user->id],
                 [
-                    'level_id' => $level->id,
+                    'level_id' => $plan->level_id,
                     'reserve_plan_id' => $plan->id,
                     'amount' => $plan->reserve_amount,
-                    'reserved_balance' => $plan->reserve_amount,
                     'status' => 'confirmed',
                     'confirmed_at' => now(),
+                    'completed_at' => null,
                     'meta' => [
                         'profit_min_percent' => $plan->profit_min_percent,
                         'profit_max_percent' => $plan->profit_max_percent,
+                        'daily_limit' => 1,
                     ],
                 ]
             );
 
-            $walletService->debit($user, 'reserve_lock', $plan->reserve_amount, [
-                'level_id' => $level->id,
-                'reserve_plan_id' => $plan->id,
-            ], $reserve);
-
-            $userReserveService->creditUserReserve(
-                $user,
-                (float) $plan->reserve_amount,
-                'reserve_add',
-                'reserve_plan',
-                $plan->id
-            );
+            UserReserveLedger::create([
+                'user_id' => $user->id,
+                'change' => 0,
+                'reason' => 'reserve_started',
+                'ref_type' => 'reserve_plan',
+                'ref_id' => $plan->id,
+                'created_at' => now(),
+            ]);
         });
 
-        return redirect()->route('reserve.sell.form')->with('status', 'Reserve confirmed successfully.');
+        return redirect()->route('reserve.sell.form')->with('status', 'Reserve confirmed. Continue to Buy PI and sell to receive your reserve amount plus profit.');
     }
 
     public function sellForm(Request $request, FeatureFlagService $featureFlagService): View|RedirectResponse
@@ -150,6 +141,7 @@ class ReserveController extends Controller
 
         $reserve = UserReserve::where('user_id', $request->user()->id)
             ->where('status', 'confirmed')
+            ->with(['plan', 'level'])
             ->first();
 
         if (!$reserve) {
@@ -164,31 +156,16 @@ class ReserveController extends Controller
             ->limit(8)
             ->get();
 
-        $sellCount = NftSale::where('user_reserve_id', $reserve->id)->count();
-        $sellLimit = $reserve->plan?->max_sells;
-        $sellsRemaining = $sellLimit === null ? null : max(0, (int) $sellLimit - (int) $sellCount);
-        $dailyLimit = $reserve->plan?->max_sells_per_day;
-        $dailyCount = NftSale::where('user_reserve_id', $reserve->id)
-            ->whereDate('created_at', now()->toDateString())
-            ->count();
-        $dailyRemaining = $dailyLimit === null ? null : max(0, (int) $dailyLimit - (int) $dailyCount);
-
         return view('reserve.sell', [
             'reserve' => $reserve,
             'plan' => $reserve->plan,
             'level' => $reserve->level,
             'items' => $items,
             'nftEnabled' => $featureFlagService->isEnabled('nft_enabled'),
-            'sellLimit' => $sellLimit,
-            'sellCount' => $sellCount,
-            'sellsRemaining' => $sellsRemaining,
-            'dailyLimit' => $dailyLimit,
-            'dailyCount' => $dailyCount,
-            'dailyRemaining' => $dailyRemaining,
         ]);
     }
 
-    public function sellSubmit(Request $request, WalletService $walletService, ReferralChainService $chainService, FeatureFlagService $featureFlagService, UserReserveService $userReserveService): RedirectResponse
+    public function sellSubmit(Request $request, WalletService $walletService, ReferralChainService $chainService, FeatureFlagService $featureFlagService): RedirectResponse
     {
         if (!$featureFlagService->isEnabled('nft_enabled')) {
             return back()->withErrors(['sale_amount' => 'Sell is disabled.']);
@@ -204,24 +181,6 @@ class ReserveController extends Controller
 
         if (!$reserve || !$reserve->plan) {
             return back()->withErrors(['sale_amount' => 'No active reserve found.']);
-        }
-
-        $sellLimit = $reserve->plan?->max_sells;
-        $unlockPolicy = $reserve->plan?->unlock_policy ?? 'never';
-        if ($sellLimit !== null) {
-            $sellCount = NftSale::where('user_reserve_id', $reserve->id)->count();
-            if ($sellCount >= (int) $sellLimit) {
-                return back()->withErrors(['sale_amount' => 'Sell limit reached for this reserve.']);
-            }
-        }
-        $dailyLimit = $reserve->plan?->max_sells_per_day;
-        if ($dailyLimit !== null) {
-            $dailyCount = NftSale::where('user_reserve_id', $reserve->id)
-                ->whereDate('created_at', now()->toDateString())
-                ->count();
-            if ($dailyCount >= (int) $dailyLimit) {
-                return back()->withErrors(['sale_amount' => 'Daily sell limit reached for this reserve.']);
-            }
         }
 
         $saleAmount = (float) ($reserve->amount ?? $reserve->reserved_balance);
@@ -243,7 +202,7 @@ class ReserveController extends Controller
         }
         $profit = ($saleAmount * $percent) / 100;
 
-        DB::transaction(function () use ($request, $reserve, $saleAmount, $percent, $profit, $walletService, $chainService, $nftItemId, $userReserveService, $sellLimit, $unlockPolicy) {
+        DB::transaction(function () use ($request, $reserve, $saleAmount, $percent, $profit, $walletService, $chainService, $nftItemId) {
             $sale = NftSale::create([
                 'user_id' => $request->user()->id,
                 'user_reserve_id' => $reserve->id,
@@ -254,6 +213,11 @@ class ReserveController extends Controller
                 'status' => 'paid',
             ]);
 
+            $walletService->credit($request->user(), 'reserve_release', $saleAmount, [
+                'reserve_id' => $reserve->id,
+                'reserve_plan_id' => $reserve->reserve_plan_id,
+            ], $reserve);
+
             $walletService->credit($request->user(), 'nft_profit', $profit, [
                 'sale_amount' => $saleAmount,
                 'percent' => $percent,
@@ -263,30 +227,43 @@ class ReserveController extends Controller
 
             $chainService->distributeCommissionFromSale($sale, $walletService);
 
-            if ($unlockPolicy === 'after_sells' && $sellLimit !== null) {
-                $newCount = NftSale::where('user_reserve_id', $reserve->id)->count();
-                if ($newCount >= (int) $sellLimit) {
-                    $releaseAmount = (float) ($reserve->amount ?? $reserve->reserved_balance);
-                    $walletService->credit($request->user(), 'reserve_release', $releaseAmount, [
-                        'reserve_id' => $reserve->id,
-                    ], $reserve);
+            UserReserveLedger::create([
+                'user_id' => $request->user()->id,
+                'change' => $saleAmount,
+                'reason' => 'reserve_completed',
+                'ref_type' => 'reserve_sale',
+                'ref_id' => $sale->id,
+                'created_at' => now(),
+            ]);
 
-                    $userReserveService->debitUserReserve(
-                        $request->user(),
-                        $releaseAmount,
-                        'reserve_release',
-                        'reserve',
-                        $reserve->id
-                    );
-
-                    $reserve->update([
-                        'status' => 'completed',
-                        'completed_at' => now(),
-                    ]);
-                }
-            }
+            $reserve->update([
+                'status' => 'completed',
+                'completed_at' => now(),
+            ]);
         });
 
-        return back()->with('status', 'Profit credited to wallet.');
+        return redirect()->route('reserve.index')->with('status', 'PI sold successfully. Reserve amount and profit were added to your wallet.');
+    }
+
+    private function eligibleReservePlans(?Level $level): Collection
+    {
+        if (!$level) {
+            return collect();
+        }
+
+        $eligibleLevelIds = Level::query()
+            ->where('is_active', true)
+            ->orderBy('min_deposit')
+            ->get()
+            ->filter(fn (Level $candidate) => (float) $candidate->min_deposit <= (float) $level->min_deposit)
+            ->pluck('id');
+
+        return ReservePlan::query()
+            ->with('level')
+            ->where('is_active', true)
+            ->whereIn('level_id', $eligibleLevelIds)
+            ->orderBy('level_id')
+            ->orderBy('reserve_amount')
+            ->get();
     }
 }

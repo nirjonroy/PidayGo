@@ -13,6 +13,9 @@
 
     <div class="card">
         <div class="card-body">
+            <p class="text-muted mb-3">
+                Reserve now works as: 1 reserve per day, then 1 Buy PI sell, then the reserve amount and profit are credited directly to wallet.
+            </p>
             @if ($plans->isEmpty())
                 <p class="text-muted">No reserve plans configured.</p>
             @else
@@ -23,9 +26,8 @@
                                 <th>Level</th>
                                 <th>Reserve Amount</th>
                                 <th>Profit % Range</th>
-                                <th>Max Sells</th>
-                                <th>Max/Day</th>
-                                <th>Unlock Policy</th>
+                                <th>Daily Rule</th>
+                                <th>Completion</th>
                                 <th>Status</th>
                                 <th></th>
                             </tr>
@@ -36,9 +38,8 @@
                                     <td>{{ $plan->level?->code ?? 'N/A' }}</td>
                                     <td>{{ number_format((float) $plan->reserve_amount, 8) }}</td>
                                     <td>{{ $plan->profit_min_percent }}% - {{ $plan->profit_max_percent }}%</td>
-                                    <td>{{ $plan->max_sells ?? 'Unlimited' }}</td>
-                                    <td>{{ $plan->max_sells_per_day ?? 'Unlimited' }}</td>
-                                    <td>{{ ucfirst(str_replace('_', ' ', $plan->unlock_policy ?? 'never')) }}</td>
+                                    <td>1 reserve / day</td>
+                                    <td>1 PI sell</td>
                                     <td>
                                         @if ($plan->is_active)
                                             <span class="badge bg-success">Active</span>

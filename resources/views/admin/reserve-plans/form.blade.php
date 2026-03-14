@@ -29,38 +29,24 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-md-4 mb-2">
+                    <div class="col-md-6 mb-2">
                         <label class="form-label">Profit Min %</label>
                         <input name="profit_min_percent" class="form-control" type="number" step="0.001" value="{{ old('profit_min_percent', $plan->profit_min_percent) }}" required>
                         @error('profit_min_percent') <div class="text-danger">{{ $message }}</div> @enderror
                     </div>
-                    <div class="col-md-4 mb-2">
+                    <div class="col-md-6 mb-2">
                         <label class="form-label">Profit Max %</label>
                         <input name="profit_max_percent" class="form-control" type="number" step="0.001" value="{{ old('profit_max_percent', $plan->profit_max_percent) }}" required>
                         @error('profit_max_percent') <div class="text-danger">{{ $message }}</div> @enderror
                     </div>
-                    <div class="col-md-4 mb-2">
-                        <label class="form-label">Max Sells (per reserve)</label>
-                        <input name="max_sells" class="form-control" type="number" min="1" value="{{ old('max_sells', $plan->max_sells) }}" placeholder="Leave empty for unlimited">
-                        @error('max_sells') <div class="text-danger">{{ $message }}</div> @enderror
-                    </div>
                 </div>
 
                 <div class="row">
-                    <div class="col-md-4 mb-2">
-                        <label class="form-label">Max Sells Per Day</label>
-                        <input name="max_sells_per_day" class="form-control" type="number" min="1" value="{{ old('max_sells_per_day', $plan->max_sells_per_day) }}" placeholder="Leave empty for unlimited">
-                        @error('max_sells_per_day') <div class="text-danger">{{ $message }}</div> @enderror
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <label class="form-label">Unlock Policy</label>
-                        <select name="unlock_policy" class="form-select" required>
-                            @php($selectedPolicy = old('unlock_policy', $plan->unlock_policy ?? 'never'))
-                            <option value="never" @selected($selectedPolicy === 'never')>Never unlock</option>
-                            <option value="after_sells" @selected($selectedPolicy === 'after_sells')>Unlock after max sells</option>
-                            <option value="manual" @selected($selectedPolicy === 'manual')>Manual unlock (admin)</option>
-                        </select>
-                        @error('unlock_policy') <div class="text-danger">{{ $message }}</div> @enderror
+                    <div class="col-md-8 mb-2">
+                        <label class="form-label">Reserve Flow</label>
+                        <div class="form-control bg-light" style="min-height: 38px;">
+                            1 reserve per day, then 1 Buy PI sell. After a successful sell, reserve amount and profit go directly to wallet.
+                        </div>
                     </div>
                     <div class="col-md-4 mb-2">
                         <label class="form-label">Active</label>

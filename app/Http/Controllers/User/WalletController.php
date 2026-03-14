@@ -18,7 +18,7 @@ class WalletController extends Controller
         $user = $request->user();
         $stakeRewardService->creditDueRewardsForUser($user, $walletService);
         $balance = (float) $user->walletLedgers()->sum('amount');
-        $reservedBalance = (float) $user->reserves()->where('status', 'confirmed')->sum('amount');
+        $reservedBalance = (float) $userReserveService->getBalance($user);
         $todayEarnings = (float) $user->walletLedgers()
             ->whereIn('type', ['nft_profit', 'chain_income', 'reward_credit'])
             ->whereDate('created_at', now()->toDateString())
@@ -31,7 +31,7 @@ class WalletController extends Controller
             ->limit(20)
             ->get();
         $level = $levelResolver->resolve($user);
-        $canSell = $reservedBalance > 0;
+        $canSell = $user->reserves()->where('status', 'confirmed')->exists();
 
         return view('wallet.index', [
             'balance' => $balance,
