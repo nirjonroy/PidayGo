@@ -4,23 +4,31 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
+use App\Models\Level;
 use App\Models\StakePlan;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class StakingPlanController extends Controller
 {
-    public function index()
+    public function index(): View
     {
         return view('admin.staking-plans.index', [
-            'plans' => StakePlan::orderBy('created_at', 'desc')->get(),
+            'plans' => StakePlan::with('requiredLevel')
+                ->orderBy('created_at', 'desc')
+                ->get(),
         ]);
     }
 
-    public function create()
+    public function create(): View
     {
         return view('admin.staking-plans.form', [
             'plan' => new StakePlan(),
+            'levels' => Level::query()
+                ->orderBy('min_deposit')
+                ->orderBy('id')
+                ->get(),
         ]);
     }
 
@@ -34,10 +42,14 @@ class StakingPlanController extends Controller
         return redirect()->route('admin.staking-plans.index')->with('status', 'Plan created.');
     }
 
-    public function edit(StakePlan $stakingPlan)
+    public function edit(StakePlan $stakingPlan): View
     {
         return view('admin.staking-plans.form', [
             'plan' => $stakingPlan,
+            'levels' => Level::query()
+                ->orderBy('min_deposit')
+                ->orderBy('id')
+                ->get(),
         ]);
     }
 
@@ -68,7 +80,7 @@ class StakingPlanController extends Controller
             'min_amount' => ['nullable', 'numeric', 'min:0'],
             'max_amount' => ['nullable', 'numeric', 'min:0'],
             'max_payout_multiplier' => ['nullable', 'numeric', 'min:1'],
-            'level_required' => ['nullable', 'integer', 'min:0'],
+            'level_required' => ['nullable', 'integer', 'exists:levels,id'],
             'is_active' => ['nullable'],
         ]);
 

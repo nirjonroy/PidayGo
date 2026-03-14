@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Models\Level;
 use App\Models\Stake;
 use App\Models\StakePlan;
 use App\Services\StakeRewardService;
+use App\Services\UserLevelResolver;
 use App\Services\WalletService;
 use App\Services\UserReserveService;
 use Illuminate\Http\RedirectResponse;
@@ -34,7 +36,10 @@ class StakeController extends Controller
 
         return view('stake.index', [
             'balance' => $walletService->getBalance($user),
-            'plans' => StakePlan::where('is_active', true)->orderBy('min_amount')->get(),
+            'plans' => StakePlan::with('requiredLevel')
+                ->where('is_active', true)
+                ->orderBy('min_amount')
+                ->get(),
             'stakes' => $user->stakes()
                 ->with('stakePlan')
                 ->where('status', 'active')
@@ -45,7 +50,12 @@ class StakeController extends Controller
         ]);
     }
 
-    public function store(Request $request, WalletService $walletService, UserReserveService $userReserveService): RedirectResponse
+    public function store(
+        Request $request,
+        WalletService $walletService,
+        UserReserveService $userReserveService,
+        UserLevelResolver $levelResolver
+    ): RedirectResponse
     {
         $validated = $request->validate([
             'stake_plan_id' => ['required', 'exists:stake_plans,id'],
@@ -69,8 +79,10 @@ class StakeController extends Controller
         }
 
         if (!is_null($plan->level_required)) {
-            $userLevel = (int) ($request->user()->level ?? 0);
-            if ($userLevel < (int) $plan->level_required) {
+            $requiredLevel = $plan->requiredLevel;
+            $userLevel = $levelResolver->resolve($request->user());
+
+            if (!$this->meetsLevelRequirement($userLevel, $requiredLevel)) {
                 return back()->withErrors(['stake_plan_id' => 'Your level is too low for this plan.'])->withInput();
             }
         }
@@ -108,5 +120,31 @@ class StakeController extends Controller
         }
 
         return redirect()->route('stake.index')->with('status', 'Stake created successfully.');
+    }
+
+    private function meetsLevelRequirement(?Level $userLevel, ?Level $requiredLevel): bool
+    {
+        if (!$requiredLevel) {
+            return false;
+        }
+
+        if (!$userLevel) {
+            return false;
+        }
+
+        $orderedLevelIds = Level::query()
+            ->orderBy('min_deposit')
+            ->orderBy('id')
+            ->pluck('id')
+            ->values();
+
+        $userRank = $orderedLevelIds->search($userLevel->id);
+        $requiredRank = $orderedLevelIds->search($requiredLevel->id);
+
+        if ($userRank === false || $requiredRank === false) {
+            return false;
+        }
+
+        return $userRank >= $requiredRank;
     }
 }

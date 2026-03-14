@@ -22,6 +22,7 @@ class StakePlan extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
+        'level_required' => 'integer',
         'min_amount' => 'decimal:8',
         'max_amount' => 'decimal:8',
         'daily_rate' => 'decimal:6',
@@ -31,5 +32,10 @@ class StakePlan extends Model
     public function stakes()
     {
         return $this->hasMany(Stake::class);
+    }
+
+    public function requiredLevel()
+    {
+        return $this->belongsTo(Level::class, 'level_required');
     }
 }

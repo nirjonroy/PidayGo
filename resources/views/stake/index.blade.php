@@ -35,7 +35,7 @@
                             <div class="nft__item_price">Daily Rate: {{ $plan->daily_rate }}%</div>
                             <div class="nft__item_price">Duration: {{ $plan->duration_days }} days</div>
                             @if ($plan->level_required)
-                                <div class="nft__item_price">Level Required: {{ $plan->level_required }}</div>
+                                <div class="nft__item_price">Level Required: {{ $plan->requiredLevel?->code ?? ('Level #' . $plan->level_required) }}</div>
                             @endif
                             <div class="mt-3">
                                 <form id="stake-form-{{ $plan->id }}" method="POST" action="{{ route('stake.store') }}">

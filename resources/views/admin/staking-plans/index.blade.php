@@ -30,7 +30,7 @@
                             <td>{{ $plan->min_amount }}</td>
                             <td>{{ $plan->max_amount ?? '-' }}</td>
                             <td>{{ $plan->max_payout_multiplier }}</td>
-                            <td>{{ $plan->level_required ?? '-' }}</td>
+                            <td>{{ $plan->requiredLevel?->code ?? ($plan->level_required ? 'Level #' . $plan->level_required : '-') }}</td>
                             <td>{{ $plan->is_active ? 'Active' : 'Inactive' }}</td>
                             <td class="text-end">
                                 <a href="{{ route('admin.staking-plans.edit', $plan) }}" class="btn btn-sm btn-secondary">Edit</a>

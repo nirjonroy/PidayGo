@@ -39,7 +39,15 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="level_required">Level Required</label>
-                    <input id="level_required" name="level_required" type="number" class="form-control" value="{{ old('level_required', $plan->level_required) }}">
+                    @php($selectedLevel = old('level_required', $plan->level_required))
+                    <select id="level_required" name="level_required" class="form-select">
+                        <option value="">No level restriction</option>
+                        @foreach ($levels as $level)
+                            <option value="{{ $level->id }}" @selected((string) $selectedLevel === (string) $level->id)>
+                                {{ $level->code }} ({{ $level->min_deposit }} - {{ $level->max_deposit }}){{ $level->is_active ? '' : ' - Inactive' }}
+                            </option>
+                        @endforeach
+                    </select>
                     @error('level_required') <div class="text-danger">{{ $message }}</div> @enderror
                 </div>
                 <div class="mb-3">
