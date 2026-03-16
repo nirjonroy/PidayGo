@@ -10,6 +10,7 @@ use App\Models\ReservePlanRange;
 use App\Models\UserReserve;
 use App\Models\UserReserveLedger;
 use App\Services\FeatureFlagService;
+use App\Services\NotificationService;
 use App\Services\ReferralChainService;
 use App\Services\UserLevelResolver;
 use App\Services\UserReserveService;
@@ -65,7 +66,7 @@ class ReserveController extends Controller
         ]);
     }
 
-    public function confirm(Request $request, UserLevelResolver $levelResolver, FeatureFlagService $featureFlagService, UserReserveService $userReserveService, WalletService $walletService): RedirectResponse
+    public function confirm(Request $request, UserLevelResolver $levelResolver, FeatureFlagService $featureFlagService, UserReserveService $userReserveService, WalletService $walletService, NotificationService $notifications): RedirectResponse
     {
         if (!$featureFlagService->isEnabled('reserve_enabled')) {
             return back()->withErrors(['reserve_plan_id' => 'Reserve is currently disabled.']);
@@ -105,9 +106,10 @@ class ReserveController extends Controller
             return back()->withErrors(['reserve_plan_id' => $option->getAttribute('availability_note') ?: 'This reserve option is not available right now.']);
         }
 
-        DB::transaction(function () use ($user, $option, $userReserveService, $walletService) {
-            $reserveAmount = (float) $option->getAttribute('computed_reserve_amount');
-            $plan = $option->plan;
+        $reserveAmount = (float) $option->getAttribute('computed_reserve_amount');
+        $plan = $option->plan;
+
+        DB::transaction(function () use ($user, $option, $reserveAmount, $plan, $userReserveService, $walletService) {
 
             $walletService->debit($user, 'reserve_lock', $reserveAmount, [
                 'reserve_plan_id' => $plan->id,
@@ -160,6 +162,22 @@ class ReserveController extends Controller
             ]);
         });
 
+        $notifications->notifyUser(
+            $user->id,
+            'reserve_started',
+            'PI Reserve Confirmed',
+            'Your PI reserve of ' . number_format($reserveAmount, 8) . ' USDT for ' . ($plan->level?->code ?? 'your level') . ' has been confirmed. Continue to Buy PI and complete the sell to receive your reserve back with profit.',
+            'success',
+            [
+                'popup_icon' => 'pi',
+                'reserve_plan_id' => $plan->id,
+                'reserve_plan_range_id' => $option->id,
+                'reserve_amount' => $reserveAmount,
+                'range_label' => $option->getAttribute('range_label'),
+            ],
+            true
+        );
+
         return redirect()->route('reserve.sell.form')->with('status', 'Reserve confirmed. The reserve amount was deducted from wallet and moved to reserve balance. Continue to Buy PI and sell to receive it back with profit.');
     }
 
@@ -195,7 +213,7 @@ class ReserveController extends Controller
         ]);
     }
 
-    public function sellSubmit(Request $request, WalletService $walletService, ReferralChainService $chainService, FeatureFlagService $featureFlagService, UserReserveService $userReserveService): RedirectResponse
+    public function sellSubmit(Request $request, WalletService $walletService, ReferralChainService $chainService, FeatureFlagService $featureFlagService, UserReserveService $userReserveService, NotificationService $notifications): RedirectResponse
     {
         if (!$featureFlagService->isEnabled('nft_enabled')) {
             return back()->withErrors(['sale_amount' => 'Sell is disabled.']);
@@ -279,6 +297,23 @@ class ReserveController extends Controller
                 'completed_at' => now(),
             ]);
         });
+
+        $notifications->notifyUser(
+            $request->user()->id,
+            'reserve_completed',
+            'PI Sell Completed',
+            'Your PI sell completed successfully. ' . number_format($saleAmount, 8) . ' USDT reserve and ' . number_format($profit, 8) . ' USDT profit were credited to your wallet.',
+            'success',
+            [
+                'popup_icon' => 'pi',
+                'reserve_id' => $reserve->id,
+                'reserve_amount' => $saleAmount,
+                'profit_amount' => $profit,
+                'profit_percent' => $percent,
+                'nft_item_id' => $nftItemId,
+            ],
+            true
+        );
 
         return redirect()->route('reserve.index')->with('status', 'PI sold successfully. Reserve amount and profit were returned to your wallet.');
     }
