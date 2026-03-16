@@ -94,7 +94,7 @@
                     <div class="border rounded p-3 bg-light">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <div class="text-muted">
-                                Add as many wallet balance criteria as needed. Each row defines the wallet balance band and the reserve percentage for that band.
+                                Add as many reserve criteria rows as needed. Each row defines the level amount band and the reserve percentage for that band.
                             </div>
                             <button class="btn btn-sm btn-outline-primary" type="button" id="add-reserve-range">Add Row</button>
                         </div>
@@ -105,12 +105,12 @@
                                     <input type="hidden" name="ranges[{{ $index }}][id]" value="{{ $row['id'] ?? '' }}">
                                     <div class="row align-items-end">
                                         <div class="col-md-4 mb-2">
-                                            <label class="form-label">Wallet Balance From</label>
+                                            <label class="form-label">Level Amount From</label>
                                             <input name="ranges[{{ $index }}][wallet_balance_min]" class="form-control" type="number" step="0.00000001" min="0" value="{{ $row['wallet_balance_min'] }}" required>
                                             @error("ranges.$index.wallet_balance_min") <div class="text-danger">{{ $message }}</div> @enderror
                                         </div>
                                         <div class="col-md-4 mb-2">
-                                            <label class="form-label">Wallet Balance To</label>
+                                            <label class="form-label">Level Amount To</label>
                                             <input name="ranges[{{ $index }}][wallet_balance_max]" class="form-control" type="number" step="0.00000001" min="0" value="{{ $row['wallet_balance_max'] }}" required>
                                             @error("ranges.$index.wallet_balance_max") <div class="text-danger">{{ $message }}</div> @enderror
                                         </div>
@@ -171,11 +171,11 @@
                     '<input type="hidden" name="ranges[' + index + '][id]" value="">' +
                     '<div class="row align-items-end">' +
                         '<div class="col-md-4 mb-2">' +
-                            '<label class="form-label">Wallet Balance From</label>' +
+                            '<label class="form-label">Level Amount From</label>' +
                             '<input name="ranges[' + index + '][wallet_balance_min]" class="form-control" type="number" step="0.00000001" min="0" required>' +
                         '</div>' +
                         '<div class="col-md-4 mb-2">' +
-                            '<label class="form-label">Wallet Balance To</label>' +
+                            '<label class="form-label">Level Amount To</label>' +
                             '<input name="ranges[' + index + '][wallet_balance_max]" class="form-control" type="number" step="0.00000001" min="0" required>' +
                         '</div>' +
                         '<div class="col-md-3 mb-2">' +

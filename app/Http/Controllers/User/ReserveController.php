@@ -329,14 +329,11 @@ class ReserveController extends Controller
                 $isActivePlan = !empty($activeReserve) && (int) $activeReserve->reserve_plan_id === (int) $plan->id;
                 $isActiveOption = $isActivePlan && ($activeRangeId === 0 || $activeRangeId === (int) $range->id);
                 $hasConfiguredRange = $rangeMax > 0 || $rangeMin > 0;
-                $isWithinWalletRange = $hasConfiguredRange
-                    && $walletBalance >= $rangeMin
-                    && ($rangeMax <= 0 || $walletBalance <= $rangeMax);
                 $canReserve = $reserveEnabled
                     && $isUnlocked
                     && empty($activeReserve)
                     && $hasConfiguredRange
-                    && $isWithinWalletRange
+                    && $reservePercentage > 0
                     && $computedReserveAmount > 0
                     && ($dailyRemaining === null || $dailyRemaining > 0);
 
@@ -357,11 +354,8 @@ class ReserveController extends Controller
                 } elseif ($dailyRemaining !== null && $dailyRemaining <= 0) {
                     $availabilityNote = 'Daily limit reached for this plan.';
                     $actionLabel = 'Limit Reached';
-                } elseif (!$isWithinWalletRange) {
-                    $availabilityNote = 'Requires wallet balance in the range ' . $rangeLabel . '.';
-                    $actionLabel = 'Not Applicable';
                 } else {
-                    $availabilityNote = 'Available now.';
+                    $availabilityNote = 'Available now for your current level.';
                     $actionLabel = 'Reserve Now';
                 }
 

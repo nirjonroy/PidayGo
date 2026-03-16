@@ -20,21 +20,21 @@ class UserLevelResolver
     public function qualifyingLevels(User $user): Collection
     {
         $depositTotal = (float) $user->walletLedgers()->where('type', 'deposit')->sum('amount');
-        $reservedTotal = (float) ($user->reserve?->reserved_balance ?? 0);
         $counts = $this->referralChainService->getReferralDepthCounts($user);
 
         return Level::query()
             ->where('is_active', true)
             ->orderByDesc('min_deposit')
-            ->orderByDesc('min_reservation')
+            ->orderByDesc('max_deposit')
             ->orderByDesc('id')
             ->get()
-            ->filter(function (Level $level) use ($depositTotal, $reservedTotal, $counts) {
+            ->filter(function (Level $level) use ($depositTotal, $counts) {
                 if ($depositTotal < (float) $level->min_deposit) {
                     return false;
                 }
 
-                if ($reservedTotal < (float) $level->min_reservation) {
+                $maxDeposit = (float) ($level->max_deposit ?? 0);
+                if ($maxDeposit > 0 && $depositTotal > $maxDeposit) {
                     return false;
                 }
 

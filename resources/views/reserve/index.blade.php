@@ -355,7 +355,7 @@
                         <div class="nft__item_price">Visible Reserve Options: {{ $reserveOptions->count() }}</div>
                         <div class="nft__item_price">Available Right Now: {{ $availableOptionCount }}</div>
                         <p class="reserve-flow-note">
-                            Reserve plans are filtered by your unlocked level, and each level can now contain multiple admin-defined wallet balance criteria with different reserve percentages.
+                            Reserve uses your level qualification from level rules. Each reserve plan then provides profit, sell limits, and selectable reserve criteria for that level.
                         </p>
                     </div>
                 </div>
@@ -633,7 +633,7 @@
                 selectedRemaining.textContent = selectedPlan.remainingToday;
             }
             if (selectedNote) {
-                selectedNote.textContent = 'Wallet balance range: ' + selectedPlan.rangeLabel + ' | Profit: ' + selectedPlan.profitRange + ' | ' + selectedPlan.note;
+                selectedNote.textContent = 'Level amount range: ' + selectedPlan.rangeLabel + ' | Profit: ' + selectedPlan.profitRange + ' | ' + selectedPlan.note;
             }
 
             if (selectedPlan.isActiveOption) {
