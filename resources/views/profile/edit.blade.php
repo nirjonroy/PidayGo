@@ -143,6 +143,32 @@
             <div class="col-lg-4">
                 <div class="nft__item s2 mb30">
                     <div class="nft__item_info">
+                        <h4 class="mb-3">Account Status</h4>
+                        <div class="d-flex flex-column gap-2">
+                            <div class="d-flex align-items-center justify-content-between gap-3">
+                                <span>Email Verification</span>
+                                <span class="badge {{ $emailVerified ? 'bg-success' : 'bg-secondary' }}">
+                                    {{ $emailVerified ? 'Verified' : 'Pending' }}
+                                </span>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between gap-3">
+                                <span>Two-Factor Authentication</span>
+                                <span class="badge {{ $twoFactorEnabled ? 'bg-success' : 'bg-secondary' }}">
+                                    {{ $twoFactorEnabled ? 'Enabled' : 'Disabled' }}
+                                </span>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between gap-3">
+                                <span>KYC</span>
+                                <span class="badge {{ $kycStatus === 'approved' ? 'bg-success' : 'bg-secondary' }}">
+                                    {{ $kycStatus ? ucfirst($kycStatus) : 'Not submitted' }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="nft__item s2 mb30">
+                    <div class="nft__item_info">
                         <h4 class="mb-3">Notification Preferences</h4>
                         <form method="POST" action="{{ route('profile.notifications.update') }}">
                             @csrf

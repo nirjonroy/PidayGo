@@ -20,6 +20,7 @@ class ProfileController extends Controller
     public function edit(Request $request, ReferralChainService $referralChainService): View
     {
         $user = $request->user();
+        $user->loadMissing(['profile', 'latestKycRequest']);
         $depthCounts = $referralChainService->getReferralDepthCounts($user);
         $downlineCount = $referralChainService->getDownlineCount($user);
 
@@ -50,6 +51,9 @@ class ProfileController extends Controller
             'downlineCount' => $downlineCount,
             'chainIncomeTotal' => $chainIncomeTotal,
             'recentChain' => $recentChain,
+            'emailVerified' => !is_null($user->email_verified_at),
+            'twoFactorEnabled' => $user->hasTwoFactorEnabled(),
+            'kycStatus' => $user->latestKycRequest?->status,
         ]);
     }
 

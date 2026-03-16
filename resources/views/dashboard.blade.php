@@ -40,8 +40,12 @@
     }
     .dashboard-profile {
         display: flex;
-        align-items: center;
+        align-items: stretch;
         gap: 18px;
+    }
+    .dashboard-profile-body {
+        flex: 1 1 auto;
+        min-width: 0;
     }
     .dashboard-avatar,
     .dashboard-avatar-fallback {
@@ -70,14 +74,35 @@
         letter-spacing: 0.08em;
         text-transform: uppercase;
         color: #64748b;
-        margin-bottom: 6px;
+        margin-bottom: 8px;
     }
-    .dashboard-name {
-        margin: 0 0 10px;
-        font-size: clamp(28px, 4vw, 38px);
-        line-height: 1.05;
+    .dashboard-identity-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, 0.95fr);
+        gap: 14px;
+    }
+    .dashboard-identity-card {
+        min-width: 0;
+        padding: 16px 18px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.76);
+        border: 1px solid rgba(15, 23, 42, 0.08);
+    }
+    .dashboard-identity-value {
+        font-size: 18px;
+        line-height: 1.25;
         font-weight: 800;
+        color: #0f172a;
         word-break: break-word;
+    }
+    .dashboard-identity-value--name {
+        font-size: clamp(26px, 3vw, 38px);
+        line-height: 1.05;
+    }
+    .dashboard-identity-value--level {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
     }
     .dashboard-uid-row {
         display: flex;
@@ -117,6 +142,7 @@
         font-size: 12px;
         font-weight: 700;
         color: #059669;
+        white-space: nowrap;
     }
     .dashboard-copy-feedback.is-visible {
         display: inline-flex;
@@ -203,6 +229,10 @@
         background: linear-gradient(135deg, #10b981, #0f766e);
         box-shadow: 0 14px 26px rgba(16, 185, 129, 0.18);
     }
+    .dashboard-metric__icon.is-daily {
+        background: linear-gradient(135deg, #f97316, #ea580c);
+        box-shadow: 0 14px 26px rgba(234, 88, 12, 0.18);
+    }
     .dashboard-income-card {
         padding: 18px 20px;
         border-radius: 22px;
@@ -282,41 +312,70 @@
         font-size: 13px;
         color: #64748b;
     }
-    .dashboard-team-tabs {
+    .dashboard-team-dropdowns {
         display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 12px;
-        margin-bottom: 18px;
+        gap: 14px;
     }
-    .dashboard-team-tab {
-        width: 100%;
-        padding: 12px 14px;
-        border-radius: 16px;
-        border: 1px solid rgba(15, 23, 42, 0.08);
+    .dashboard-team-dropdown {
+        border-radius: 22px;
         background: rgba(255, 255, 255, 0.76);
-        color: #0f172a;
-        font-weight: 800;
-        transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        overflow: hidden;
     }
-    .dashboard-team-tab:hover,
-    .dashboard-team-tab:focus {
-        transform: translateY(-1px);
+    .dashboard-team-dropdown[open] {
+        box-shadow: 0 16px 30px rgba(15, 23, 42, 0.08);
     }
-    .dashboard-team-tab.is-active {
-        color: #ffffff;
-        border-color: transparent;
-        background: linear-gradient(135deg, #f0a83a, #6f33cc);
-        box-shadow: 0 14px 26px rgba(111, 51, 204, 0.18);
+    .dashboard-team-dropdown__toggle {
+        list-style: none;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 18px 20px;
+        cursor: pointer;
     }
-    .dashboard-team-panel {
+    .dashboard-team-dropdown__toggle::-webkit-details-marker {
         display: none;
     }
-    .dashboard-team-panel.is-active {
-        display: block;
+    .dashboard-team-dropdown__title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 800;
+        color: #0f172a;
+    }
+    .dashboard-team-dropdown__meta {
+        margin-top: 6px;
+        font-size: 13px;
+        color: #64748b;
+    }
+    .dashboard-team-dropdown__right {
+        display: inline-flex;
+        align-items: center;
+        gap: 14px;
+        flex-shrink: 0;
+    }
+    .dashboard-team-dropdown__earn {
+        font-size: 14px;
+        font-weight: 800;
+        color: #059669;
+        white-space: nowrap;
+    }
+    .dashboard-team-dropdown__chevron {
+        font-size: 14px;
+        color: #64748b;
+        transition: transform 0.2s ease;
+    }
+    .dashboard-team-dropdown[open] .dashboard-team-dropdown__chevron {
+        transform: rotate(180deg);
+    }
+    .dashboard-team-dropdown__content {
+        padding: 0 18px 18px;
+        border-top: 1px solid rgba(15, 23, 42, 0.08);
     }
     .dashboard-team-list {
         display: grid;
         gap: 14px;
+        padding-top: 16px;
     }
     .dashboard-team-member {
         display: grid;
@@ -396,6 +455,13 @@
     .dashboard-ledger-type {
         font-weight: 700;
     }
+    .dashboard-ledger-source {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 14px;
+        font-weight: 700;
+        color: #0f172a;
+    }
     .dashboard-ledger-subtext {
         display: block;
         margin-top: 4px;
@@ -461,11 +527,12 @@
         box-shadow: 0 26px 54px rgba(0, 0, 0, 0.34);
     }
     .dark-scheme .dashboard-uid,
+    .dark-scheme .dashboard-identity-card,
     .dark-scheme .dashboard-chip,
     .dark-scheme .dashboard-metric,
     .dark-scheme .dashboard-income-card,
     .dark-scheme .dashboard-team-stat,
-    .dark-scheme .dashboard-team-tab,
+    .dark-scheme .dashboard-team-dropdown,
     .dark-scheme .dashboard-team-member,
     .dark-scheme .dashboard-team-member__item,
     .dark-scheme .dashboard-ledger-wrap,
@@ -498,13 +565,14 @@
     }
     .dark-scheme .dashboard-income-table__label,
     .dark-scheme .dashboard-income-table__value,
-    .dark-scheme .dashboard-name,
+    .dark-scheme .dashboard-identity-value,
     .dark-scheme .dashboard-section-title,
     .dark-scheme .dashboard-uid,
-    .dark-scheme .dashboard-team-tab,
     .dark-scheme .dashboard-team-stat__value,
+    .dark-scheme .dashboard-team-dropdown__title,
     .dark-scheme .dashboard-team-member__value,
     .dark-scheme .dashboard-ledger-type,
+    .dark-scheme .dashboard-ledger-source,
     .dark-scheme .dashboard-ledger-mobile-meta strong {
         color: #f8fafc;
     }
@@ -516,13 +584,15 @@
         background: rgba(16, 185, 129, 0.14);
         border-color: rgba(16, 185, 129, 0.24);
     }
-    .dark-scheme .dashboard-team-tab.is-active {
-        color: #ffffff;
-        background: linear-gradient(135deg, rgba(var(--secondary-color-rgb), 0.9), rgba(var(--primary-color-rgb), 0.9));
-        border-color: transparent;
-    }
     .dark-scheme .dashboard-team-member__value.is-earn {
         color: #86efac;
+    }
+    .dark-scheme .dashboard-team-dropdown__meta,
+    .dark-scheme .dashboard-team-dropdown__chevron {
+        color: #94a3b8;
+    }
+    .dark-scheme .dashboard-team-dropdown__content {
+        border-color: rgba(255, 255, 255, 0.08);
     }
     .dark-scheme .dashboard-team-member__label {
         color: #f8fafc;
@@ -558,8 +628,10 @@
         }
         .dashboard-summary-grid,
         .dashboard-team-summary,
-        .dashboard-team-tabs,
         .dashboard-team-member {
+            grid-template-columns: 1fr;
+        }
+        .dashboard-identity-grid {
             grid-template-columns: 1fr;
         }
         .dashboard-section-head {
@@ -603,12 +675,10 @@
         .dashboard-ledger-mobile-meta {
             flex-direction: column;
         }
-        .dashboard-copy-btn {
-            width: 100%;
-        }
-        .dashboard-chip {
-            width: 100%;
-            justify-content: flex-start;
+        .dashboard-team-dropdown__toggle,
+        .dashboard-team-dropdown__right {
+            flex-direction: column;
+            align-items: flex-start;
         }
         .dashboard-income-table thead th,
         .dashboard-income-table tbody td {
@@ -640,42 +710,37 @@
                             </span>
                         @endif
 
-                        <div>
-                            <div class="dashboard-meta-label">Username</div>
-                            <h1 class="dashboard-name">{{ $displayName }}</h1>
+                        <div class="dashboard-profile-body">
+                            <div class="dashboard-identity-grid">
+                                <div class="dashboard-identity-card">
+                                    <div class="dashboard-meta-label">User Name</div>
+                                    <div class="dashboard-identity-value dashboard-identity-value--name">{{ $displayName }}</div>
+                                </div>
 
-                            <div class="dashboard-meta-label">UID</div>
-                            <div class="dashboard-uid-row">
-                                <span class="dashboard-uid">{{ $user->user_code }}</span>
-                                <button
-                                    type="button"
-                                    class="dashboard-copy-btn"
-                                    data-copy-target="{{ $user->user_code }}"
-                                    data-copy-feedback="dashboard-uid-feedback"
-                                    aria-label="Copy UID"
-                                >
-                                    <i class="fa fa-copy" aria-hidden="true"></i>
-                                </button>
-                                <span id="dashboard-uid-feedback" class="dashboard-copy-feedback" aria-live="polite">Copied</span>
-                            </div>
+                                <div class="dashboard-identity-card">
+                                    <div class="dashboard-meta-label">UID</div>
+                                    <div class="dashboard-uid-row">
+                                        <span class="dashboard-uid">{{ $user->user_code }}</span>
+                                        <button
+                                            type="button"
+                                            class="dashboard-copy-btn"
+                                            data-copy-target="{{ $user->user_code }}"
+                                            data-copy-feedback="dashboard-uid-feedback"
+                                            aria-label="Copy UID"
+                                        >
+                                            <i class="fa fa-copy" aria-hidden="true"></i>
+                                        </button>
+                                        <span id="dashboard-uid-feedback" class="dashboard-copy-feedback" aria-live="polite">Copied</span>
+                                    </div>
+                                </div>
 
-                            <div class="dashboard-chip-list">
-                                <span class="dashboard-chip">
-                                    <i class="fa fa-trophy" aria-hidden="true"></i>
-                                    Current Level: {{ $level?->code ?? 'Not set' }}
-                                </span>
-                                <span class="dashboard-chip {{ $emailVerified ? 'is-success' : '' }}">
-                                    <i class="fa fa-envelope-o" aria-hidden="true"></i>
-                                    {{ $emailVerified ? 'Email verified' : 'Email pending' }}
-                                </span>
-                                <span class="dashboard-chip {{ $twoFactorEnabled ? 'is-success' : '' }}">
-                                    <i class="fa fa-shield" aria-hidden="true"></i>
-                                    {{ $twoFactorEnabled ? '2FA enabled' : '2FA disabled' }}
-                                </span>
-                                <span class="dashboard-chip {{ $kycStatus === 'approved' ? 'is-success' : '' }}">
-                                    <i class="fa fa-id-card-o" aria-hidden="true"></i>
-                                    KYC: {{ $kycStatus ? ucfirst($kycStatus) : 'Not submitted' }}
-                                </span>
+                                <div class="dashboard-identity-card">
+                                    <div class="dashboard-meta-label">Level Info</div>
+                                    <div class="dashboard-identity-value dashboard-identity-value--level">
+                                        <i class="fa fa-trophy" aria-hidden="true"></i>
+                                        <span>{{ $level?->code ?? 'Not set' }}</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -697,12 +762,12 @@
 
                             <div class="dashboard-metric">
                                 <div>
-                                    <div class="dashboard-metric__label">Reserve Balance</div>
-                                    <p class="dashboard-metric__value">{{ number_format($reserveBalance, 4) }}</p>
-                                    <div class="dashboard-metric__caption">Current reserve account balance</div>
+                                    <div class="dashboard-metric__label">Daily Income</div>
+                                    <p class="dashboard-metric__value">{{ number_format($dailyIncome, 4) }}</p>
+                                    <div class="dashboard-metric__caption">Today's earned amount across active income sources</div>
                                 </div>
-                                <span class="dashboard-metric__icon is-alt">
-                                    <i class="fa fa-lock" aria-hidden="true"></i>
+                                <span class="dashboard-metric__icon is-daily">
+                                    <i class="fa fa-line-chart" aria-hidden="true"></i>
                                 </span>
                             </div>
                         </div>
@@ -753,7 +818,7 @@
                     <div>
                         <div class="dashboard-meta-label">Community</div>
                         <h2 class="dashboard-section-title">My Team</h2>
-                        <p class="dashboard-section-copy">Browse your A, B, and C branches and see each member's username, user ID, and your total earn.</p>
+                        <p class="dashboard-section-copy">Open each branch dropdown to see member usernames, user IDs, and the income you earned from them.</p>
                     </div>
                 </div>
 
@@ -776,47 +841,47 @@
                     </div>
                 </div>
 
-                <div class="dashboard-team-tabs" role="tablist" aria-label="Team branches">
+                <div class="dashboard-team-dropdowns" aria-label="Team branches">
                     @foreach ($teamBranches as $branch)
-                        <button
-                            type="button"
-                            class="dashboard-team-tab {{ $teamDefaultBranch === $branch['slot'] ? 'is-active' : '' }}"
-                            data-team-tab="{{ $branch['slot'] }}"
-                        >
-                            {{ $branch['label'] }} ({{ $branch['count'] }})
-                        </button>
+                        <details class="dashboard-team-dropdown" @if ($teamDefaultBranch === $branch['slot']) open @endif>
+                            <summary class="dashboard-team-dropdown__toggle">
+                                <div>
+                                    <h3 class="dashboard-team-dropdown__title">{{ $branch['label'] }}</h3>
+                                    <div class="dashboard-team-dropdown__meta">{{ $branch['count'] }} members in this branch</div>
+                                </div>
+                                <span class="dashboard-team-dropdown__right">
+                                    <span class="dashboard-team-dropdown__earn">Total Earn {{ number_format((float) $branch['total_earned'], 4) }}</span>
+                                    <i class="fa fa-chevron-down dashboard-team-dropdown__chevron" aria-hidden="true"></i>
+                                </span>
+                            </summary>
+
+                            <div class="dashboard-team-dropdown__content">
+                                @if ($branch['members']->isEmpty())
+                                    <div class="dashboard-empty">No members found in {{ $branch['label'] }} yet.</div>
+                                @else
+                                    <div class="dashboard-team-list">
+                                        @foreach ($branch['members'] as $member)
+                                            <div class="dashboard-team-member">
+                                                <div class="dashboard-team-member__item">
+                                                    <span class="dashboard-team-member__label">User Name</span>
+                                                    <span class="dashboard-team-member__value">{{ $member['display_name'] }}</span>
+                                                </div>
+                                                <div class="dashboard-team-member__item">
+                                                    <span class="dashboard-team-member__label">User ID</span>
+                                                    <span class="dashboard-team-member__value">{{ $member['uid'] }}</span>
+                                                </div>
+                                                <div class="dashboard-team-member__item">
+                                                    <span class="dashboard-team-member__label">My Earn</span>
+                                                    <span class="dashboard-team-member__value is-earn">{{ number_format((float) $member['total_earned'], 4) }}</span>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
+                        </details>
                     @endforeach
                 </div>
-
-                @foreach ($teamBranches as $branch)
-                    <div
-                        class="dashboard-team-panel {{ $teamDefaultBranch === $branch['slot'] ? 'is-active' : '' }}"
-                        data-team-panel="{{ $branch['slot'] }}"
-                    >
-                        @if ($branch['members']->isEmpty())
-                            <div class="dashboard-empty">No members found in {{ $branch['label'] }} yet.</div>
-                        @else
-                            <div class="dashboard-team-list">
-                                @foreach ($branch['members'] as $member)
-                                    <div class="dashboard-team-member">
-                                        <div class="dashboard-team-member__item">
-                                            <span class="dashboard-team-member__label">User Name</span>
-                                            <span class="dashboard-team-member__value">{{ $member['display_name'] }}</span>
-                                        </div>
-                                        <div class="dashboard-team-member__item">
-                                            <span class="dashboard-team-member__label">User ID</span>
-                                            <span class="dashboard-team-member__value">{{ $member['uid'] }}</span>
-                                        </div>
-                                        <div class="dashboard-team-member__item">
-                                            <span class="dashboard-team-member__label">My Earn</span>
-                                            <span class="dashboard-team-member__value is-earn">{{ number_format((float) $member['total_earned'], 4) }}</span>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        @endif
-                    </div>
-                @endforeach
             </div>
 
             <div class="dashboard-panel">
@@ -849,6 +914,17 @@
                                         $referenceLabel = $ledger->reference_type && $ledger->reference_id
                                             ? class_basename($ledger->reference_type) . ' #' . $ledger->reference_id
                                             : '-';
+                                        $chainSourceUser = $ledger->relationLoaded('chainSourceUser')
+                                            ? $ledger->getRelation('chainSourceUser')
+                                            : null;
+                                        $chainSourceLabel = null;
+
+                                        if ($ledger->type === 'chain_income') {
+                                            $sourceUserId = (int) data_get($ledger->meta, 'source_user_id', 0);
+                                            $chainSourceLabel = $chainSourceUser
+                                                ? ($chainSourceUser->profile?->username ?: $chainSourceUser->name)
+                                                : ($sourceUserId > 0 ? 'User #' . $sourceUserId : null);
+                                        }
                                     @endphp
                                     <tr>
                                         <td>
@@ -865,6 +941,9 @@
                                             </span>
                                         </td>
                                         <td>
+                                            @if ($chainSourceLabel)
+                                                <span class="dashboard-ledger-source">{{ $chainSourceLabel }}</span>
+                                            @endif
                                             <span class="dashboard-ledger-subtext">{{ $referenceLabel }}</span>
                                         </td>
                                         <td>
@@ -883,6 +962,17 @@
                                 $referenceLabel = $ledger->reference_type && $ledger->reference_id
                                     ? class_basename($ledger->reference_type) . ' #' . $ledger->reference_id
                                     : '-';
+                                $chainSourceUser = $ledger->relationLoaded('chainSourceUser')
+                                    ? $ledger->getRelation('chainSourceUser')
+                                    : null;
+                                $chainSourceLabel = null;
+
+                                if ($ledger->type === 'chain_income') {
+                                    $sourceUserId = (int) data_get($ledger->meta, 'source_user_id', 0);
+                                    $chainSourceLabel = $chainSourceUser
+                                        ? ($chainSourceUser->profile?->username ?: $chainSourceUser->name)
+                                        : ($sourceUserId > 0 ? 'User #' . $sourceUserId : null);
+                                }
                             @endphp
                             <div class="dashboard-ledger-mobile-card">
                                 <div class="dashboard-ledger-mobile-top">
@@ -903,6 +993,12 @@
                                     <span>Reference</span>
                                     <strong>{{ $referenceLabel }}</strong>
                                 </div>
+                                @if ($chainSourceLabel)
+                                    <div class="dashboard-ledger-mobile-meta">
+                                        <span>From</span>
+                                        <strong>{{ $chainSourceLabel }}</strong>
+                                    </div>
+                                @endif
                                 <div class="dashboard-ledger-mobile-meta">
                                     <span>Date</span>
                                     <strong>{{ optional($ledger->created_at)->format('M d, Y h:i A') }}</strong>
@@ -941,24 +1037,6 @@
                         feedback.classList.remove('is-visible');
                     }, 1600);
                 });
-            });
-        });
-
-        var teamTabs = document.querySelectorAll('[data-team-tab]');
-        var teamPanels = document.querySelectorAll('[data-team-panel]');
-        var activateTeamBranch = function (slot) {
-            teamTabs.forEach(function (tab) {
-                tab.classList.toggle('is-active', tab.getAttribute('data-team-tab') === slot);
-            });
-
-            teamPanels.forEach(function (panel) {
-                panel.classList.toggle('is-active', panel.getAttribute('data-team-panel') === slot);
-            });
-        };
-
-        teamTabs.forEach(function (tab) {
-            tab.addEventListener('click', function () {
-                activateTeamBranch(tab.getAttribute('data-team-tab'));
             });
         });
     });

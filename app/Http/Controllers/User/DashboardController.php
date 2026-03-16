@@ -10,6 +10,7 @@ use App\Services\StakeRewardService;
 use App\Services\UserLevelResolver;
 use App\Services\WalletService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -57,7 +58,7 @@ class DashboardController extends Controller
         $user = $request->user();
 
         $stakeRewardService->creditDueRewardsForUser($user, $walletService);
-        $user->loadMissing(['profile', 'latestKycRequest']);
+        $user->loadMissing(['profile']);
 
         $displayName = filled($user->profile?->username)
             ? $user->profile->username
@@ -91,6 +92,7 @@ class DashboardController extends Controller
         $dailyIncome = (float) $incomeBreakdown->firstWhere('label', 'Comprehensive')['daily'];
         $totalIncome = (float) $incomeBreakdown->firstWhere('label', 'Comprehensive')['total'];
         [$teamSummary, $teamBranches, $teamDefaultBranch] = $this->buildTeamData($user, $referralChainService);
+        $recentWalletLedgers = $this->loadRecentWalletLedgers($user);
 
         return view('dashboard', [
             'user' => $user,
@@ -98,21 +100,49 @@ class DashboardController extends Controller
             'avatarUrl' => $user->profile?->photo_url,
             'level' => $levelResolver->resolve($user),
             'walletBalance' => (float) $walletService->getBalance($user),
-            'reserveBalance' => (float) ($user->reserve?->reserved_balance ?? 0),
             'dailyIncome' => $dailyIncome,
             'totalIncome' => $totalIncome,
             'incomeBreakdown' => $incomeBreakdown,
             'teamSummary' => $teamSummary,
             'teamBranches' => $teamBranches,
             'teamDefaultBranch' => $teamDefaultBranch,
-            'recentWalletLedgers' => $user->walletLedgers()
-                ->orderByDesc('created_at')
-                ->limit(10)
-                ->get(),
-            'emailVerified' => !is_null($user->email_verified_at),
-            'twoFactorEnabled' => $user->hasTwoFactorEnabled(),
-            'kycStatus' => $user->latestKycRequest?->status,
+            'recentWalletLedgers' => $recentWalletLedgers,
         ]);
+    }
+
+    private function loadRecentWalletLedgers(User $user): Collection
+    {
+        $recentWalletLedgers = $user->walletLedgers()
+            ->orderByDesc('created_at')
+            ->limit(10)
+            ->get();
+
+        $sourceUserIds = $recentWalletLedgers
+            ->where('type', 'chain_income')
+            ->map(fn ($ledger) => (int) data_get($ledger->meta, 'source_user_id', 0))
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($sourceUserIds->isEmpty()) {
+            return $recentWalletLedgers;
+        }
+
+        $sourceUsers = User::query()
+            ->with('profile')
+            ->whereIn('id', $sourceUserIds->all())
+            ->get()
+            ->keyBy('id');
+
+        $recentWalletLedgers->each(function ($ledger) use ($sourceUsers) {
+            $sourceUserId = (int) data_get($ledger->meta, 'source_user_id', 0);
+
+            if ($sourceUserId > 0) {
+                $ledger->setRelation('chainSourceUser', $sourceUsers->get($sourceUserId));
+            }
+        });
+
+        return $recentWalletLedgers;
     }
 
     private function buildTeamData(User $user, ReferralChainService $referralChainService): array
