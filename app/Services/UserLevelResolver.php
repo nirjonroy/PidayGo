@@ -22,26 +22,34 @@ class UserLevelResolver
         $depositTotal = (float) $user->walletLedgers()->where('type', 'deposit')->sum('amount');
         $counts = $this->referralChainService->getReferralDepthCounts($user);
 
-        return Level::query()
+        $levels = Level::query()
             ->where('is_active', true)
             ->orderByDesc('min_deposit')
             ->orderByDesc('max_deposit')
             ->orderByDesc('id')
-            ->get()
-            ->filter(function (Level $level) use ($depositTotal, $counts) {
-                if ($depositTotal < (float) $level->min_deposit) {
-                    return false;
-                }
+            ->get();
 
-                $maxDeposit = (float) ($level->max_deposit ?? 0);
-                if ($maxDeposit > 0 && $depositTotal > $maxDeposit) {
-                    return false;
-                }
+        $eligibleByMinAndChains = $levels->filter(function (Level $level) use ($depositTotal, $counts) {
+            if ($depositTotal < (float) $level->min_deposit) {
+                return false;
+            }
 
-                return $counts['A'] >= (int) $level->req_chain_a
-                    && $counts['B'] >= (int) $level->req_chain_b
-                    && $counts['C'] >= (int) $level->req_chain_c;
-            })
-            ->values();
+            return $counts['A'] >= (int) $level->req_chain_a
+                && $counts['B'] >= (int) $level->req_chain_b
+                && $counts['C'] >= (int) $level->req_chain_c;
+        })->values();
+
+        $strictMatches = $eligibleByMinAndChains->filter(function (Level $level) use ($depositTotal) {
+            $maxDeposit = (float) ($level->max_deposit ?? 0);
+            if ($maxDeposit <= 0) {
+                return true;
+            }
+
+            return $depositTotal <= $maxDeposit;
+        })->values();
+
+        return $strictMatches->isNotEmpty()
+            ? $strictMatches
+            : $eligibleByMinAndChains;
     }
 }
