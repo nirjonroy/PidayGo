@@ -11,6 +11,8 @@ class ReservePlan extends Model
 
     protected $fillable = [
         'level_id',
+        'wallet_balance_min',
+        'wallet_balance_max',
         'reserve_amount',
         'profit_min_percent',
         'profit_max_percent',
@@ -21,6 +23,8 @@ class ReservePlan extends Model
     ];
 
     protected $casts = [
+        'wallet_balance_min' => 'decimal:8',
+        'wallet_balance_max' => 'decimal:8',
         'reserve_amount' => 'decimal:8',
         'profit_min_percent' => 'decimal:3',
         'profit_max_percent' => 'decimal:3',

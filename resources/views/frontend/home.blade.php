@@ -159,7 +159,13 @@
                                             <tr>
                                                 <td>{{ $reserve->user?->user_code ?? ('#' . $reserve->user_id) }}</td>
                                                 <td>{{ $reserve->level?->code ?? '-' }}</td>
-                                                <td>{{ $reserve->plan?->reserve_amount ? number_format($reserve->plan->reserve_amount, 4) . ' USDT' : '-' }}</td>
+                                                <td>
+                                                    @if ($reserve->plan)
+                                                        {{ number_format((float) ($reserve->plan->wallet_balance_min ?? 0), 4) }} - {{ number_format((float) ($reserve->plan->wallet_balance_max ?? 0), 4) }} USDT
+                                                    @else
+                                                        -
+                                                    @endif
+                                                </td>
                                                 <td>{{ number_format($reserve->amount ?? 0, 4) }} USDT</td>
                                                 <td>{{ $reserve->confirmed_at?->format('Y-m-d H:i') ?? '-' }}</td>
                                             </tr>

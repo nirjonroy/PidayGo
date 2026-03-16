@@ -18,10 +18,14 @@
                     <div class="nft__item_info">
                         <h4>PI Reservation Details</h4>
                         <div class="nft__item_price">Level: {{ $level?->code ?? '-' }}</div>
+                        <div class="nft__item_price">Wallet Balance Range: {{ $reserve->meta['range_label'] ?? '-' }}</div>
+                        <div class="nft__item_price">Reserve Percentage: {{ isset($reserve->meta['reserve_percentage']) ? number_format((float) $reserve->meta['reserve_percentage'], 3) . '%' : '-' }}</div>
                         <div class="nft__item_price">Reserve Amount: {{ number_format((float) ($reserve->amount ?? 0), 8) }} USDT</div>
                         <div class="nft__item_price">Profit Range: {{ $plan?->profit_min_percent }}% - {{ $plan?->profit_max_percent }}%</div>
+                        <div class="nft__item_price">Max Sells Per Reserve: {{ $plan?->max_sells ?? 'Unlimited' }}</div>
+                        <div class="nft__item_price">Daily Limit: {{ $plan?->max_sells_per_day ?? 'Unlimited' }}</div>
                         <div class="nft__item_price">Reserved At: {{ optional($reserve->confirmed_at)->format('M d, Y h:i A') }}</div>
-                        <p class="text-muted mt-3">After a successful PI sell, the reserve amount and profit will be added directly to your wallet.</p>
+                        <p class="text-muted mt-3">The reserve amount was debited from wallet and moved to reserve balance when you confirmed this plan. After a successful PI sell, that reserve amount and the profit will be returned to wallet.</p>
                     </div>
                 </div>
             </div>

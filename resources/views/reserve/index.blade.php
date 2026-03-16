@@ -14,6 +14,9 @@
         border: 1px solid rgba(255, 255, 255, 0.08);
         height: 100%;
     }
+    .reserve-option-card.is-disabled {
+        opacity: 0.78;
+    }
     .reserve-option-label {
         display: inline-flex;
         margin-bottom: 12px;
@@ -39,8 +42,104 @@
         font-size: 14px;
         margin-bottom: 16px;
     }
+    .reserve-option-status {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+    .reserve-option-status.is-available {
+        background: rgba(17, 185, 129, 0.16);
+        color: #7cf0bd;
+    }
+    .reserve-option-status.is-blocked {
+        background: rgba(255, 255, 255, 0.08);
+        color: #d5dae3;
+    }
+    .reserve-option-note {
+        min-height: 42px;
+        color: #d5dae3;
+        font-size: 14px;
+        margin-bottom: 14px;
+    }
     .reserve-option-form {
         margin: 0;
+    }
+    .reserve-selector {
+        display: grid;
+        gap: 18px;
+    }
+    .reserve-selector__row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+    }
+    .reserve-selector__field {
+        display: grid;
+        gap: 8px;
+    }
+    .reserve-selector__field label {
+        color: #aeb7c4;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+    .reserve-selector__select {
+        width: 100%;
+        min-height: 52px;
+        padding: 0 16px;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.04);
+        color: #ffffff;
+        font-weight: 700;
+    }
+    .reserve-selector__summary {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+    }
+    .reserve-selector__stat {
+        padding: 14px 16px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .reserve-selector__stat span {
+        display: block;
+        margin-bottom: 6px;
+        color: #aeb7c4;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+    .reserve-selector__stat strong {
+        color: #ffffff;
+        font-size: 18px;
+        font-weight: 800;
+    }
+    .reserve-selector__note {
+        padding: 14px 16px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: #d5dae3;
+    }
+    .reserve-selector__actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+    .reserve-selector__actions .btn-main {
+        min-width: 220px;
+        text-align: center;
     }
     .reserve-flow-note {
         color: #aeb7c4;
@@ -111,6 +210,16 @@
         0% { transform: translateX(-120%); }
         100% { transform: translateX(260%); }
     }
+    @media (max-width: 767px) {
+        .reserve-selector__row,
+        .reserve-selector__summary {
+            grid-template-columns: 1fr;
+        }
+        .reserve-selector__actions .btn-main {
+            width: 100%;
+            min-width: 0;
+        }
+    }
 </style>
 @endpush
 
@@ -130,9 +239,9 @@
                 <span>You already have an active reserve. Continue to the Buy PI page and complete the sell.</span>
                 <a class="btn btn-sm btn-primary" href="{{ route('reserve.sell.form') }}">Go to Buy PI</a>
             </div>
-        @elseif ($reservedToday)
+        @elseif ($plans->isNotEmpty() && $availablePlanCount === 0)
             <div class="alert alert-warning">
-                You already used today's reserve chance. Please come back tomorrow.
+                No reserve option is available right now. Use the dropdowns below to review which plans are locked or already exhausted for today.
             </div>
         @endif
 
@@ -145,12 +254,14 @@
                         <div class="nft__item_price">Reserve Account Balance: {{ number_format($reserveAccountBalance, 8) }} USDT</div>
                         @if ($level)
                             <div class="nft__item_price">Current Level: {{ $level->code }}</div>
-                            <div class="nft__item_price">Eligible Reserve Options: {{ $plans->count() }}</div>
+                            <div class="nft__item_price">Unlocked Reserve Options: {{ $unlockedPlanCount }}</div>
                         @else
                             <div class="text-muted">No active level found.</div>
                         @endif
+                        <div class="nft__item_price">Visible Reserve Options: {{ $plans->count() }}</div>
+                        <div class="nft__item_price">Available Right Now: {{ $availablePlanCount }}</div>
                         <p class="reserve-flow-note">
-                            Reserve works once per day. No amount is locked when you reserve. After a successful PI sell, the reserve amount and profit are credited to your wallet.
+                            Reserve plans are filtered by your unlocked level and the wallet balance range configured in admin. The reserve page only shows the applicable range options here.
                         </p>
                     </div>
                 </div>
@@ -160,36 +271,86 @@
                 <div class="nft__item s2">
                     <div class="nft__item_info">
                         <h4>Reservation Options</h4>
-                        @if (!$reserveEnabled)
-                            <div class="text-muted">Reserve is currently disabled.</div>
-                        @elseif (!$level)
-                            <div class="text-muted">You do not have an eligible level yet.</div>
-                        @elseif ($plans->isEmpty())
-                            <div class="text-muted">No reserve options are available for your current level yet.</div>
-                        @elseif (!empty($activeReserve))
-                            <div class="text-muted">Your current reserve is already ready. Open the Buy PI page to sell it.</div>
-                            <a class="btn-main mt-2" href="{{ route('reserve.sell.form') }}">Go to Buy PI</a>
-                        @elseif ($reservedToday)
-                            <div class="text-muted">Today's reserve chance is already used.</div>
+                        @if ($plans->isEmpty())
+                            <div class="text-muted">No reserve plans are configured yet.</div>
                         @else
-                            <div class="reserve-options-grid">
-                                @foreach ($plans as $plan)
-                                    <div class="reserve-option-card">
-                                        <span class="reserve-option-label">{{ $plan->level?->code ?? 'Reserve' }}</span>
-                                        <div class="reserve-option-amount">{{ number_format((float) $plan->reserve_amount, 8) }} USDT</div>
-                                        <div class="reserve-option-meta">
-                                            <div>Profit: {{ $plan->profit_min_percent }}% - {{ $plan->profit_max_percent }}%</div>
-                                            <div>Daily Reserve Limit: 1 time</div>
-                                            <div>After reserve, you will continue to Buy PI and sell once.</div>
-                                        </div>
-                                        <form method="POST" action="{{ route('reserve.confirm') }}" class="reserve-option-form reserve-start-form">
-                                            @csrf
-                                            <input type="hidden" name="reserve_plan_id" value="{{ $plan->id }}">
-                                            <button type="submit" class="btn-main w-100">Reserve Now</button>
-                                        </form>
+                            @php
+                                $activeLevelId = optional($plans->firstWhere('is_active_plan', true))->level_id;
+                                $availableLevelId = optional($plans->firstWhere('can_reserve', true))->level_id;
+                                $initialLevelId = $activeLevelId ?? $availableLevelId ?? optional($plans->first())->level_id;
+                                $levelGroups = $plans->groupBy('level_id');
+                                $planPayload = $plans->map(function ($plan) {
+                                    return [
+                                        'id' => (int) $plan->id,
+                                        'levelId' => (int) $plan->level_id,
+                                        'levelLabel' => $plan->level?->code ?? 'Reserve',
+                                        'profitRange' => $plan->profit_min_percent . '% - ' . $plan->profit_max_percent . '%',
+                                        'rangeLabel' => $plan->getAttribute('range_label'),
+                                        'maxSells' => $plan->max_sells ? (string) $plan->max_sells : 'Unlimited',
+                                        'dailyLimit' => is_null($plan->max_sells_per_day) ? 'Unlimited' : (string) $plan->max_sells_per_day,
+                                        'usedToday' => (int) $plan->used_today,
+                                        'remainingToday' => is_null($plan->daily_remaining) ? 'Unlimited' : (string) $plan->daily_remaining,
+                                        'canReserve' => (bool) $plan->can_reserve,
+                                        'isActivePlan' => (bool) $plan->is_active_plan,
+                                        'note' => $plan->availability_note,
+                                        'actionLabel' => $plan->action_label,
+                                    ];
+                                })->values();
+                            @endphp
+
+                            <div class="reserve-selector" data-initial-level="{{ $initialLevelId }}">
+                                <div class="reserve-selector__row">
+                                    <div class="reserve-selector__field">
+                                        <label for="reserve-level-select">Level</label>
+                                        <select id="reserve-level-select" class="reserve-selector__select">
+                                            @foreach ($levelGroups as $levelId => $levelPlans)
+                                                @php($firstPlan = $levelPlans->first())
+                                                <option value="{{ $levelId }}" @selected((string) $initialLevelId === (string) $levelId)>
+                                                    {{ $firstPlan->level?->code ?? 'Reserve' }}
+                                                </option>
+                                            @endforeach
+                                        </select>
                                     </div>
-                                @endforeach
+
+                                    <div class="reserve-selector__field">
+                                        <label for="reserve-plan-select">Reserve Option</label>
+                                        <select id="reserve-plan-select" class="reserve-selector__select"></select>
+                                    </div>
+                                </div>
+
+                                <div class="reserve-selector__summary">
+                                    <div class="reserve-selector__stat">
+                                        <span>Status</span>
+                                        <strong id="reserve-selected-status">-</strong>
+                                    </div>
+                                    <div class="reserve-selector__stat">
+                                        <span>Profit</span>
+                                        <strong id="reserve-selected-profit">-</strong>
+                                    </div>
+                                    <div class="reserve-selector__stat">
+                                        <span>Daily Limit</span>
+                                        <strong id="reserve-selected-daily-limit">-</strong>
+                                    </div>
+                                    <div class="reserve-selector__stat">
+                                        <span>Remaining</span>
+                                        <strong id="reserve-selected-remaining">-</strong>
+                                    </div>
+                                </div>
+
+                                <div class="reserve-selector__note" id="reserve-selected-note">Select a reserve option to continue.</div>
+
+                                <div class="reserve-selector__actions">
+                                    <form method="POST" action="{{ route('reserve.confirm') }}" class="reserve-option-form reserve-start-form" id="reserve-plan-form">
+                                        @csrf
+                                        <input type="hidden" name="reserve_plan_id" id="reserve_plan_id">
+                                        <button type="submit" class="btn-main" id="reserve-plan-submit">Confirm Reserve</button>
+                                    </form>
+
+                                    <a href="{{ route('reserve.sell.form') }}" class="btn-main" id="reserve-go-buy-pi" style="display:none;">Go to Buy PI</a>
+                                </div>
                             </div>
+
+                            <script type="application/json" id="reserve-plan-data">{!! $planPayload->toJson(JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}</script>
                         @endif
                     </div>
                 </div>
@@ -296,6 +457,116 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         var reserveLoader = document.getElementById('reserve-loader');
+        var levelSelect = document.getElementById('reserve-level-select');
+        var planSelect = document.getElementById('reserve-plan-select');
+        var hiddenPlanId = document.getElementById('reserve_plan_id');
+        var submitButton = document.getElementById('reserve-plan-submit');
+        var buyPiButton = document.getElementById('reserve-go-buy-pi');
+        var selectedStatus = document.getElementById('reserve-selected-status');
+        var selectedProfit = document.getElementById('reserve-selected-profit');
+        var selectedDailyLimit = document.getElementById('reserve-selected-daily-limit');
+        var selectedRemaining = document.getElementById('reserve-selected-remaining');
+        var selectedNote = document.getElementById('reserve-selected-note');
+        var planDataElement = document.getElementById('reserve-plan-data');
+        var plans = planDataElement ? JSON.parse(planDataElement.textContent || '[]') : [];
+
+        function groupPlansByLevel() {
+            return plans.reduce(function (carry, plan) {
+                if (!carry[plan.levelId]) {
+                    carry[plan.levelId] = [];
+                }
+                carry[plan.levelId].push(plan);
+                return carry;
+            }, {});
+        }
+
+        function populatePlanOptions(levelId) {
+            if (!planSelect) {
+                return;
+            }
+
+            var groupedPlans = groupPlansByLevel();
+            var levelPlans = groupedPlans[levelId] || [];
+
+            planSelect.innerHTML = '';
+
+            levelPlans.forEach(function (plan) {
+                var option = document.createElement('option');
+                option.value = String(plan.id);
+                option.textContent = plan.rangeLabel;
+                planSelect.appendChild(option);
+            });
+
+            if (levelPlans.length > 0) {
+                var activePlan = levelPlans.find(function (plan) { return plan.isActivePlan; });
+                var availablePlan = levelPlans.find(function (plan) { return plan.canReserve; });
+                planSelect.value = String((activePlan || availablePlan || levelPlans[0]).id);
+            }
+        }
+
+        function updatePlanDetails() {
+            if (!planSelect) {
+                return;
+            }
+
+            var selectedPlan = plans.find(function (plan) {
+                return String(plan.id) === String(planSelect.value);
+            });
+
+            if (!selectedPlan) {
+                return;
+            }
+
+            if (hiddenPlanId) {
+                hiddenPlanId.value = selectedPlan.id;
+            }
+            if (selectedStatus) {
+                selectedStatus.textContent = selectedPlan.isActivePlan ? 'In Progress' : (selectedPlan.canReserve ? 'Available' : 'Blocked');
+            }
+            if (selectedProfit) {
+                selectedProfit.textContent = selectedPlan.profitRange;
+            }
+            if (selectedDailyLimit) {
+                selectedDailyLimit.textContent = selectedPlan.dailyLimit;
+            }
+            if (selectedRemaining) {
+                selectedRemaining.textContent = selectedPlan.remainingToday;
+            }
+            if (selectedNote) {
+                selectedNote.textContent = 'Wallet balance range: ' + selectedPlan.rangeLabel + ' | Profit: ' + selectedPlan.profitRange + ' | ' + selectedPlan.note;
+            }
+
+            if (selectedPlan.isActivePlan) {
+                if (submitButton) {
+                    submitButton.style.display = 'none';
+                }
+                if (buyPiButton) {
+                    buyPiButton.style.display = 'inline-flex';
+                }
+                return;
+            }
+
+            if (buyPiButton) {
+                buyPiButton.style.display = 'none';
+            }
+            if (submitButton) {
+                submitButton.style.display = 'inline-flex';
+                submitButton.disabled = !selectedPlan.canReserve;
+                submitButton.textContent = selectedPlan.actionLabel;
+            }
+        }
+
+        if (levelSelect && planSelect && plans.length > 0) {
+            populatePlanOptions(levelSelect.value);
+            updatePlanDetails();
+
+            levelSelect.addEventListener('change', function () {
+                populatePlanOptions(levelSelect.value);
+                updatePlanDetails();
+            });
+
+            planSelect.addEventListener('change', updatePlanDetails);
+        }
 
         document.querySelectorAll('.reserve-start-form').forEach(function (form) {
             form.addEventListener('submit', function () {

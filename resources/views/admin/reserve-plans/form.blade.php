@@ -9,7 +9,7 @@
                 @csrf
 
                 <div class="row">
-                    <div class="col-md-6 mb-2">
+                    <div class="col-md-4 mb-2">
                         <label class="form-label">Level</label>
                         <select name="level_id" class="form-select" required>
                             <option value="">Select level</option>
@@ -21,14 +21,24 @@
                         </select>
                         @error('level_id') <div class="text-danger">{{ $message }}</div> @enderror
                     </div>
-                    <div class="col-md-6 mb-2">
-                        <label class="form-label">Reserve Amount</label>
-                        <input name="reserve_amount" class="form-control" type="number" step="0.00000001" value="{{ old('reserve_amount', $plan->reserve_amount) }}" required>
-                        @error('reserve_amount') <div class="text-danger">{{ $message }}</div> @enderror
+                    <div class="col-md-4 mb-2">
+                        <label class="form-label">Wallet Balance From</label>
+                        <input name="wallet_balance_min" class="form-control" type="number" step="0.00000001" min="0" value="{{ old('wallet_balance_min', $plan->wallet_balance_min) }}" required>
+                        @error('wallet_balance_min') <div class="text-danger">{{ $message }}</div> @enderror
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <label class="form-label">Wallet Balance To</label>
+                        <input name="wallet_balance_max" class="form-control" type="number" step="0.00000001" min="0" value="{{ old('wallet_balance_max', $plan->wallet_balance_max) }}" required>
+                        @error('wallet_balance_max') <div class="text-danger">{{ $message }}</div> @enderror
                     </div>
                 </div>
 
                 <div class="row">
+                    <div class="col-md-4 mb-2">
+                        <label class="form-label">Reserve Percentage</label>
+                        <input name="reserve_amount" class="form-control" type="number" step="0.001" min="0.001" max="100" value="{{ old('reserve_amount', $plan->reserve_amount) }}" required>
+                        @error('reserve_amount') <div class="text-danger">{{ $message }}</div> @enderror
+                    </div>
                     <div class="col-md-4 mb-2">
                         <label class="form-label">Profit Min %</label>
                         <input name="profit_min_percent" class="form-control" type="number" step="0.001" value="{{ old('profit_min_percent', $plan->profit_min_percent) }}" required>

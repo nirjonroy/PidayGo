@@ -18,6 +18,7 @@ class ReservePlanController extends Controller
         return view('admin.reserve-plans.index', [
             'plans' => ReservePlan::with('level')
                 ->orderBy('level_id')
+                ->orderBy('wallet_balance_min')
                 ->orderBy('reserve_amount')
                 ->get(),
         ]);
@@ -81,13 +82,13 @@ class ReservePlanController extends Controller
     {
         return $request->validate([
             'level_id' => ['required', 'exists:levels,id'],
+            'wallet_balance_min' => ['required', 'numeric', 'min:0'],
+            'wallet_balance_max' => ['required', 'numeric', 'gte:wallet_balance_min'],
             'reserve_amount' => [
                 'required',
                 'numeric',
                 'min:0.00000001',
-                Rule::unique('reserve_plans', 'reserve_amount')
-                    ->where('level_id', $request->input('level_id'))
-                    ->ignore($plan?->id),
+                'max:100',
             ],
             'profit_min_percent' => ['required', 'numeric', 'min:0'],
             'profit_max_percent' => ['required', 'numeric', 'min:0', 'gte:profit_min_percent'],
