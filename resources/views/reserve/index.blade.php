@@ -2,6 +2,59 @@
 
 @push('styles')
 <style>
+    .reserve-page {
+        --reserve-panel-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 245, 255, 0.96));
+        --reserve-panel-border: rgba(15, 23, 42, 0.08);
+        --reserve-panel-shadow: 0 18px 36px rgba(15, 23, 42, 0.08);
+        --reserve-surface-bg: rgba(15, 23, 42, 0.04);
+        --reserve-surface-border: rgba(15, 23, 42, 0.08);
+        --reserve-title: #121826;
+        --reserve-text: #253044;
+        --reserve-muted: #617086;
+        --reserve-select-bg: #ffffff;
+        --reserve-select-border: rgba(15, 23, 42, 0.12);
+        --reserve-select-text: #111827;
+        --reserve-select-option-bg: #ffffff;
+        --reserve-select-option-text: #111827;
+        --reserve-select-option-disabled: #98a2b3;
+        --reserve-note-bg: rgba(15, 23, 42, 0.04);
+        --reserve-note-border: rgba(15, 23, 42, 0.08);
+        --reserve-note-text: #334155;
+    }
+    .dark-scheme .reserve-page {
+        --reserve-panel-bg: linear-gradient(180deg, rgba(28, 18, 47, 0.96), rgba(19, 13, 34, 0.96));
+        --reserve-panel-border: rgba(255, 255, 255, 0.08);
+        --reserve-panel-shadow: 0 24px 48px rgba(0, 0, 0, 0.34);
+        --reserve-surface-bg: rgba(255, 255, 255, 0.04);
+        --reserve-surface-border: rgba(255, 255, 255, 0.08);
+        --reserve-title: #ffffff;
+        --reserve-text: #edf2f7;
+        --reserve-muted: #aeb7c4;
+        --reserve-select-bg: rgba(255, 255, 255, 0.05);
+        --reserve-select-border: rgba(255, 255, 255, 0.12);
+        --reserve-select-text: #ffffff;
+        --reserve-select-option-bg: #1a1327;
+        --reserve-select-option-text: #f8fbff;
+        --reserve-select-option-disabled: #7f8a9f;
+        --reserve-note-bg: rgba(255, 255, 255, 0.04);
+        --reserve-note-border: rgba(255, 255, 255, 0.08);
+        --reserve-note-text: #d5dae3;
+    }
+    .reserve-page .nft__item.s2 {
+        background: var(--reserve-panel-bg);
+        border: 1px solid var(--reserve-panel-border);
+        box-shadow: var(--reserve-panel-shadow);
+        border-radius: 22px;
+    }
+    .reserve-page .nft__item_info h4,
+    .reserve-page .nft__item_info .nft__item_price,
+    .reserve-page .nft__item_info .text-muted,
+    .reserve-page .nft__item_info p {
+        color: var(--reserve-text);
+    }
+    .reserve-page .nft__item_info h4 {
+        color: var(--reserve-title);
+    }
     .reserve-options-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -84,7 +137,7 @@
         gap: 8px;
     }
     .reserve-selector__field label {
-        color: #aeb7c4;
+        color: var(--reserve-muted);
         font-size: 13px;
         font-weight: 700;
         letter-spacing: 0.04em;
@@ -93,12 +146,39 @@
     .reserve-selector__select {
         width: 100%;
         min-height: 52px;
-        padding: 0 16px;
+        padding: 0 46px 0 16px;
         border-radius: 16px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        background: rgba(255, 255, 255, 0.04);
-        color: #ffffff;
+        border: 1px solid var(--reserve-select-border);
+        background-color: var(--reserve-select-bg);
+        color: var(--reserve-select-text);
         font-weight: 700;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M5 7.5L10 12.5L15 7.5' stroke='%23617086' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 14px center;
+        background-size: 18px 18px;
+        box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+        color-scheme: light;
+    }
+    .dark-scheme .reserve-selector__select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M5 7.5L10 12.5L15 7.5' stroke='%23D5DAE3' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+        box-shadow: none;
+        color-scheme: dark;
+    }
+    .reserve-selector__select:focus {
+        outline: none;
+        border-color: rgba(var(--primary-color-rgb, 111, 51, 204), 0.45);
+        box-shadow: 0 0 0 4px rgba(var(--primary-color-rgb, 111, 51, 204), 0.12);
+    }
+    .reserve-selector__select option {
+        background: var(--reserve-select-option-bg);
+        color: var(--reserve-select-option-text);
+    }
+    .reserve-selector__select option:disabled {
+        color: var(--reserve-select-option-disabled);
     }
     .reserve-selector__summary {
         display: grid;
@@ -108,29 +188,29 @@
     .reserve-selector__stat {
         padding: 14px 16px;
         border-radius: 16px;
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: var(--reserve-surface-bg);
+        border: 1px solid var(--reserve-surface-border);
     }
     .reserve-selector__stat span {
         display: block;
         margin-bottom: 6px;
-        color: #aeb7c4;
+        color: var(--reserve-muted);
         font-size: 12px;
         font-weight: 700;
         letter-spacing: 0.04em;
         text-transform: uppercase;
     }
     .reserve-selector__stat strong {
-        color: #ffffff;
+        color: var(--reserve-title);
         font-size: 18px;
         font-weight: 800;
     }
     .reserve-selector__note {
         padding: 14px 16px;
         border-radius: 16px;
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        color: #d5dae3;
+        background: var(--reserve-note-bg);
+        border: 1px solid var(--reserve-note-border);
+        color: var(--reserve-note-text);
     }
     .reserve-selector__actions {
         display: flex;
@@ -142,9 +222,10 @@
         text-align: center;
     }
     .reserve-flow-note {
-        color: #aeb7c4;
+        color: var(--reserve-muted);
         font-size: 14px;
         margin-top: 12px;
+        line-height: 1.85;
     }
     .reserve-loader {
         position: fixed;
@@ -165,9 +246,9 @@
         padding: 28px 24px;
         border-radius: 24px;
         text-align: center;
-        background: #11131f;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        box-shadow: 0 24px 50px rgba(0, 0, 0, 0.35);
+        background: #ffffff;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        box-shadow: 0 24px 50px rgba(15, 23, 42, 0.18);
     }
     .reserve-loader__logo {
         width: 76px;
@@ -179,11 +260,11 @@
     .reserve-loader__title {
         font-size: 22px;
         font-weight: 800;
-        color: #ffffff;
+        color: #101828;
         margin-bottom: 8px;
     }
     .reserve-loader__copy {
-        color: #aeb7c4;
+        color: #617086;
         margin-bottom: 18px;
     }
     .reserve-loader__bar {
@@ -191,6 +272,20 @@
         overflow: hidden;
         height: 8px;
         border-radius: 999px;
+        background: rgba(15, 23, 42, 0.08);
+    }
+    .dark-scheme .reserve-loader__card {
+        background: #11131f;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 24px 50px rgba(0, 0, 0, 0.35);
+    }
+    .dark-scheme .reserve-loader__title {
+        color: #ffffff;
+    }
+    .dark-scheme .reserve-loader__copy {
+        color: #aeb7c4;
+    }
+    .dark-scheme .reserve-loader__bar {
         background: rgba(255, 255, 255, 0.08);
     }
     .reserve-loader__bar::after {
@@ -215,6 +310,9 @@
         .reserve-selector__summary {
             grid-template-columns: 1fr;
         }
+        .reserve-page .nft__item.s2 {
+            border-radius: 18px;
+        }
         .reserve-selector__actions .btn-main {
             width: 100%;
             min-width: 0;
@@ -226,7 +324,7 @@
 @section('content')
 @include('frontend.partials.page-banner', ['title' => 'Reserve PI'])
 
-<section aria-label="section">
+<section aria-label="section" class="reserve-page">
     <div class="container">
         @if (session('status'))
             <div class="alert alert-success">{{ session('status') }}</div>
