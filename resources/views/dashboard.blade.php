@@ -78,8 +78,9 @@
     }
     .dashboard-identity-grid {
         display: grid;
-        grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, 0.95fr);
+        grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
         gap: 14px;
+        align-items: stretch;
     }
     .dashboard-identity-card {
         min-width: 0;
@@ -88,27 +89,32 @@
         background: rgba(255, 255, 255, 0.76);
         border: 1px solid rgba(15, 23, 42, 0.08);
     }
+    .dashboard-identity-card--name {
+        grid-column: 1 / -1;
+    }
     .dashboard-identity-value {
         font-size: 18px;
         line-height: 1.25;
         font-weight: 800;
         color: #0f172a;
-        word-break: break-word;
+        overflow-wrap: anywhere;
     }
     .dashboard-identity-value--name {
-        font-size: clamp(26px, 3vw, 38px);
-        line-height: 1.05;
+        font-size: clamp(24px, 3vw, 36px);
+        line-height: 1.1;
     }
     .dashboard-identity-value--level {
         display: inline-flex;
         align-items: center;
         gap: 8px;
+        font-size: clamp(18px, 2vw, 24px);
     }
     .dashboard-uid-row {
         display: flex;
         align-items: center;
         gap: 10px;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
+        min-width: 0;
     }
     .dashboard-uid {
         display: inline-flex;
@@ -118,11 +124,18 @@
         background: rgba(255, 255, 255, 0.7);
         border: 1px solid rgba(15, 23, 42, 0.08);
         font-weight: 700;
-        letter-spacing: 0.04em;
+        letter-spacing: 0.02em;
+        font-size: 15px;
+        min-width: 0;
+        max-width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     .dashboard-copy-btn {
         width: 40px;
         height: 40px;
+        flex: 0 0 40px;
         border: 0;
         border-radius: 12px;
         display: inline-flex;
@@ -634,6 +647,9 @@
         .dashboard-identity-grid {
             grid-template-columns: 1fr;
         }
+        .dashboard-identity-card--name {
+            grid-column: auto;
+        }
         .dashboard-section-head {
             flex-direction: column;
             align-items: stretch;
@@ -712,12 +728,12 @@
 
                         <div class="dashboard-profile-body">
                             <div class="dashboard-identity-grid">
-                                <div class="dashboard-identity-card">
+                                <div class="dashboard-identity-card dashboard-identity-card--name">
                                     <div class="dashboard-meta-label">User Name</div>
                                     <div class="dashboard-identity-value dashboard-identity-value--name">{{ $displayName }}</div>
                                 </div>
 
-                                <div class="dashboard-identity-card">
+                                <div class="dashboard-identity-card dashboard-identity-card--uid">
                                     <div class="dashboard-meta-label">UID</div>
                                     <div class="dashboard-uid-row">
                                         <span class="dashboard-uid">{{ $user->user_code }}</span>

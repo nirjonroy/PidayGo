@@ -895,7 +895,7 @@
                 height: auto;
                 min-height: 78px;
                 display: grid;
-                grid-template-columns: repeat(5, minmax(0, 1fr));
+                grid-template-columns: repeat(4, minmax(0, 1fr));
                 gap: 6px;
                 padding: 8px;
                 border-radius: 22px;
@@ -936,8 +936,8 @@
             }
             .mobile-quick-actions__item.is-active {
                 color: #ffffff;
-                background: linear-gradient(135deg, rgba(240, 168, 58, 0.92), rgba(111, 51, 204, 0.92));
-                box-shadow: 0 10px 24px rgba(111, 51, 204, 0.28);
+                background: transparent;
+                box-shadow: none;
             }
         }
         @media (max-width: 575.98px) {
@@ -1017,10 +1017,6 @@
                 <a href="{{ route('stake.index') }}" class="mobile-quick-actions__item {{ request()->routeIs('stake.*', 'staking.*') ? 'is-active' : '' }}">
                     <i class="fa fa-line-chart" aria-hidden="true"></i>
                     <span>Stake</span>
-                </a>
-                <a href="{{ route('wallet.deposit') }}" class="mobile-quick-actions__item {{ request()->routeIs('wallet.deposit*') ? 'is-active' : '' }}">
-                    <i class="fa fa-arrow-circle-down" aria-hidden="true"></i>
-                    <span>Deposit</span>
                 </a>
                 <a href="{{ route('wallet.index') }}" class="mobile-quick-actions__item {{ request()->routeIs('wallet.*') && !request()->routeIs('wallet.deposit*', 'wallet.withdrawals*') ? 'is-active' : '' }}">
                     <i class="fa fa-wallet" aria-hidden="true"></i>
