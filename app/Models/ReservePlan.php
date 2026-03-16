@@ -38,4 +38,9 @@ class ReservePlan extends Model
     {
         return $this->belongsTo(Level::class);
     }
+
+    public function ranges()
+    {
+        return $this->hasMany(ReservePlanRange::class)->orderBy('wallet_balance_min')->orderBy('wallet_balance_max');
+    }
 }

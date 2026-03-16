@@ -160,7 +160,9 @@
                                                 <td>{{ $reserve->user?->user_code ?? ('#' . $reserve->user_id) }}</td>
                                                 <td>{{ $reserve->level?->code ?? '-' }}</td>
                                                 <td>
-                                                    @if ($reserve->plan)
+                                                    @if (!empty($reserve->meta['range_label']))
+                                                        {{ $reserve->meta['range_label'] }}
+                                                    @elseif ($reserve->plan)
                                                         {{ number_format((float) ($reserve->plan->wallet_balance_min ?? 0), 4) }} - {{ number_format((float) ($reserve->plan->wallet_balance_max ?? 0), 4) }} USDT
                                                     @else
                                                         -

@@ -239,7 +239,7 @@
                 <span>You already have an active reserve. Continue to the Buy PI page and complete the sell.</span>
                 <a class="btn btn-sm btn-primary" href="{{ route('reserve.sell.form') }}">Go to Buy PI</a>
             </div>
-        @elseif ($plans->isNotEmpty() && $availablePlanCount === 0)
+        @elseif ($reserveOptions->isNotEmpty() && $availableOptionCount === 0)
             <div class="alert alert-warning">
                 No reserve option is available right now. Use the dropdowns below to review which plans are locked or already exhausted for today.
             </div>
@@ -254,14 +254,14 @@
                         <div class="nft__item_price">Reserve Account Balance: {{ number_format($reserveAccountBalance, 8) }} USDT</div>
                         @if ($level)
                             <div class="nft__item_price">Current Level: {{ $level->code }}</div>
-                            <div class="nft__item_price">Unlocked Reserve Options: {{ $unlockedPlanCount }}</div>
+                            <div class="nft__item_price">Unlocked Reserve Options: {{ $unlockedOptionCount }}</div>
                         @else
                             <div class="text-muted">No active level found.</div>
                         @endif
-                        <div class="nft__item_price">Visible Reserve Options: {{ $plans->count() }}</div>
-                        <div class="nft__item_price">Available Right Now: {{ $availablePlanCount }}</div>
+                        <div class="nft__item_price">Visible Reserve Options: {{ $reserveOptions->count() }}</div>
+                        <div class="nft__item_price">Available Right Now: {{ $availableOptionCount }}</div>
                         <p class="reserve-flow-note">
-                            Reserve plans are filtered by your unlocked level and the wallet balance range configured in admin. The reserve page only shows the applicable range options here.
+                            Reserve plans are filtered by your unlocked level, and each level can now contain multiple admin-defined wallet balance criteria with different reserve percentages.
                         </p>
                     </div>
                 </div>
@@ -271,29 +271,30 @@
                 <div class="nft__item s2">
                     <div class="nft__item_info">
                         <h4>Reservation Options</h4>
-                        @if ($plans->isEmpty())
+                        @if ($reserveOptions->isEmpty())
                             <div class="text-muted">No reserve plans are configured yet.</div>
                         @else
                             @php
-                                $activeLevelId = optional($plans->firstWhere('is_active_plan', true))->level_id;
-                                $availableLevelId = optional($plans->firstWhere('can_reserve', true))->level_id;
-                                $initialLevelId = $activeLevelId ?? $availableLevelId ?? optional($plans->first())->level_id;
-                                $levelGroups = $plans->groupBy('level_id');
-                                $planPayload = $plans->map(function ($plan) {
+                                $activeLevelId = optional($reserveOptions->firstWhere('is_active_option', true))->getAttribute('level_id');
+                                $availableLevelId = optional($reserveOptions->firstWhere('can_reserve', true))->getAttribute('level_id');
+                                $initialLevelId = $activeLevelId ?? $availableLevelId ?? optional($reserveOptions->first())->getAttribute('level_id');
+                                $levelGroups = $reserveOptions->groupBy('level_id');
+                                $planPayload = $reserveOptions->map(function ($option) {
                                     return [
-                                        'id' => (int) $plan->id,
-                                        'levelId' => (int) $plan->level_id,
-                                        'levelLabel' => $plan->level?->code ?? 'Reserve',
-                                        'profitRange' => $plan->profit_min_percent . '% - ' . $plan->profit_max_percent . '%',
-                                        'rangeLabel' => $plan->getAttribute('range_label'),
-                                        'maxSells' => $plan->max_sells ? (string) $plan->max_sells : 'Unlimited',
-                                        'dailyLimit' => is_null($plan->max_sells_per_day) ? 'Unlimited' : (string) $plan->max_sells_per_day,
-                                        'usedToday' => (int) $plan->used_today,
-                                        'remainingToday' => is_null($plan->daily_remaining) ? 'Unlimited' : (string) $plan->daily_remaining,
-                                        'canReserve' => (bool) $plan->can_reserve,
-                                        'isActivePlan' => (bool) $plan->is_active_plan,
-                                        'note' => $plan->availability_note,
-                                        'actionLabel' => $plan->action_label,
+                                        'id' => (int) $option->id,
+                                        'planId' => (int) $option->reserve_plan_id,
+                                        'levelId' => (int) $option->getAttribute('level_id'),
+                                        'levelLabel' => $option->getAttribute('level_label'),
+                                        'profitRange' => $option->plan->profit_min_percent . '% - ' . $option->plan->profit_max_percent . '%',
+                                        'rangeLabel' => $option->getAttribute('range_label'),
+                                        'maxSells' => $option->plan->max_sells ? (string) $option->plan->max_sells : 'Unlimited',
+                                        'dailyLimit' => is_null($option->plan->max_sells_per_day) ? 'Unlimited' : (string) $option->plan->max_sells_per_day,
+                                        'usedToday' => (int) $option->used_today,
+                                        'remainingToday' => is_null($option->daily_remaining) ? 'Unlimited' : (string) $option->daily_remaining,
+                                        'canReserve' => (bool) $option->can_reserve,
+                                        'isActiveOption' => (bool) $option->is_active_option,
+                                        'note' => $option->availability_note,
+                                        'actionLabel' => $option->action_label,
                                     ];
                                 })->values();
                             @endphp
@@ -306,7 +307,7 @@
                                             @foreach ($levelGroups as $levelId => $levelPlans)
                                                 @php($firstPlan = $levelPlans->first())
                                                 <option value="{{ $levelId }}" @selected((string) $initialLevelId === (string) $levelId)>
-                                                    {{ $firstPlan->level?->code ?? 'Reserve' }}
+                                                    {{ $firstPlan->getAttribute('level_label') }}
                                                 </option>
                                             @endforeach
                                         </select>
@@ -343,6 +344,7 @@
                                     <form method="POST" action="{{ route('reserve.confirm') }}" class="reserve-option-form reserve-start-form" id="reserve-plan-form">
                                         @csrf
                                         <input type="hidden" name="reserve_plan_id" id="reserve_plan_id">
+                                        <input type="hidden" name="reserve_plan_range_id" id="reserve_plan_range_id">
                                         <button type="submit" class="btn-main" id="reserve-plan-submit">Confirm Reserve</button>
                                     </form>
 
@@ -460,6 +462,7 @@
         var levelSelect = document.getElementById('reserve-level-select');
         var planSelect = document.getElementById('reserve-plan-select');
         var hiddenPlanId = document.getElementById('reserve_plan_id');
+        var hiddenRangeId = document.getElementById('reserve_plan_range_id');
         var submitButton = document.getElementById('reserve-plan-submit');
         var buyPiButton = document.getElementById('reserve-go-buy-pi');
         var selectedStatus = document.getElementById('reserve-selected-status');
@@ -498,7 +501,7 @@
             });
 
             if (levelPlans.length > 0) {
-                var activePlan = levelPlans.find(function (plan) { return plan.isActivePlan; });
+                var activePlan = levelPlans.find(function (plan) { return plan.isActiveOption; });
                 var availablePlan = levelPlans.find(function (plan) { return plan.canReserve; });
                 planSelect.value = String((activePlan || availablePlan || levelPlans[0]).id);
             }
@@ -518,10 +521,13 @@
             }
 
             if (hiddenPlanId) {
-                hiddenPlanId.value = selectedPlan.id;
+                hiddenPlanId.value = selectedPlan.planId;
+            }
+            if (hiddenRangeId) {
+                hiddenRangeId.value = selectedPlan.id;
             }
             if (selectedStatus) {
-                selectedStatus.textContent = selectedPlan.isActivePlan ? 'In Progress' : (selectedPlan.canReserve ? 'Available' : 'Blocked');
+                selectedStatus.textContent = selectedPlan.isActiveOption ? 'In Progress' : (selectedPlan.canReserve ? 'Available' : 'Blocked');
             }
             if (selectedProfit) {
                 selectedProfit.textContent = selectedPlan.profitRange;
@@ -536,7 +542,7 @@
                 selectedNote.textContent = 'Wallet balance range: ' + selectedPlan.rangeLabel + ' | Profit: ' + selectedPlan.profitRange + ' | ' + selectedPlan.note;
             }
 
-            if (selectedPlan.isActivePlan) {
+            if (selectedPlan.isActiveOption) {
                 if (submitButton) {
                     submitButton.style.display = 'none';
                 }

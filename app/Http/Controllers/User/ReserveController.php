@@ -3,20 +3,21 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
-use App\Models\ReservePlan;
 use App\Models\NftItem;
+use App\Models\NftSale;
+use App\Models\ReservePlan;
+use App\Models\ReservePlanRange;
 use App\Models\UserReserve;
 use App\Models\UserReserveLedger;
-use App\Models\NftSale;
 use App\Services\FeatureFlagService;
+use App\Services\ReferralChainService;
 use App\Services\UserLevelResolver;
 use App\Services\UserReserveService;
 use App\Services\WalletService;
-use App\Services\ReferralChainService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class ReserveController extends Controller
@@ -46,18 +47,18 @@ class ReserveController extends Controller
             ->get();
 
         $qualifiedLevelIds = $levelResolver->qualifyingLevels($user)->pluck('id');
-        $plans = $this->visibleReservePlans($user->id, $qualifiedLevelIds, $activeReserve, $reserveEnabled, $walletBalance);
-        $availablePlanCount = $plans->where('can_reserve', true)->count();
-        $unlockedPlanCount = $plans->where('is_unlocked', true)->count();
+        $reserveOptions = $this->visibleReserveOptions($user->id, $qualifiedLevelIds, $activeReserve, $reserveEnabled, $walletBalance);
+        $availableOptionCount = $reserveOptions->where('can_reserve', true)->count();
+        $unlockedOptionCount = $reserveOptions->where('is_unlocked', true)->count();
 
         return view('reserve.index', [
             'walletBalance' => $walletBalance,
             'reserveAccountBalance' => $reserveAccountBalance,
             'level' => $level,
             'reserveEnabled' => $reserveEnabled,
-            'plans' => $plans,
-            'availablePlanCount' => $availablePlanCount,
-            'unlockedPlanCount' => $unlockedPlanCount,
+            'reserveOptions' => $reserveOptions,
+            'availableOptionCount' => $availableOptionCount,
+            'unlockedOptionCount' => $unlockedOptionCount,
             'activeReserve' => $activeReserve,
             'recentReserveLedgers' => $recentReserveLedgers,
             'recentReserveSales' => $recentReserveSales,
@@ -79,6 +80,7 @@ class ReserveController extends Controller
 
         $data = $request->validate([
             'reserve_plan_id' => ['required', 'exists:reserve_plans,id'],
+            'reserve_plan_range_id' => ['required', 'exists:reserve_plan_ranges,id'],
         ]);
 
         $activeReserve = UserReserve::where('user_id', $user->id)
@@ -89,25 +91,31 @@ class ReserveController extends Controller
         }
 
         $qualifiedLevelIds = $levelResolver->qualifyingLevels($user)->pluck('id');
-        $visiblePlans = $this->visibleReservePlans($user->id, $qualifiedLevelIds, null, true, $walletBalance);
-        $plan = $visiblePlans->firstWhere('id', (int) $data['reserve_plan_id']);
-        if (!$plan) {
-            return back()->withErrors(['reserve_plan_id' => 'Invalid reserve plan.']);
+        $visibleOptions = $this->visibleReserveOptions($user->id, $qualifiedLevelIds, null, true, $walletBalance);
+        $option = $visibleOptions->first(function (ReservePlanRange $range) use ($data) {
+            return (int) $range->reserve_plan_id === (int) $data['reserve_plan_id']
+                && (int) $range->id === (int) $data['reserve_plan_range_id'];
+        });
+
+        if (!$option) {
+            return back()->withErrors(['reserve_plan_id' => 'Invalid reserve plan option.']);
         }
 
-        if (!$plan->getAttribute('can_reserve')) {
-            return back()->withErrors(['reserve_plan_id' => $plan->getAttribute('availability_note') ?: 'This reserve option is not available right now.']);
+        if (!$option->getAttribute('can_reserve')) {
+            return back()->withErrors(['reserve_plan_id' => $option->getAttribute('availability_note') ?: 'This reserve option is not available right now.']);
         }
 
-        DB::transaction(function () use ($user, $plan, $userReserveService, $walletService) {
-            $reserveAmount = (float) $plan->getAttribute('computed_reserve_amount');
+        DB::transaction(function () use ($user, $option, $userReserveService, $walletService) {
+            $reserveAmount = (float) $option->getAttribute('computed_reserve_amount');
+            $plan = $option->plan;
 
             $walletService->debit($user, 'reserve_lock', $reserveAmount, [
                 'reserve_plan_id' => $plan->id,
-                'reserve_percentage' => $plan->getAttribute('reserve_percentage'),
+                'reserve_plan_range_id' => $option->id,
+                'reserve_percentage' => $option->getAttribute('reserve_percentage'),
                 'level_id' => $plan->level_id,
-                'range_min' => $plan->getAttribute('range_min'),
-                'range_max' => $plan->getAttribute('range_max'),
+                'range_min' => $option->getAttribute('range_min'),
+                'range_max' => $option->getAttribute('range_max'),
             ], $plan);
 
             $userReserveService->creditUserReserve(
@@ -128,12 +136,13 @@ class ReserveController extends Controller
                     'confirmed_at' => now(),
                     'completed_at' => null,
                     'meta' => [
-                        'wallet_balance_min' => $plan->getAttribute('range_min'),
-                        'wallet_balance_max' => $plan->getAttribute('range_max'),
-                        'reserve_percentage' => $plan->getAttribute('reserve_percentage'),
-                        'range_min' => $plan->getAttribute('range_min'),
-                        'range_max' => $plan->getAttribute('range_max'),
-                        'range_label' => $plan->getAttribute('range_label'),
+                        'reserve_plan_range_id' => $option->id,
+                        'wallet_balance_min' => $option->getAttribute('range_min'),
+                        'wallet_balance_max' => $option->getAttribute('range_max'),
+                        'reserve_percentage' => $option->getAttribute('reserve_percentage'),
+                        'range_min' => $option->getAttribute('range_min'),
+                        'range_max' => $option->getAttribute('range_max'),
+                        'range_label' => $option->getAttribute('range_label'),
                         'profit_min_percent' => $plan->profit_min_percent,
                         'profit_max_percent' => $plan->profit_max_percent,
                         'daily_limit' => $plan->max_sells_per_day,
@@ -274,7 +283,7 @@ class ReserveController extends Controller
         return redirect()->route('reserve.index')->with('status', 'PI sold successfully. Reserve amount and profit were returned to your wallet.');
     }
 
-    private function visibleReservePlans(int $userId, Collection $qualifiedLevelIds, ?UserReserve $activeReserve, bool $reserveEnabled, float $walletBalance): Collection
+    private function visibleReserveOptions(int $userId, Collection $qualifiedLevelIds, ?UserReserve $activeReserve, bool $reserveEnabled, float $walletBalance): Collection
     {
         $dailyStarts = UserReserveLedger::query()
             ->select('ref_id', DB::raw('COUNT(*) as total'))
@@ -285,22 +294,40 @@ class ReserveController extends Controller
             ->groupBy('ref_id')
             ->pluck('total', 'ref_id');
 
+        $activeRangeId = (int) data_get($activeReserve?->meta, 'reserve_plan_range_id', 0);
+
         return ReservePlan::query()
-            ->with('level')
+            ->with(['level', 'ranges'])
             ->where('is_active', true)
             ->orderBy('level_id')
-            ->orderBy('wallet_balance_min')
-            ->orderBy('reserve_amount')
             ->get()
-            ->map(function (ReservePlan $plan) use ($qualifiedLevelIds, $activeReserve, $reserveEnabled, $dailyStarts, $walletBalance) {
-                [$rangeMin, $rangeMax, $rangeLabel] = $this->resolveWalletBalanceRange($plan);
-                $reservePercentage = (float) $plan->reserve_amount;
+            ->flatMap(function (ReservePlan $plan) {
+                if ($plan->ranges->isNotEmpty()) {
+                    return $plan->ranges;
+                }
+
+                $fallbackRange = new ReservePlanRange([
+                    'reserve_plan_id' => $plan->id,
+                    'wallet_balance_min' => $plan->wallet_balance_min,
+                    'wallet_balance_max' => $plan->wallet_balance_max,
+                    'reserve_percentage' => $plan->reserve_amount,
+                ]);
+                $fallbackRange->id = 0;
+                $fallbackRange->setRelation('plan', $plan);
+
+                return collect([$fallbackRange]);
+            })
+            ->map(function (ReservePlanRange $range) use ($qualifiedLevelIds, $activeReserve, $activeRangeId, $reserveEnabled, $dailyStarts, $walletBalance) {
+                $plan = $range->plan;
+                [$rangeMin, $rangeMax, $rangeLabel] = $this->resolveWalletBalanceRange($range);
+                $reservePercentage = (float) $range->reserve_percentage;
                 $computedReserveAmount = round(($walletBalance * $reservePercentage) / 100, 8);
                 $isUnlocked = $qualifiedLevelIds->contains($plan->level_id);
                 $usedToday = (int) ($dailyStarts[$plan->id] ?? 0);
                 $dailyLimit = $plan->max_sells_per_day;
                 $dailyRemaining = $dailyLimit === null ? null : max(0, (int) $dailyLimit - $usedToday);
                 $isActivePlan = !empty($activeReserve) && (int) $activeReserve->reserve_plan_id === (int) $plan->id;
+                $isActiveOption = $isActivePlan && ($activeRangeId === 0 || $activeRangeId === (int) $range->id);
                 $hasConfiguredRange = $rangeMax > 0 || $rangeMin > 0;
                 $isWithinWalletRange = $hasConfiguredRange
                     && $walletBalance >= $rangeMin
@@ -317,16 +344,16 @@ class ReserveController extends Controller
                     $availabilityNote = 'Reserve is currently disabled.';
                     $actionLabel = 'Unavailable';
                 } elseif (!$hasConfiguredRange) {
-                    $availabilityNote = 'This level does not have a reserve amount range configured.';
+                    $availabilityNote = 'This reserve option does not have a wallet balance range configured.';
                     $actionLabel = 'Unavailable';
                 } elseif (!$isUnlocked) {
                     $availabilityNote = 'Requires ' . ($plan->level?->code ?? 'a higher level') . '.';
                     $actionLabel = 'Locked';
                 } elseif (!empty($activeReserve)) {
-                    $availabilityNote = $isActivePlan
+                    $availabilityNote = $isActiveOption
                         ? 'This reserve is active. Continue to Buy PI.'
                         : 'Complete your current reserve first.';
-                    $actionLabel = $isActivePlan ? 'Go to Buy PI' : 'Unavailable';
+                    $actionLabel = $isActiveOption ? 'Go to Buy PI' : 'Unavailable';
                 } elseif ($dailyRemaining !== null && $dailyRemaining <= 0) {
                     $availabilityNote = 'Daily limit reached for this plan.';
                     $actionLabel = 'Limit Reached';
@@ -338,43 +365,39 @@ class ReserveController extends Controller
                     $actionLabel = 'Reserve Now';
                 }
 
-                $plan->setAttribute('range_min', $rangeMin);
-                $plan->setAttribute('range_max', $rangeMax);
-                $plan->setAttribute('range_label', $rangeLabel);
-                $plan->setAttribute('reserve_percentage', $reservePercentage);
-                $plan->setAttribute('computed_reserve_amount', $computedReserveAmount);
-                $plan->setAttribute('computed_reserve_label', $this->formatDisplayAmount($computedReserveAmount) . ' USDT');
-                $plan->setAttribute('is_unlocked', $isUnlocked);
-                $plan->setAttribute('used_today', $usedToday);
-                $plan->setAttribute('daily_remaining', $dailyRemaining);
-                $plan->setAttribute('can_reserve', $canReserve);
-                $plan->setAttribute('is_active_plan', $isActivePlan);
-                $plan->setAttribute('availability_note', $availabilityNote);
-                $plan->setAttribute('action_label', $actionLabel);
+                $range->setAttribute('level_id', $plan->level_id);
+                $range->setAttribute('level_label', $plan->level?->code ?? 'Reserve');
+                $range->setAttribute('range_min', $rangeMin);
+                $range->setAttribute('range_max', $rangeMax);
+                $range->setAttribute('range_label', $rangeLabel);
+                $range->setAttribute('reserve_percentage', $reservePercentage);
+                $range->setAttribute('computed_reserve_amount', $computedReserveAmount);
+                $range->setAttribute('computed_reserve_label', $this->formatDisplayAmount($computedReserveAmount) . ' USDT');
+                $range->setAttribute('is_unlocked', $isUnlocked);
+                $range->setAttribute('used_today', $usedToday);
+                $range->setAttribute('daily_remaining', $dailyRemaining);
+                $range->setAttribute('can_reserve', $canReserve);
+                $range->setAttribute('is_active_option', $isActiveOption);
+                $range->setAttribute('availability_note', $availabilityNote);
+                $range->setAttribute('action_label', $actionLabel);
 
-                return $plan;
-            });
+                return $range;
+            })
+            ->sortBy(function (ReservePlanRange $range) {
+                return sprintf(
+                    '%010d-%020.8F-%020.8F',
+                    (int) $range->getAttribute('level_id'),
+                    (float) ($range->wallet_balance_min ?? 0),
+                    (float) ($range->wallet_balance_max ?? 0)
+                );
+            })
+            ->values();
     }
 
-    private function resolveWalletBalanceRange(ReservePlan $plan): array
+    private function resolveWalletBalanceRange(ReservePlanRange $range): array
     {
-        $min = (float) ($plan->wallet_balance_min ?? 0);
-        $max = (float) ($plan->wallet_balance_max ?? 0);
-
-        if ($min <= 0 && $max <= 0) {
-            $level = $plan->level;
-            if (!$level) {
-                return [0.0, 0.0, 'Not configured'];
-            }
-
-            $depositMin = (float) ($level->min_deposit ?? 0);
-            $depositMax = (float) ($level->max_deposit ?? 0);
-            $reservationMin = (float) ($level->min_reservation ?? 0);
-            $reservationMax = (float) ($level->max_reservation ?? 0);
-
-            $min = $depositMin > 0 || $depositMax > 0 ? $depositMin : $reservationMin;
-            $max = $depositMin > 0 || $depositMax > 0 ? $depositMax : $reservationMax;
-        }
+        $min = (float) ($range->wallet_balance_min ?? 0);
+        $max = (float) ($range->wallet_balance_max ?? 0);
 
         if ($min <= 0 && $max <= 0) {
             return [0.0, 0.0, 'Not configured'];

@@ -21,8 +21,7 @@
                         <thead>
                             <tr>
                                 <th>Level</th>
-                                <th>Wallet Range</th>
-                                <th>Reserve %</th>
+                                <th>Reserve Criteria</th>
                                 <th>Profit % Range</th>
                                 <th>Max Sells</th>
                                 <th>Max/Day</th>
@@ -35,8 +34,21 @@
                             @foreach ($plans as $plan)
                                 <tr>
                                     <td>{{ $plan->level?->code ?? 'N/A' }}</td>
-                                    <td>{{ number_format((float) ($plan->wallet_balance_min ?? 0), 4) }} - {{ number_format((float) ($plan->wallet_balance_max ?? 0), 4) }}</td>
-                                    <td>{{ number_format((float) $plan->reserve_amount, 3) }}%</td>
+                                    <td>
+                                        @if ($plan->ranges->isNotEmpty())
+                                            @foreach ($plan->ranges as $range)
+                                                <div>
+                                                    {{ number_format((float) $range->wallet_balance_min, 4) }}
+                                                    -
+                                                    {{ number_format((float) $range->wallet_balance_max, 4) }}
+                                                    =
+                                                    {{ number_format((float) $range->reserve_percentage, 3) }}%
+                                                </div>
+                                            @endforeach
+                                        @else
+                                            <span class="text-muted">No criteria</span>
+                                        @endif
+                                    </td>
                                     <td>{{ $plan->profit_min_percent }}% - {{ $plan->profit_max_percent }}%</td>
                                     <td>{{ $plan->max_sells ?? 'Unlimited' }}</td>
                                     <td>{{ $plan->max_sells_per_day ?? 'Unlimited' }}</td>
