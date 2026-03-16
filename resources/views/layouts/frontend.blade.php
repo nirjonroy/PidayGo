@@ -899,13 +899,13 @@
                 gap: 6px;
                 padding: 8px;
                 border-radius: 22px;
-                background: transparent;
-                border: 0;
-                box-shadow: none;
+                background: rgba(7, 8, 18, 0.62);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                box-shadow: 0 14px 30px rgba(0, 0, 0, 0.18);
                 overflow: visible;
                 box-sizing: border-box;
-                backdrop-filter: none;
-                -webkit-backdrop-filter: none;
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
                 z-index: 1200;
             }
             .mobile-quick-actions__item {
