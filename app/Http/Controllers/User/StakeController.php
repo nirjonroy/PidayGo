@@ -18,13 +18,19 @@ use RuntimeException;
 
 class StakeController extends Controller
 {
-    public function index(Request $request, WalletService $walletService, StakeRewardService $stakeRewardService): View
+    public function index(
+        Request $request,
+        WalletService $walletService,
+        StakeRewardService $stakeRewardService,
+        UserLevelResolver $levelResolver
+    ): View
     {
         $user = $request->user();
         $stakeRewardService->creditDueRewardsForUser($user, $walletService);
+        $stakeMorphClass = (new Stake())->getMorphClass();
         $recentStakeIncome = $user->walletLedgers()
             ->where('type', 'reward_credit')
-            ->where('reference_type', (new Stake())->getMorphClass())
+            ->where('reference_type', $stakeMorphClass)
             ->orderByDesc('created_at')
             ->limit(30)
             ->get();
@@ -33,18 +39,32 @@ class StakeController extends Controller
             ->whereIn('id', $recentStakeIncome->pluck('reference_id')->filter()->unique())
             ->get()
             ->keyBy('id');
+        $plans = StakePlan::with('requiredLevel')
+            ->where('is_active', true)
+            ->orderBy('min_amount')
+            ->get();
+        $stakes = $user->stakes()
+            ->with('stakePlan.requiredLevel')
+            ->where('status', 'active')
+            ->orderByDesc('started_at')
+            ->get();
+        $todayStakeIncome = (float) $user->walletLedgers()
+            ->where('type', 'reward_credit')
+            ->where('reference_type', $stakeMorphClass)
+            ->whereDate('created_at', today())
+            ->sum('amount');
 
         return view('stake.index', [
-            'balance' => $walletService->getBalance($user),
-            'plans' => StakePlan::with('requiredLevel')
-                ->where('is_active', true)
-                ->orderBy('min_amount')
-                ->get(),
-            'stakes' => $user->stakes()
-                ->with('stakePlan')
-                ->where('status', 'active')
-                ->orderByDesc('started_at')
-                ->get(),
+            'balance' => (float) $walletService->getBalance($user),
+            'currentLevel' => $levelResolver->resolve($user),
+            'plans' => $plans,
+            'stakes' => $stakes,
+            'activeStakeCount' => $stakes->count(),
+            'activeStakePrincipal' => (float) $stakes->sum('principal_amount'),
+            'totalRewardPaid' => (float) Stake::query()
+                ->where('user_id', $user->id)
+                ->sum('total_reward_paid'),
+            'todayStakeIncome' => $todayStakeIncome,
             'recentStakeIncome' => $recentStakeIncome,
             'stakeReferences' => $stakeReferences,
         ]);
