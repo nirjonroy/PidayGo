@@ -15,10 +15,12 @@ class WithdrawalController extends Controller
     public function index(Request $request): View
     {
         $user = $request->user();
+        $walletService = app(WalletService::class);
+        $withdrawals = WithdrawalRequest::where('user_id', $user->id)->latest()->get();
 
         return view('wallet.withdrawals', [
-            'balance' => (float) $user->walletLedgers()->sum('amount'),
-            'withdrawals' => WithdrawalRequest::where('user_id', $user->id)->latest()->get(),
+            'balance' => (float) $walletService->getBalance($user),
+            'withdrawals' => $withdrawals,
             'reviewHours' => 72,
         ]);
     }
@@ -31,7 +33,7 @@ class WithdrawalController extends Controller
 
         $amount = (float) $validated['amount'];
         $user = $request->user();
-        $balance = (float) $user->walletLedgers()->sum('amount');
+        $balance = (float) $walletService->getBalance($user);
 
         if ($balance < $amount) {
             return back()->withErrors(['amount' => 'Insufficient balance.']);

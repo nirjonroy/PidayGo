@@ -7,13 +7,14 @@ use App\Models\DepositAddress;
 use App\Models\DepositRequest;
 use App\Models\SiteSetting;
 use App\Services\NotificationService;
+use App\Services\WalletService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class DepositController extends Controller
 {
-    public function create(Request $request): View
+    public function create(Request $request, WalletService $walletService): View
     {
         $setting = SiteSetting::first();
         $activeAddress = DepositAddress::where('is_active', true)->first();
@@ -27,6 +28,7 @@ class DepositController extends Controller
             'chain' => $activeAddress?->chain ?? 'TRC20',
             'minDeposit' => $minDeposit,
             'reviewHours' => $reviewHours,
+            'walletBalance' => (float) $walletService->getBalance($request->user()),
             'history' => $request->user()
                 ->depositRequests()
                 ->orderByDesc('id')
