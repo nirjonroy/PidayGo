@@ -859,7 +859,7 @@
 
                 <div class="dashboard-team-dropdowns" aria-label="Team branches">
                     @foreach ($teamBranches as $branch)
-                        <details class="dashboard-team-dropdown" @if ($teamDefaultBranch === $branch['slot']) open @endif>
+                        <details class="dashboard-team-dropdown">
                             <summary class="dashboard-team-dropdown__toggle">
                                 <div>
                                     <h3 class="dashboard-team-dropdown__title">{{ $branch['label'] }}</h3>
