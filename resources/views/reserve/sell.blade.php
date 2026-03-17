@@ -1,5 +1,88 @@
 @extends('layouts.frontend')
 
+@push('styles')
+<style>
+    .reserve-loader {
+        position: fixed;
+        inset: 0;
+        z-index: 3000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(7, 8, 18, 0.88);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
+    .reserve-loader.is-visible {
+        display: flex;
+    }
+    .reserve-loader__card {
+        width: min(320px, calc(100vw - 32px));
+        padding: 28px 24px;
+        border-radius: 24px;
+        text-align: center;
+        background: #ffffff;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        box-shadow: 0 24px 50px rgba(15, 23, 42, 0.18);
+    }
+    .reserve-loader__logo {
+        width: 76px;
+        height: 76px;
+        object-fit: contain;
+        margin-bottom: 18px;
+        animation: reserve-loader-pulse 1.2s ease-in-out infinite;
+    }
+    .reserve-loader__title {
+        font-size: 22px;
+        font-weight: 800;
+        color: #101828;
+        margin-bottom: 8px;
+    }
+    .reserve-loader__copy {
+        color: #617086;
+        margin-bottom: 18px;
+    }
+    .reserve-loader__bar {
+        position: relative;
+        overflow: hidden;
+        height: 8px;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.08);
+    }
+    .reserve-loader__bar::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        width: 40%;
+        border-radius: inherit;
+        background: linear-gradient(135deg, #f0a83a, #6f33cc);
+        animation: reserve-loader-slide 1s linear infinite;
+    }
+    .dark-scheme .reserve-loader__card {
+        background: #11131f;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 24px 50px rgba(0, 0, 0, 0.35);
+    }
+    .dark-scheme .reserve-loader__title {
+        color: #ffffff;
+    }
+    .dark-scheme .reserve-loader__copy {
+        color: #aeb7c4;
+    }
+    .dark-scheme .reserve-loader__bar {
+        background: rgba(255, 255, 255, 0.08);
+    }
+    @keyframes reserve-loader-pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.08); }
+    }
+    @keyframes reserve-loader-slide {
+        0% { transform: translateX(-120%); }
+        100% { transform: translateX(260%); }
+    }
+</style>
+@endpush
+
 @section('content')
 @include('frontend.partials.page-banner', ['title' => 'Buy PI'])
 
@@ -39,7 +122,7 @@
                         @elseif ($items->isEmpty())
                             <div class="text-muted">No PI items are available right now.</div>
                         @else
-                            <form method="POST" action="{{ route('reserve.sell.submit') }}" class="form-border">
+                            <form method="POST" action="{{ route('reserve.sell.submit') }}" class="form-border reserve-sell-form" id="sell-pi-form" data-loader-title="Selling PI" data-loader-copy="Please wait while your PI sell and profit are being processed.">
                                 @csrf
                                 @php
                                     $firstItem = $items->first();
@@ -99,6 +182,15 @@
         </div>
     </div>
 </section>
+
+<div class="reserve-loader" id="reserve-loader" aria-hidden="true">
+    <div class="reserve-loader__card">
+        <img src="{{ asset('frontend/images/icon.png') }}" alt="Loading" class="reserve-loader__logo">
+        <div class="reserve-loader__title" id="reserve-loader-title">Selling PI</div>
+        <div class="reserve-loader__copy" id="reserve-loader-copy">Please wait while your PI sell and profit are being processed.</div>
+        <div class="reserve-loader__bar"></div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -108,6 +200,9 @@
     const selectedImage = document.getElementById('selected-nft-image');
     const selectedTitle = document.getElementById('selected-nft-title');
     const selectedPrice = document.getElementById('selected-nft-price');
+    const reserveLoader = document.getElementById('reserve-loader');
+    const reserveLoaderTitle = document.getElementById('reserve-loader-title');
+    const reserveLoaderCopy = document.getElementById('reserve-loader-copy');
 
     document.querySelectorAll('.nft-select').forEach(function (radio) {
       radio.addEventListener('change', function () {
@@ -127,6 +222,21 @@
     if (preselected && selectedPrice && amountInput) {
       selectedPrice.textContent = `Reserve Amount: ${parseFloat(amountInput.value || 0).toFixed(8)} USDT`;
     }
+
+    document.querySelectorAll('.reserve-sell-form').forEach(function (form) {
+      form.addEventListener('submit', function () {
+        if (reserveLoaderTitle) {
+          reserveLoaderTitle.textContent = form.dataset.loaderTitle || 'Selling PI';
+        }
+        if (reserveLoaderCopy) {
+          reserveLoaderCopy.textContent = form.dataset.loaderCopy || 'Please wait while your PI sell is being processed.';
+        }
+        if (reserveLoader) {
+          reserveLoader.classList.add('is-visible');
+          reserveLoader.setAttribute('aria-hidden', 'false');
+        }
+      });
+    });
   });
 </script>
 @endpush

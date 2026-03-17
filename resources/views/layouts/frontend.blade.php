@@ -440,33 +440,73 @@
         .popup-backdrop {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(4, 6, 14, 0.72);
             display: none;
             align-items: center;
             justify-content: center;
+            padding: 20px;
             z-index: 1000;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
         }
         .popup-card {
-            background: #101017;
-            color: #f2f5f9;
-            padding: 20px;
-            border-radius: 12px;
+            background: #ffffff;
+            color: #101828;
+            padding: 24px;
+            border-radius: 22px;
             max-width: 520px;
             width: 92%;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: 0 24px 50px rgba(15, 23, 42, 0.18);
+            animation: popup-card-rise 0.24s ease;
+        }
+        .dark-scheme .popup-card {
+            background: #101017;
+            color: #f2f5f9;
+            border-color: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 24px 50px rgba(0, 0, 0, 0.35);
+        }
+        .popup-card__icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 22px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, rgba(240, 168, 58, 0.18), rgba(111, 51, 204, 0.24));
+            border: 1px solid rgba(240, 168, 58, 0.2);
+            box-shadow: 0 14px 28px rgba(111, 51, 204, 0.18);
+        }
+        .popup-card__icon img {
+            width: 44px;
+            height: 44px;
+            object-fit: contain;
+            animation: popup-pulse 1.2s ease-in-out infinite;
         }
         .popup-card h3 {
             margin-top: 0;
+            margin-bottom: 10px;
             font-size: 20px;
+            color: inherit;
+        }
+        .popup-card p {
+            margin-bottom: 0;
+            color: inherit;
+            line-height: 1.75;
         }
         .popup-actions {
             display: flex;
             gap: 10px;
+            flex-wrap: wrap;
             justify-content: flex-end;
             margin-top: 16px;
         }
-        .popup-actions form {
+        .popup-actions form,
+        .popup-actions .btn-main {
             flex: 1 1 0;
+        }
+        .popup-actions form {
             margin: 0;
         }
         .popup-actions .btn-main {
@@ -477,6 +517,40 @@
             justify-content: center;
             padding: 10px 18px;
             white-space: nowrap;
+        }
+        .popup-actions .btn-border {
+            min-height: 54px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            padding: 10px 18px;
+            border: 1px solid rgba(15, 23, 42, 0.14);
+            color: inherit;
+            background: rgba(15, 23, 42, 0.04);
+        }
+        .dark-scheme .popup-actions .btn-border {
+            border-color: rgba(255, 255, 255, 0.14);
+            background: rgba(255, 255, 255, 0.06);
+            color: #f2f5f9;
+        }
+        @keyframes popup-card-rise {
+            0% {
+                opacity: 0;
+                transform: translateY(14px) scale(0.97);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        @keyframes popup-pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.08);
+            }
         }
         .top-sellers-grid {
             margin: 0;
@@ -1352,14 +1426,32 @@
     @stack('scripts')
 
     @if (!empty($popupNotification) && $popupNotification->notification)
+        @php
+            $notificationMeta = $popupNotification->notification->metadata ?? [];
+            $popupIcon = $notificationMeta['popup_icon'] ?? null;
+            $popupActionType = $notificationMeta['action_type'] ?? null;
+            $popupActionLabel = $notificationMeta['action_label'] ?? null;
+            $popupActionUrl = $notificationMeta['action_url'] ?? null;
+            $popupActionTarget = $notificationMeta['action_target'] ?? null;
+        @endphp
         <div class="popup-backdrop" id="notif-modal">
             <div class="popup-card">
+                @if ($popupIcon === 'pi')
+                    <div class="popup-card__icon">
+                        <img src="{{ asset('frontend/images/icon.png') }}" alt="PI">
+                    </div>
+                @endif
                 <h3>{{ $popupNotification->notification->title }}</h3>
                 <p>{{ $popupNotification->notification->message }}</p>
                 <div class="popup-actions">
+                    @if ($popupActionLabel && $popupActionType === 'open_modal' && $popupActionTarget)
+                        <button type="button" class="btn-main" data-popup-modal-target="{{ $popupActionTarget }}">{{ $popupActionLabel }}</button>
+                    @elseif ($popupActionLabel && $popupActionUrl)
+                        <a href="{{ $popupActionUrl }}" class="btn-main">{{ $popupActionLabel }}</a>
+                    @endif
                     <form method="POST" action="{{ route('notifications.dismiss', $popupNotification->notification) }}">
                         @csrf
-                        <button type="submit" class="btn-main btn-light">Dismiss</button>
+                        <button type="submit" class="btn-border">Dismiss</button>
                     </form>
                     <form method="POST" action="{{ route('notifications.read', $popupNotification->notification) }}">
                         @csrf
@@ -1384,6 +1476,21 @@
                         if (e.target === modal) {
                             modal.style.display = 'none';
                         }
+                    });
+                    modal.querySelectorAll('[data-popup-modal-target]').forEach(function (button) {
+                        button.addEventListener('click', function () {
+                            var targetId = button.getAttribute('data-popup-modal-target');
+                            if (!targetId) {
+                                return;
+                            }
+                            var target = document.getElementById(targetId);
+                            if (target) {
+                                modal.style.display = 'none';
+                                target.classList.add('is-visible');
+                                target.setAttribute('aria-hidden', 'false');
+                                document.body.classList.add('reserve-modal-open');
+                            }
+                        });
                     });
                 }
             });

@@ -19,6 +19,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use RuntimeException;
 use Illuminate\View\View;
 
 class ReserveController extends Controller
@@ -46,6 +47,15 @@ class ReserveController extends Controller
             ->orderByDesc('created_at')
             ->limit(20)
             ->get();
+        $sellItems = $activeReserve
+            ? NftItem::query()
+                ->where('is_active', true)
+                ->where('status', 'published')
+                ->orderByDesc('is_featured')
+                ->orderByDesc('updated_at')
+                ->limit(8)
+                ->get()
+            : collect();
 
         $qualifiedLevelIds = $levelResolver->qualifyingLevels($user)->pluck('id');
         $reserveOptions = $this->visibleReserveOptions($user->id, $qualifiedLevelIds, $activeReserve, $reserveEnabled, $walletBalance);
@@ -63,6 +73,8 @@ class ReserveController extends Controller
             'activeReserve' => $activeReserve,
             'recentReserveLedgers' => $recentReserveLedgers,
             'recentReserveSales' => $recentReserveSales,
+            'sellItems' => $sellItems,
+            'nftEnabled' => $featureFlagService->isEnabled('nft_enabled'),
         ]);
     }
 
@@ -109,58 +121,67 @@ class ReserveController extends Controller
         $reserveAmount = (float) $option->getAttribute('computed_reserve_amount');
         $plan = $option->plan;
 
-        DB::transaction(function () use ($user, $option, $reserveAmount, $plan, $userReserveService, $walletService) {
+        try {
+            DB::transaction(function () use ($user, $option, $reserveAmount, $plan, $userReserveService, $walletService) {
 
-            $walletService->debit($user, 'reserve_lock', $reserveAmount, [
-                'reserve_plan_id' => $plan->id,
-                'reserve_plan_range_id' => $option->id,
-                'reserve_percentage' => $option->getAttribute('reserve_percentage'),
-                'level_id' => $plan->level_id,
-                'range_min' => $option->getAttribute('range_min'),
-                'range_max' => $option->getAttribute('range_max'),
-            ], $plan);
-
-            $userReserveService->creditUserReserve(
-                $user,
-                $reserveAmount,
-                'reserve_add',
-                'reserve_plan',
-                $plan->id
-            );
-
-            UserReserve::updateOrCreate(
-                ['user_id' => $user->id],
-                [
-                    'level_id' => $plan->level_id,
+                $walletService->debit($user, 'reserve_lock', $reserveAmount, [
                     'reserve_plan_id' => $plan->id,
-                    'amount' => $reserveAmount,
-                    'status' => 'confirmed',
-                    'confirmed_at' => now(),
-                    'completed_at' => null,
-                    'meta' => [
-                        'reserve_plan_range_id' => $option->id,
-                        'wallet_balance_min' => $option->getAttribute('range_min'),
-                        'wallet_balance_max' => $option->getAttribute('range_max'),
-                        'reserve_percentage' => $option->getAttribute('reserve_percentage'),
-                        'range_min' => $option->getAttribute('range_min'),
-                        'range_max' => $option->getAttribute('range_max'),
-                        'range_label' => $option->getAttribute('range_label'),
-                        'profit_min_percent' => $plan->profit_min_percent,
-                        'profit_max_percent' => $plan->profit_max_percent,
-                        'daily_limit' => $plan->max_sells_per_day,
-                    ],
-                ]
-            );
+                    'reserve_plan_range_id' => $option->id,
+                    'reserve_percentage' => $option->getAttribute('reserve_percentage'),
+                    'reserve_mode' => $option->getAttribute('reserve_mode'),
+                    'level_id' => $plan->level_id,
+                    'range_min' => $option->getAttribute('range_min'),
+                    'range_max' => $option->getAttribute('range_max'),
+                ], $plan);
 
-            UserReserveLedger::create([
-                'user_id' => $user->id,
-                'change' => 0,
-                'reason' => 'reserve_started',
-                'ref_type' => 'reserve_plan',
-                'ref_id' => $plan->id,
-                'created_at' => now(),
+                $userReserveService->creditUserReserve(
+                    $user,
+                    $reserveAmount,
+                    'reserve_add',
+                    'reserve_plan',
+                    $plan->id
+                );
+
+                UserReserve::updateOrCreate(
+                    ['user_id' => $user->id],
+                    [
+                        'level_id' => $plan->level_id,
+                        'reserve_plan_id' => $plan->id,
+                        'amount' => $reserveAmount,
+                        'status' => 'confirmed',
+                        'confirmed_at' => now(),
+                        'completed_at' => null,
+                        'meta' => [
+                            'reserve_plan_range_id' => $option->id,
+                            'wallet_balance_min' => $option->getAttribute('range_min'),
+                            'wallet_balance_max' => $option->getAttribute('range_max'),
+                            'reserve_percentage' => $option->getAttribute('reserve_percentage'),
+                            'reserve_mode' => $option->getAttribute('reserve_mode'),
+                            'computed_reserve_amount' => $reserveAmount,
+                            'range_min' => $option->getAttribute('range_min'),
+                            'range_max' => $option->getAttribute('range_max'),
+                            'range_label' => $option->getAttribute('range_label'),
+                            'profit_min_percent' => $plan->profit_min_percent,
+                            'profit_max_percent' => $plan->profit_max_percent,
+                            'daily_limit' => $plan->max_sells_per_day,
+                        ],
+                    ]
+                );
+
+                UserReserveLedger::create([
+                    'user_id' => $user->id,
+                    'change' => 0,
+                    'reason' => 'reserve_started',
+                    'ref_type' => 'reserve_plan',
+                    'ref_id' => $plan->id,
+                    'created_at' => now(),
+                ]);
+            });
+        } catch (RuntimeException $exception) {
+            return back()->withErrors([
+                'reserve_plan_id' => 'This reserve option requires ' . number_format($reserveAmount, 8) . ' USDT, but your available wallet balance is lower.',
             ]);
-        });
+        }
 
         $notifications->notifyUser(
             $user->id,
@@ -174,11 +195,17 @@ class ReserveController extends Controller
                 'reserve_plan_range_id' => $option->id,
                 'reserve_amount' => $reserveAmount,
                 'range_label' => $option->getAttribute('range_label'),
+                'action_type' => 'open_modal',
+                'action_target' => 'reserve-sell-modal',
+                'action_label' => 'Sell PI Now',
             ],
             true
         );
 
-        return redirect()->route('reserve.sell.form')->with('status', 'Reserve confirmed. The reserve amount was deducted from wallet and moved to reserve balance. Continue to Buy PI and sell to receive it back with profit.');
+        return redirect()
+            ->route('reserve.index')
+            ->with('status', 'Reserve confirmed. The reserve amount was deducted from wallet and moved to reserve balance. Continue to Buy PI and sell to receive it back with profit.')
+            ->with('open_sell_modal', true);
     }
 
     public function sellForm(Request $request, FeatureFlagService $featureFlagService): View|RedirectResponse
@@ -311,6 +338,9 @@ class ReserveController extends Controller
                 'profit_amount' => $profit,
                 'profit_percent' => $percent,
                 'nft_item_id' => $nftItemId,
+                'action_type' => 'link',
+                'action_url' => route('wallet.index'),
+                'action_label' => 'View Wallet',
             ],
             true
         );
@@ -356,7 +386,7 @@ class ReserveController extends Controller
                 $plan = $range->plan;
                 [$rangeMin, $rangeMax, $rangeLabel] = $this->resolveWalletBalanceRange($range);
                 $reservePercentage = (float) $range->reserve_percentage;
-                $computedReserveAmount = round(($walletBalance * $reservePercentage) / 100, 8);
+                [$computedReserveAmount, $reserveMode] = $this->resolveReserveAmount($walletBalance, $reservePercentage);
                 $isUnlocked = $qualifiedLevelIds->contains($plan->level_id);
                 $usedToday = (int) ($dailyStarts[$plan->id] ?? 0);
                 $dailyLimit = $plan->max_sells_per_day;
@@ -364,12 +394,14 @@ class ReserveController extends Controller
                 $isActivePlan = !empty($activeReserve) && (int) $activeReserve->reserve_plan_id === (int) $plan->id;
                 $isActiveOption = $isActivePlan && ($activeRangeId === 0 || $activeRangeId === (int) $range->id);
                 $hasConfiguredRange = $rangeMax > 0 || $rangeMin > 0;
+                $hasSufficientBalance = $walletBalance + 0.00000001 >= $computedReserveAmount;
                 $canReserve = $reserveEnabled
                     && $isUnlocked
                     && empty($activeReserve)
                     && $hasConfiguredRange
                     && $reservePercentage > 0
                     && $computedReserveAmount > 0
+                    && $hasSufficientBalance
                     && ($dailyRemaining === null || $dailyRemaining > 0);
 
                 if (!$reserveEnabled) {
@@ -386,6 +418,9 @@ class ReserveController extends Controller
                         ? 'This reserve is active. Continue to Buy PI.'
                         : 'Complete your current reserve first.';
                     $actionLabel = $isActiveOption ? 'Go to Buy PI' : 'Unavailable';
+                } elseif (!$hasSufficientBalance) {
+                    $availabilityNote = 'This option requires ' . $this->formatDisplayAmount($computedReserveAmount) . ' USDT, which is higher than your available wallet balance.';
+                    $actionLabel = 'Insufficient Balance';
                 } elseif ($dailyRemaining !== null && $dailyRemaining <= 0) {
                     $availabilityNote = 'Daily limit reached for this plan.';
                     $actionLabel = 'Limit Reached';
@@ -400,6 +435,7 @@ class ReserveController extends Controller
                 $range->setAttribute('range_max', $rangeMax);
                 $range->setAttribute('range_label', $rangeLabel);
                 $range->setAttribute('reserve_percentage', $reservePercentage);
+                $range->setAttribute('reserve_mode', $reserveMode);
                 $range->setAttribute('computed_reserve_amount', $computedReserveAmount);
                 $range->setAttribute('computed_reserve_label', $this->formatDisplayAmount($computedReserveAmount) . ' USDT');
                 $range->setAttribute('is_unlocked', $isUnlocked);
@@ -444,5 +480,14 @@ class ReserveController extends Controller
     private function formatDisplayAmount(float $amount): string
     {
         return rtrim(rtrim(number_format($amount, 8, '.', ''), '0'), '.');
+    }
+
+    private function resolveReserveAmount(float $walletBalance, float $reservePercentage): array
+    {
+        if ($reservePercentage > 100) {
+            return [round($reservePercentage, 8), 'fixed'];
+        }
+
+        return [round(($walletBalance * $reservePercentage) / 100, 8), 'percentage'];
     }
 }

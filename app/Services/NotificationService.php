@@ -330,6 +330,8 @@ class NotificationService
             'withdraw_approved' => 'system_alerts',
             'withdraw_rejected' => 'system_alerts',
             'stake_created' => 'system_alerts',
+            'reserve_started' => 'system_alerts',
+            'reserve_completed' => 'system_alerts',
             'kyc_submitted' => 'system_alerts',
             'kyc_approved' => 'system_alerts',
             'kyc_rejected' => 'system_alerts',

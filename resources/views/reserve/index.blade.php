@@ -293,6 +293,154 @@
         background: linear-gradient(135deg, #f0a83a, #6f33cc);
         animation: reserve-loader-slide 1s linear infinite;
     }
+    .reserve-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 2900;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: rgba(7, 8, 18, 0.82);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
+    .reserve-modal.is-visible {
+        display: flex;
+    }
+    .reserve-modal__dialog {
+        position: relative;
+        width: min(860px, calc(100vw - 32px));
+        max-height: calc(100vh - 40px);
+        overflow-y: auto;
+        padding: 24px;
+        border-radius: 24px;
+        background: var(--reserve-panel-bg);
+        border: 1px solid var(--reserve-panel-border);
+        box-shadow: var(--reserve-panel-shadow);
+    }
+    .reserve-modal__close {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        width: 42px;
+        height: 42px;
+        border: 0;
+        border-radius: 999px;
+        background: var(--reserve-surface-bg);
+        border: 1px solid var(--reserve-surface-border);
+        color: var(--reserve-title);
+        font-size: 24px;
+        line-height: 1;
+    }
+    .reserve-modal__head {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 20px;
+        padding-right: 40px;
+    }
+    .reserve-modal__icon {
+        width: 68px;
+        height: 68px;
+        border-radius: 22px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, rgba(240, 168, 58, 0.18), rgba(111, 51, 204, 0.24));
+        border: 1px solid rgba(240, 168, 58, 0.22);
+        box-shadow: 0 16px 28px rgba(111, 51, 204, 0.18);
+    }
+    .reserve-modal__icon img {
+        width: 42px;
+        height: 42px;
+        object-fit: contain;
+    }
+    .reserve-modal__title {
+        margin: 0 0 4px;
+        color: var(--reserve-title);
+        font-size: 28px;
+        font-weight: 800;
+    }
+    .reserve-modal__copy {
+        margin: 0;
+        color: var(--reserve-muted);
+        line-height: 1.7;
+    }
+    .reserve-modal__grid {
+        display: grid;
+        grid-template-columns: minmax(0, 280px) minmax(0, 1fr);
+        gap: 18px;
+        margin-bottom: 18px;
+    }
+    .reserve-modal__panel {
+        padding: 18px;
+        border-radius: 18px;
+        background: var(--reserve-surface-bg);
+        border: 1px solid var(--reserve-surface-border);
+    }
+    .reserve-modal__panel h5 {
+        margin-bottom: 12px;
+        color: var(--reserve-title);
+        font-size: 18px;
+        font-weight: 800;
+    }
+    .reserve-modal__meta {
+        display: grid;
+        gap: 8px;
+        color: var(--reserve-text);
+    }
+    .reserve-modal__nft-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+    }
+    .reserve-modal__nft {
+        display: block;
+        height: 100%;
+        padding: 12px;
+        border-radius: 18px;
+        background: var(--reserve-surface-bg);
+        border: 1px solid var(--reserve-surface-border);
+    }
+    .reserve-modal__nft img {
+        width: 100%;
+        max-height: 150px;
+        object-fit: cover;
+        border-radius: 14px;
+        margin-top: 10px;
+    }
+    .reserve-modal__selected {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 12px;
+        border-radius: 18px;
+        background: var(--reserve-surface-bg);
+        border: 1px solid var(--reserve-surface-border);
+        margin-bottom: 16px;
+    }
+    .reserve-modal__selected img {
+        width: 92px;
+        height: 92px;
+        object-fit: cover;
+        border-radius: 16px;
+        flex: 0 0 92px;
+    }
+    .reserve-modal__actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 18px;
+    }
+    .reserve-modal__actions .btn-main,
+    .reserve-modal__actions .btn-border {
+        min-width: 180px;
+        text-align: center;
+    }
+    body.reserve-modal-open {
+        overflow: hidden;
+    }
     @keyframes reserve-loader-pulse {
         0%, 100% { transform: scale(1); }
         50% { transform: scale(1.08); }
@@ -305,6 +453,18 @@
         .reserve-selector__row,
         .reserve-selector__summary {
             grid-template-columns: 1fr;
+        }
+        .reserve-modal__grid,
+        .reserve-modal__nft-grid {
+            grid-template-columns: 1fr;
+        }
+        .reserve-modal__selected {
+            align-items: flex-start;
+        }
+        .reserve-modal__actions .btn-main,
+        .reserve-modal__actions .btn-border {
+            width: 100%;
+            min-width: 0;
         }
         .reserve-page .nft__item.s2 {
             border-radius: 18px;
@@ -331,7 +491,7 @@
         @if (!empty($activeReserve))
             <div class="alert alert-warning d-flex justify-content-between align-items-center">
                 <span>You already have an active reserve. Continue to the Buy PI page and complete the sell.</span>
-                <a class="btn btn-sm btn-primary" href="{{ route('reserve.sell.form') }}">Go to Buy PI</a>
+                <button type="button" class="btn btn-sm btn-primary" data-open-reserve-modal>Sell PI Now</button>
             </div>
         @elseif ($reserveOptions->isNotEmpty() && $availableOptionCount === 0)
             <div class="alert alert-warning">
@@ -381,6 +541,7 @@
                                         'levelLabel' => $option->getAttribute('level_label'),
                                         'profitRange' => $option->plan->profit_min_percent . '% - ' . $option->plan->profit_max_percent . '%',
                                         'rangeLabel' => $option->getAttribute('range_label'),
+                                        'reserveAmountLabel' => $option->getAttribute('computed_reserve_label'),
                                         'maxSells' => $option->plan->max_sells ? (string) $option->plan->max_sells : 'Unlimited',
                                         'dailyLimit' => is_null($option->plan->max_sells_per_day) ? 'Unlimited' : (string) $option->plan->max_sells_per_day,
                                         'usedToday' => (int) $option->used_today,
@@ -435,14 +596,14 @@
                                 <div class="reserve-selector__note" id="reserve-selected-note">Select a reserve option to continue.</div>
 
                                 <div class="reserve-selector__actions">
-                                    <form method="POST" action="{{ route('reserve.confirm') }}" class="reserve-option-form reserve-start-form" id="reserve-plan-form">
+                                    <form method="POST" action="{{ route('reserve.confirm') }}" class="reserve-option-form reserve-start-form" id="reserve-plan-form" data-loader-title="Preparing Buy PI" data-loader-copy="Please wait while your reserve is being created.">
                                         @csrf
                                         <input type="hidden" name="reserve_plan_id" id="reserve_plan_id">
                                         <input type="hidden" name="reserve_plan_range_id" id="reserve_plan_range_id">
                                         <button type="submit" class="btn-main" id="reserve-plan-submit">Confirm Reserve</button>
                                     </form>
 
-                                    <a href="{{ route('reserve.sell.form') }}" class="btn-main" id="reserve-go-buy-pi" style="display:none;">Go to Buy PI</a>
+                                    <button type="button" class="btn-main" id="reserve-go-buy-pi" style="display:none;" data-open-reserve-modal>Sell PI Now</button>
                                 </div>
                             </div>
 
@@ -539,11 +700,19 @@
     </div>
 </section>
 
+@if (!empty($activeReserve))
+    @include('reserve.partials.sell-modal', [
+        'activeReserve' => $activeReserve,
+        'sellItems' => $sellItems,
+        'nftEnabled' => $nftEnabled,
+    ])
+@endif
+
 <div class="reserve-loader" id="reserve-loader" aria-hidden="true">
     <div class="reserve-loader__card">
         <img src="{{ asset('frontend/images/icon.png') }}" alt="Loading" class="reserve-loader__logo">
-        <div class="reserve-loader__title">Preparing Buy PI</div>
-        <div class="reserve-loader__copy">Please wait while your reserve is being created.</div>
+        <div class="reserve-loader__title" id="reserve-loader-title">Preparing Buy PI</div>
+        <div class="reserve-loader__copy" id="reserve-loader-copy">Please wait while your reserve is being created.</div>
         <div class="reserve-loader__bar"></div>
     </div>
 </div>
@@ -553,6 +722,8 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         var reserveLoader = document.getElementById('reserve-loader');
+        var reserveLoaderTitle = document.getElementById('reserve-loader-title');
+        var reserveLoaderCopy = document.getElementById('reserve-loader-copy');
         var levelSelect = document.getElementById('reserve-level-select');
         var planSelect = document.getElementById('reserve-plan-select');
         var hiddenPlanId = document.getElementById('reserve_plan_id');
@@ -564,8 +735,52 @@
         var selectedDailyLimit = document.getElementById('reserve-selected-daily-limit');
         var selectedRemaining = document.getElementById('reserve-selected-remaining');
         var selectedNote = document.getElementById('reserve-selected-note');
+        var sellModal = document.getElementById('reserve-sell-modal');
+        var openSellButtons = document.querySelectorAll('[data-open-reserve-modal]');
+        var closeSellButtons = document.querySelectorAll('[data-close-reserve-modal]');
+        var reserveSaleAmount = document.getElementById('reserve-sale-amount');
+        var reserveSelectedImage = document.getElementById('reserve-selected-nft-image');
+        var reserveSelectedTitle = document.getElementById('reserve-selected-nft-title');
+        var reserveSelectedPrice = document.getElementById('reserve-selected-nft-price');
         var planDataElement = document.getElementById('reserve-plan-data');
         var plans = planDataElement ? JSON.parse(planDataElement.textContent || '[]') : [];
+        var shouldAutoOpenSellModal = @json((bool) session('open_sell_modal'));
+
+        function setLoaderCopy(title, copy) {
+            if (reserveLoaderTitle && title) {
+                reserveLoaderTitle.textContent = title;
+            }
+            if (reserveLoaderCopy && copy) {
+                reserveLoaderCopy.textContent = copy;
+            }
+        }
+
+        function showLoader(title, copy) {
+            if (!reserveLoader) {
+                return;
+            }
+            setLoaderCopy(title, copy);
+            reserveLoader.classList.add('is-visible');
+            reserveLoader.setAttribute('aria-hidden', 'false');
+        }
+
+        function openSellModal() {
+            if (!sellModal) {
+                return;
+            }
+            sellModal.classList.add('is-visible');
+            sellModal.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('reserve-modal-open');
+        }
+
+        function closeSellModal() {
+            if (!sellModal) {
+                return;
+            }
+            sellModal.classList.remove('is-visible');
+            sellModal.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('reserve-modal-open');
+        }
 
         function groupPlansByLevel() {
             return plans.reduce(function (carry, plan) {
@@ -633,7 +848,7 @@
                 selectedRemaining.textContent = selectedPlan.remainingToday;
             }
             if (selectedNote) {
-                selectedNote.textContent = 'Level amount range: ' + selectedPlan.rangeLabel + ' | Profit: ' + selectedPlan.profitRange + ' | ' + selectedPlan.note;
+                selectedNote.textContent = 'Level amount range: ' + selectedPlan.rangeLabel + ' | Reserve amount: ' + selectedPlan.reserveAmountLabel + ' | Profit: ' + selectedPlan.profitRange + ' | ' + selectedPlan.note;
             }
 
             if (selectedPlan.isActiveOption) {
@@ -668,14 +883,52 @@
             planSelect.addEventListener('change', updatePlanDetails);
         }
 
-        document.querySelectorAll('.reserve-start-form').forEach(function (form) {
-            form.addEventListener('submit', function () {
-                if (reserveLoader) {
-                    reserveLoader.classList.add('is-visible');
-                    reserveLoader.setAttribute('aria-hidden', 'false');
+        openSellButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                openSellModal();
+            });
+        });
+
+        closeSellButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                closeSellModal();
+            });
+        });
+
+        if (sellModal) {
+            sellModal.addEventListener('click', function (event) {
+                if (event.target === sellModal) {
+                    closeSellModal();
+                }
+            });
+        }
+
+        document.querySelectorAll('.reserve-nft-select').forEach(function (radio) {
+            radio.addEventListener('change', function () {
+                if (reserveSelectedImage) {
+                    reserveSelectedImage.src = this.dataset.image || '';
+                }
+                if (reserveSelectedTitle) {
+                    reserveSelectedTitle.textContent = this.dataset.title || '';
+                }
+                if (reserveSelectedPrice && reserveSaleAmount) {
+                    reserveSelectedPrice.textContent = 'Reserve Amount: ' + parseFloat(reserveSaleAmount.value || 0).toFixed(8) + ' USDT';
                 }
             });
         });
+
+        document.querySelectorAll('.reserve-start-form, .reserve-sell-form').forEach(function (form) {
+            form.addEventListener('submit', function () {
+                showLoader(
+                    form.dataset.loaderTitle || 'Processing',
+                    form.dataset.loaderCopy || 'Please wait while we complete your request.'
+                );
+            });
+        });
+
+        if (shouldAutoOpenSellModal && sellModal && !document.getElementById('notif-modal')) {
+            openSellModal();
+        }
     });
 </script>
 @endpush
