@@ -954,20 +954,35 @@
       * custom background
       * --------------------------------------------------*/
      function custom_bg() {
-         $("body,div,section,span").css('background-color', function() {
-             return jQuery(this).data('bgcolor');
+         $("body,div,section,span").each(function() {
+             var bgColor = jQuery(this).data('bgcolor');
+             if (typeof bgColor !== 'undefined' && bgColor !== '') {
+                 jQuery(this).css('background-color', bgColor);
+             }
          });
-         $("body,div,section").css('background', function() {
-             return jQuery(this).data('bgimage');
+
+         $("body,div,section").each(function() {
+             var bgImage = jQuery(this).data('bgimage');
+             if (typeof bgImage !== 'undefined' && bgImage !== '') {
+                 jQuery(this).css('background', bgImage);
+                 jQuery(this).css('background-size', 'cover');
+             }
          });
-         $("body.dark-scheme,.dark-scheme div,.dark-scheme section").css('background', function() {
-             return jQuery(this).data('bgimage-alt');
+
+         $("body.dark-scheme,.dark-scheme div,.dark-scheme section").each(function() {
+             var darkBgImage = jQuery(this).data('bgimage-alt');
+             if (typeof darkBgImage !== 'undefined' && darkBgImage !== '') {
+                 jQuery(this).css('background', darkBgImage);
+                 jQuery(this).css('background-size', 'cover');
+             }
          });
-         $(".rtl div,.rtl section").css('background', function() {
-             return jQuery(this).data('bgimage_rtl');
-         });
-         $("body,div,section").css('background-size', function() {
-             return 'cover';
+
+         $(".rtl div,.rtl section").each(function() {
+             var rtlBgImage = jQuery(this).data('bgimage_rtl');
+             if (typeof rtlBgImage !== 'undefined' && rtlBgImage !== '') {
+                 jQuery(this).css('background', rtlBgImage);
+                 jQuery(this).css('background-size', 'cover');
+             }
          });
      }
      /* --------------------------------------------------

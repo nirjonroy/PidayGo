@@ -373,6 +373,11 @@
             display: flex;
             align-items: center;
         }
+        .dark-scheme .page-banner,
+        body.dark-scheme .page-banner {
+            background: url("{{ asset('frontend/images/banner.png') }}") center/cover no-repeat !important;
+            background-color: transparent !important;
+        }
         .page-banner--compact {
             margin-top: 24px;
         }
