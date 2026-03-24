@@ -80,9 +80,15 @@ document.addEventListener('DOMContentLoaded', function () {
         if (hiddenPlanId) hiddenPlanId.value = selectedPlan.planId;
         if (hiddenRangeId) hiddenRangeId.value = selectedPlan.id;
         if (selectedStatus) {
-            selectedStatus.textContent = selectedPlan.isActiveOption ? 'In Progress' : (selectedPlan.canReserve ? 'Available' : 'Blocked');
+            selectedStatus.textContent = selectedPlan.isActiveOption
+                ? (selectedPlan.activeSellUnlocked ? 'Sell Ready' : 'Locked')
+                : (selectedPlan.canReserve ? 'Available' : 'Blocked');
             selectedStatus.classList.remove('is-available', 'is-progress', 'is-blocked');
-            selectedStatus.classList.add(selectedPlan.isActiveOption ? 'is-progress' : (selectedPlan.canReserve ? 'is-available' : 'is-blocked'));
+            selectedStatus.classList.add(
+                selectedPlan.isActiveOption
+                    ? (selectedPlan.activeSellUnlocked ? 'is-progress' : 'is-blocked')
+                    : (selectedPlan.canReserve ? 'is-available' : 'is-blocked')
+            );
         }
         if (selectedAmount) selectedAmount.textContent = selectedPlan.reserveAmountLabel;
         if (selectedProfit) selectedProfit.textContent = selectedPlan.profitRange;
@@ -92,7 +98,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (selectedPlan.isActiveOption) {
             if (submitButton) submitButton.style.display = 'none';
-            if (buyPiButton) buyPiButton.style.display = 'inline-flex';
+            if (buyPiButton) {
+                buyPiButton.style.display = 'inline-flex';
+                buyPiButton.disabled = !selectedPlan.activeSellUnlocked;
+                buyPiButton.textContent = selectedPlan.activeSellUnlocked
+                    ? 'Sell PI Now'
+                    : 'Locked Until 6 AM';
+            }
             return;
         }
 

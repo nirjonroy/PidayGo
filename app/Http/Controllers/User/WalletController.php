@@ -29,7 +29,19 @@ class WalletController extends Controller
             ->whereIn('type', ['nft_profit', 'chain_income', 'reward_credit'])
             ->sum('amount');
         $level = $levelResolver->resolve($user);
-        $canSell = $user->reserves()->where('status', 'confirmed')->exists();
+        $activeReserve = $user->reserves()
+            ->where('status', 'confirmed')
+            ->latest('confirmed_at')
+            ->first();
+        $canSell = $activeReserve?->isSellUnlocked() ?? false;
+        $sellStatusLabel = !$activeReserve
+            ? 'Idle'
+            : ($canSell ? 'Ready' : 'Locked');
+        $sellStatusCopy = !$activeReserve
+            ? 'No active reserve is waiting for sell right now.'
+            : ($canSell
+                ? 'You have an active reserve ready to sell.'
+                : 'Your active reserve will unlock for sell at ' . optional($activeReserve->sell_available_at)->format('M d, Y h:i A') . '.');
         $recentWalletLedgers = $this->loadRecentWalletLedgers($user);
 
         return view('wallet.index', [
@@ -40,6 +52,8 @@ class WalletController extends Controller
             'recentWalletLedgers' => $recentWalletLedgers,
             'level' => $level,
             'canSell' => $canSell,
+            'sellStatusLabel' => $sellStatusLabel,
+            'sellStatusCopy' => $sellStatusCopy,
             'plans' => StakePlan::with('requiredLevel')
                 ->where('is_active', true)
                 ->orderBy('min_amount')

@@ -108,7 +108,8 @@
                         <div class="nft__item_price">Max Sells Per Reserve: {{ $plan?->max_sells ?? 'Unlimited' }}</div>
                         <div class="nft__item_price">Daily Limit: {{ $plan?->max_sells_per_day ?? 'Unlimited' }}</div>
                         <div class="nft__item_price">Reserved At: {{ optional($reserve->confirmed_at)->format('M d, Y h:i A') }}</div>
-                        <p class="text-muted mt-3">The reserve amount was debited from wallet and moved to reserve balance when you confirmed this plan. After a successful PI sell, that reserve amount and the profit will be returned to wallet.</p>
+                        <div class="nft__item_price">Sell Unlocks At: {{ optional($reserve->sell_available_at)->format('M d, Y h:i A') ?? 'Now' }}</div>
+                        <p class="text-muted mt-3">The reserve amount was debited from wallet and moved to reserve balance when you confirmed this plan. After 6:00 AM, Sell PI unlocks. After a successful PI sell, that locked reserve amount and the profit will be returned to wallet.</p>
                     </div>
                 </div>
             </div>
@@ -117,7 +118,9 @@
                 <div class="nft__item s2">
                     <div class="nft__item_info">
                         <h4>Sell PI</h4>
-                        @if (!$nftEnabled)
+                        @if (!$reserve->isSellUnlocked())
+                            <div class="text-muted">Sell PI is locked until {{ optional($reserve->sell_available_at)->format('M d, Y h:i A') }}.</div>
+                        @elseif (!$nftEnabled)
                             <div class="text-muted">PI selling is currently disabled.</div>
                         @elseif ($items->isEmpty())
                             <div class="text-muted">No PI items are available right now.</div>

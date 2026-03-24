@@ -8,7 +8,13 @@
             </div>
             <div>
                 <h3 class="reserve-modal__title" id="reserve-sell-modal-title">Sell PI</h3>
-                <p class="reserve-modal__copy">Your reserve is confirmed. Choose a PI item, complete the sell, and your reserve amount plus profit will be credited back to your wallet.</p>
+                <p class="reserve-modal__copy">
+                    @if ($activeReserve->isSellUnlocked())
+                        Your reserve is unlocked. Choose a PI item, complete the sell, and your locked reserve amount plus profit will be credited back to your wallet.
+                    @else
+                        Your reserve amount is locked. Sell PI will unlock at {{ optional($activeReserve->sell_available_at)->format('M d, Y h:i A') }}.
+                    @endif
+                </p>
             </div>
         </div>
 
@@ -24,21 +30,25 @@
                     <div>Max Sells Per Reserve: {{ $activeReserve->plan?->max_sells ?? 'Unlimited' }}</div>
                     <div>Daily Limit: {{ $activeReserve->plan?->max_sells_per_day ?? 'Unlimited' }}</div>
                     <div>Reserved At: {{ optional($activeReserve->confirmed_at)->format('M d, Y h:i A') }}</div>
+                    <div>Sell Unlocks At: {{ optional($activeReserve->sell_available_at)->format('M d, Y h:i A') ?? 'Now' }}</div>
                 </div>
             </div>
 
             <div class="reserve-modal__panel">
-                @if (!$nftEnabled)
+                @if (!$activeReserve->isSellUnlocked())
+                    <h5>Sell PI Locked</h5>
+                    <div class="text-muted">This reserve stays locked until {{ optional($activeReserve->sell_available_at)->format('M d, Y h:i A') }}. After that time, Sell PI will be available here.</div>
+                @elseif (!$nftEnabled)
                     <h5>Sell PI</h5>
                     <div class="text-muted">PI selling is currently disabled.</div>
                 @endif
 
-                @if ($nftEnabled && $sellItems->isEmpty())
+                @if ($activeReserve->isSellUnlocked() && $nftEnabled && $sellItems->isEmpty())
                     <h5>Sell PI</h5>
                     <div class="text-muted">No PI items are available right now.</div>
                 @endif
 
-                @if ($nftEnabled && $sellItems->isNotEmpty())
+                @if ($activeReserve->isSellUnlocked() && $nftEnabled && $sellItems->isNotEmpty())
                     <h5>Complete the PI Sell</h5>
                     <form method="POST" action="{{ route('reserve.sell.submit') }}" class="form-border reserve-sell-form" id="sell-pi-form" data-loader-title="Selling PI" data-loader-copy="Please wait while your PI sell and profit are being processed.">
                         @csrf

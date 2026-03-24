@@ -17,6 +17,7 @@
     $initialLevelId = $activeLevelId ?? $availableLevelId ?? optional($reserveOptions->first())->getAttribute('level_id');
     $levelGroups = $reserveOptions->groupBy('level_id');
     $activeReserveConfirmedAt = !empty($activeReserve) ? optional($activeReserve->confirmed_at)->format('M d, Y h:i A') : null;
+    $activeReserveSellAvailableAt = !empty($activeReserve) ? optional($activeReserve->sell_available_at)->format('M d, Y h:i A') : null;
     $planPayload = $reserveOptions->map(function ($option) {
         return [
             'id' => (int) $option->id,
@@ -30,6 +31,8 @@
             'remainingToday' => is_null($option->daily_remaining) ? 'Unlimited' : (string) $option->daily_remaining,
             'canReserve' => (bool) $option->can_reserve,
             'isActiveOption' => (bool) $option->is_active_option,
+            'activeSellUnlocked' => (bool) $option->getAttribute('active_sell_unlocked'),
+            'sellAvailableLabel' => $option->getAttribute('sell_available_label'),
             'note' => $option->availability_note,
             'actionLabel' => $option->action_label,
         ];
@@ -48,8 +51,14 @@
 
         @if (!empty($activeReserve))
             <div class="alert alert-warning d-flex justify-content-between align-items-center gap-3">
-                <span>You already have an active reserve. Open the Sell PI flow and complete the sell to return reserve amount with profit to wallet.</span>
-                <button type="button" class="btn btn-sm btn-primary" data-open-reserve-modal>Sell PI Now</button>
+                <span>
+                    @if ($activeReserveSellUnlocked)
+                        You already have an active reserve. Sell PI is unlocked now, and after sell the locked reserve amount plus profit will be credited to your wallet.
+                    @else
+                        You already have an active reserve. The amount is locked and Sell PI will unlock at {{ $activeReserveSellAvailableAt ?? '6:00 AM' }}.
+                    @endif
+                </span>
+                <button type="button" class="btn btn-sm btn-primary" data-open-reserve-modal>{{ $activeReserveSellUnlocked ? 'Sell PI Now' : 'View Lock' }}</button>
             </div>
         @elseif ($reserveOptions->isNotEmpty() && $availableOptionCount === 0)
             <div class="alert alert-warning">No reserve option is available right now. Use the selector below to review which reserve levels are locked or already exhausted for today.</div>
@@ -100,7 +109,15 @@
                         <div class="reserve-card">
                             <div class="reserve-meta-label">Current Reserve</div>
                             <div class="reserve-card__value">{{ !empty($activeReserve) ? number_format($activeReserveAmount, 4) : '0.0000' }}</div>
-                            <div class="reserve-card-copy">{{ !empty($activeReserve) ? 'An active reserve is ready for Sell PI.' : 'No reserve is waiting for sell right now.' }}</div>
+                            <div class="reserve-card-copy">
+                                @if (!empty($activeReserve) && $activeReserveSellUnlocked)
+                                    An active reserve is unlocked and ready for Sell PI.
+                                @elseif (!empty($activeReserve))
+                                    An active reserve is locked until {{ $activeReserveSellAvailableAt ?? '6:00 AM' }}.
+                                @else
+                                    No reserve is waiting for sell right now.
+                                @endif
+                            </div>
                         </div>
                         <div class="reserve-card">
                             <div class="reserve-meta-label">Recent Profit</div>
@@ -112,14 +129,18 @@
                     @if (!empty($activeReserve))
                         <div class="reserve-live-card">
                             <div>
-                                <div class="reserve-meta-label">Sell PI Ready</div>
+                                <div class="reserve-meta-label">{{ $activeReserveSellUnlocked ? 'Sell PI Ready' : 'Sell PI Locked' }}</div>
                                 <div class="reserve-live-card__value">{{ number_format($activeReserveAmount, 4) }} USDT</div>
                                 <div class="reserve-card-copy">
                                     Active reserve confirmed{{ $activeReserveConfirmedAt ? ' on ' . $activeReserveConfirmedAt : '' }}.
-                                    Open Sell PI to complete the flow and credit reserve amount plus profit back to wallet.
+                                    @if ($activeReserveSellUnlocked)
+                                        Open Sell PI now to credit the locked reserve amount and profit back to your wallet.
+                                    @else
+                                        This reserve stays locked until {{ $activeReserveSellAvailableAt ?? '6:00 AM' }}. After that, Sell PI will become available.
+                                    @endif
                                 </div>
                             </div>
-                            <button type="button" class="btn-main" data-open-reserve-modal>Open Sell PI</button>
+                            <button type="button" class="btn-main" data-open-reserve-modal>{{ $activeReserveSellUnlocked ? 'Open Sell PI' : 'View Lock' }}</button>
                         </div>
                     @endif
                 </div>
@@ -129,7 +150,7 @@
                         <div>
                             <div class="reserve-meta-label">Reservation Options</div>
                             <h2 class="reserve-section-title">Choose Your Reserve Criteria</h2>
-                            <p class="reserve-section-copy">Pick the unlocked level and reserve range you want to use, then confirm reserve or continue directly to Sell PI if one is already active.</p>
+                            <p class="reserve-section-copy">Pick the unlocked level and reserve range you want to use, then confirm reserve. The amount stays locked until 6:00 AM, after which Sell PI becomes available.</p>
                         </div>
                         <span class="reserve-icon is-income" aria-hidden="true"><i class="fa fa-sliders"></i></span>
                     </div>

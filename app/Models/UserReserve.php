@@ -17,6 +17,7 @@ class UserReserve extends Model
         'amount',
         'status',
         'confirmed_at',
+        'sell_available_at',
         'completed_at',
         'meta',
     ];
@@ -25,6 +26,7 @@ class UserReserve extends Model
         'reserved_balance' => 'decimal:8',
         'amount' => 'decimal:8',
         'confirmed_at' => 'datetime',
+        'sell_available_at' => 'datetime',
         'completed_at' => 'datetime',
         'meta' => 'array',
     ];
@@ -47,5 +49,10 @@ class UserReserve extends Model
     public function sale()
     {
         return $this->hasOne(NftSale::class, 'user_reserve_id');
+    }
+
+    public function isSellUnlocked(): bool
+    {
+        return $this->sell_available_at === null || now()->gte($this->sell_available_at);
     }
 }

@@ -18,6 +18,7 @@ use App\Services\WalletService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 use Illuminate\View\View;
@@ -34,6 +35,7 @@ class ReserveController extends Controller
             ->with(['plan', 'level'])
             ->orderByDesc('updated_at')
             ->first();
+        $activeReserveSellUnlocked = $activeReserve?->isSellUnlocked() ?? false;
         $level = $levelResolver->resolve($user);
         $reserveEnabled = $featureFlagService->isEnabled('reserve_enabled');
         $recentReserveLedgers = UserReserveLedger::query()
@@ -71,6 +73,7 @@ class ReserveController extends Controller
             'availableOptionCount' => $availableOptionCount,
             'unlockedOptionCount' => $unlockedOptionCount,
             'activeReserve' => $activeReserve,
+            'activeReserveSellUnlocked' => $activeReserveSellUnlocked,
             'recentReserveLedgers' => $recentReserveLedgers,
             'recentReserveSales' => $recentReserveSales,
             'sellItems' => $sellItems,
@@ -150,6 +153,7 @@ class ReserveController extends Controller
                         'amount' => $reserveAmount,
                         'status' => 'confirmed',
                         'confirmed_at' => now(),
+                        'sell_available_at' => $this->nextSellUnlockAt(),
                         'completed_at' => null,
                         'meta' => [
                             'reserve_plan_range_id' => $option->id,
@@ -204,7 +208,7 @@ class ReserveController extends Controller
 
         return redirect()
             ->route('reserve.index')
-            ->with('status', 'Reserve confirmed. The reserve amount was deducted from wallet and moved to reserve balance. Continue to Buy PI and sell to receive it back with profit.')
+            ->with('status', 'Reserve confirmed. The reserve amount is now locked in reserve balance and will become sellable after 6:00 AM. After Sell PI, the reserve amount and profit will be credited back to your wallet.')
             ->with('open_sell_modal', true);
     }
 
@@ -221,6 +225,12 @@ class ReserveController extends Controller
 
         if (!$reserve) {
             return redirect()->route('reserve.index')->withErrors(['reserve_plan_id' => 'Confirm a reserve to sell.']);
+        }
+
+        if (!$reserve->isSellUnlocked()) {
+            return redirect()->route('reserve.index')->withErrors([
+                'reserve_plan_id' => 'Sell PI is locked until ' . optional($reserve->sell_available_at)->format('M d, Y h:i A') . '.',
+            ]);
         }
 
         $items = NftItem::query()
@@ -256,6 +266,12 @@ class ReserveController extends Controller
 
         if (!$reserve || !$reserve->plan) {
             return back()->withErrors(['sale_amount' => 'No active reserve found.']);
+        }
+
+        if (!$reserve->isSellUnlocked()) {
+            return back()->withErrors([
+                'sale_amount' => 'Sell PI is locked until ' . optional($reserve->sell_available_at)->format('M d, Y h:i A') . '.',
+            ]);
         }
 
         $saleAmount = (float) ($reserve->amount ?? $reserve->reserved_balance);
@@ -321,6 +337,7 @@ class ReserveController extends Controller
 
             $reserve->update([
                 'status' => 'completed',
+                'sell_available_at' => null,
                 'completed_at' => now(),
             ]);
         });
@@ -360,6 +377,8 @@ class ReserveController extends Controller
             ->pluck('total', 'ref_id');
 
         $activeRangeId = (int) data_get($activeReserve?->meta, 'reserve_plan_range_id', 0);
+        $activeReserveSellUnlocked = $activeReserve?->isSellUnlocked() ?? false;
+        $activeReserveSellAvailableLabel = $activeReserve?->sell_available_at?->format('M d, Y h:i A');
 
         return ReservePlan::query()
             ->with(['level', 'ranges'])
@@ -382,7 +401,7 @@ class ReserveController extends Controller
 
                 return collect([$fallbackRange]);
             })
-            ->map(function (ReservePlanRange $range) use ($qualifiedLevelIds, $activeReserve, $activeRangeId, $reserveEnabled, $dailyStarts, $walletBalance) {
+            ->map(function (ReservePlanRange $range) use ($qualifiedLevelIds, $activeReserve, $activeRangeId, $activeReserveSellUnlocked, $activeReserveSellAvailableLabel, $reserveEnabled, $dailyStarts, $walletBalance) {
                 $plan = $range->plan;
                 [$rangeMin, $rangeMax, $rangeLabel] = $this->resolveWalletBalanceRange($range);
                 $reservePercentage = (float) $range->reserve_percentage;
@@ -414,10 +433,16 @@ class ReserveController extends Controller
                     $availabilityNote = 'Requires ' . ($plan->level?->code ?? 'a higher level') . '.';
                     $actionLabel = 'Locked';
                 } elseif (!empty($activeReserve)) {
-                    $availabilityNote = $isActiveOption
-                        ? 'This reserve is active. Continue to Buy PI.'
-                        : 'Complete your current reserve first.';
-                    $actionLabel = $isActiveOption ? 'Go to Buy PI' : 'Unavailable';
+                    if ($isActiveOption && $activeReserveSellUnlocked) {
+                        $availabilityNote = 'This reserve is active and Sell PI is now unlocked.';
+                        $actionLabel = 'Sell PI Now';
+                    } elseif ($isActiveOption) {
+                        $availabilityNote = 'This reserve is active and Sell PI will unlock at ' . ($activeReserveSellAvailableLabel ?: '6:00 AM') . '.';
+                        $actionLabel = 'Locked Until 6 AM';
+                    } else {
+                        $availabilityNote = 'Complete your current reserve first.';
+                        $actionLabel = 'Unavailable';
+                    }
                 } elseif (!$hasSufficientBalance) {
                     $availabilityNote = 'This option requires ' . $this->formatDisplayAmount($computedReserveAmount) . ' USDT, which is higher than your available wallet balance.';
                     $actionLabel = 'Insufficient Balance';
@@ -443,6 +468,8 @@ class ReserveController extends Controller
                 $range->setAttribute('daily_remaining', $dailyRemaining);
                 $range->setAttribute('can_reserve', $canReserve);
                 $range->setAttribute('is_active_option', $isActiveOption);
+                $range->setAttribute('active_sell_unlocked', $isActiveOption && $activeReserveSellUnlocked);
+                $range->setAttribute('sell_available_label', $activeReserveSellAvailableLabel);
                 $range->setAttribute('availability_note', $availabilityNote);
                 $range->setAttribute('action_label', $actionLabel);
 
@@ -489,5 +516,16 @@ class ReserveController extends Controller
         }
 
         return [round(($walletBalance * $reservePercentage) / 100, 8), 'percentage'];
+    }
+
+    private function nextSellUnlockAt(): Carbon
+    {
+        $unlockAt = now()->copy()->setTime(6, 0, 0);
+
+        if (now()->gte($unlockAt)) {
+            $unlockAt->addDay();
+        }
+
+        return $unlockAt;
     }
 }

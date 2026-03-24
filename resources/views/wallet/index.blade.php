@@ -526,8 +526,8 @@
                         </div>
                         <div class="wallet-card">
                             <div class="wallet-meta-label">Sell Status</div>
-                            <div class="wallet-card__value">{{ $canSell ? 'Ready' : 'Idle' }}</div>
-                            <div class="wallet-card-copy">{{ $canSell ? 'You have an active reserve ready to sell.' : 'No active reserve is waiting for sell right now.' }}</div>
+                            <div class="wallet-card__value">{{ $sellStatusLabel }}</div>
+                            <div class="wallet-card-copy">{{ $sellStatusCopy }}</div>
                         </div>
                     </div>
                 </div>
