@@ -77,6 +77,24 @@
                     </div>
                 </div>
 
+                <div class="row">
+                    <div class="col-md-4 mb-2">
+                        <label class="form-label">Chain Income % A</label>
+                        <input name="chain_income_a_percent" class="form-control" type="number" step="0.001" min="0" value="{{ old('chain_income_a_percent', $level->chain_income_a_percent) }}" placeholder="Leave blank for default">
+                        @error('chain_income_a_percent') <div class="text-danger">{{ $message }}</div> @enderror
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <label class="form-label">Chain Income % B</label>
+                        <input name="chain_income_b_percent" class="form-control" type="number" step="0.001" min="0" value="{{ old('chain_income_b_percent', $level->chain_income_b_percent) }}" placeholder="Leave blank for default">
+                        @error('chain_income_b_percent') <div class="text-danger">{{ $message }}</div> @enderror
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <label class="form-label">Chain Income % C</label>
+                        <input name="chain_income_c_percent" class="form-control" type="number" step="0.001" min="0" value="{{ old('chain_income_c_percent', $level->chain_income_c_percent) }}" placeholder="Leave blank for default">
+                        @error('chain_income_c_percent') <div class="text-danger">{{ $message }}</div> @enderror
+                    </div>
+                </div>
+
                 <button class="btn btn-primary" type="submit">{{ $level->exists ? 'Update' : 'Create' }}</button>
                 <a class="btn btn-outline-secondary" href="{{ route('admin.levels.index') }}">Cancel</a>
             </form>

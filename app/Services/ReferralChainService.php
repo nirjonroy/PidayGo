@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\ChainBonusSetting;
 use App\Models\ChainCommission;
+use App\Models\Level;
 use App\Models\NftSale;
 use App\Models\User;
 use Illuminate\Support\Collection;
@@ -140,21 +141,19 @@ class ReferralChainService
             ->orderBy('depth')
             ->get();
 
-        if ($settings->isEmpty()) {
-            return;
-        }
-
-        $maxDepth = (int) $settings->max('depth');
+        $levels = $this->activeLevelsForResolution();
+        $maxDepth = max(3, (int) ($settings->max('depth') ?? 0));
         $ancestors = $this->getAncestors($sale->user, $maxDepth);
 
         foreach ($ancestors as $item) {
             $depth = $item['depth'];
             $ancestor = $item['user'];
-            $setting = $settings->firstWhere('depth', $depth);
-            if (!$setting) {
+            $percent = $this->resolveChainIncomePercent($ancestor, $depth, $levels, $settings);
+
+            if ($percent <= 0) {
                 continue;
             }
-            $percent = (float) $setting->percent;
+
             $amount = ($sale->profit_amount * $percent) / 100;
             if ($amount <= 0) {
                 continue;
@@ -176,6 +175,67 @@ class ReferralChainService
                 'amount' => $amount,
             ]);
         }
+    }
+
+    private function resolveChainIncomePercent(User $user, int $depth, Collection $levels, Collection $settings): float
+    {
+        if ($depth >= 1 && $depth <= 3) {
+            $level = $this->resolveLevelForChainIncome($user, $levels);
+
+            if ($level) {
+                $levelPercent = $level->chainIncomePercentForDepth($depth);
+
+                if ($levelPercent !== null) {
+                    return $levelPercent;
+                }
+            }
+        }
+
+        $fallbackSetting = $settings->firstWhere('depth', $depth);
+
+        return $fallbackSetting ? (float) $fallbackSetting->percent : 0.0;
+    }
+
+    private function resolveLevelForChainIncome(User $user, Collection $levels): ?Level
+    {
+        $depositTotal = (float) $user->walletLedgers()->where('type', 'deposit')->sum('amount');
+        $counts = $this->getReferralDepthCounts($user);
+
+        $eligibleByMinAndChains = $levels->filter(function (Level $level) use ($depositTotal, $counts) {
+            if ($depositTotal < (float) $level->min_deposit) {
+                return false;
+            }
+
+            return $counts['A'] >= (int) $level->req_chain_a
+                && $counts['B'] >= (int) $level->req_chain_b
+                && $counts['C'] >= (int) $level->req_chain_c;
+        })->values();
+
+        if ($eligibleByMinAndChains->isEmpty()) {
+            return null;
+        }
+
+        $strictMatches = $eligibleByMinAndChains->filter(function (Level $level) use ($depositTotal) {
+            $maxDeposit = (float) ($level->max_deposit ?? 0);
+
+            if ($maxDeposit <= 0) {
+                return true;
+            }
+
+            return $depositTotal <= $maxDeposit;
+        })->values();
+
+        return ($strictMatches->isNotEmpty() ? $strictMatches : $eligibleByMinAndChains)->first();
+    }
+
+    private function activeLevelsForResolution(): Collection
+    {
+        return Level::query()
+            ->where('is_active', true)
+            ->orderByDesc('min_deposit')
+            ->orderByDesc('max_deposit')
+            ->orderByDesc('id')
+            ->get();
     }
 
     private function hasChildOnSlot(User $user, string $slot): bool

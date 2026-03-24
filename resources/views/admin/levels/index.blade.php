@@ -25,6 +25,7 @@
                                 <th>Reservation Range</th>
                                 <th>Income % Range</th>
                                 <th>Chain Req (A/B/C)</th>
+                                <th>Chain Income % (A/B/C)</th>
                                 <th>Status</th>
                                 <th></th>
                             </tr>
@@ -37,6 +38,13 @@
                                     <td>{{ $level->min_reservation }} - {{ $level->max_reservation }}</td>
                                     <td>{{ $level->income_min_percent }}% - {{ $level->income_max_percent }}%</td>
                                     <td>{{ $level->req_chain_a ?? 0 }} / {{ $level->req_chain_b ?? 0 }} / {{ $level->req_chain_c ?? 0 }}</td>
+                                    <td>
+                                        {{ $level->chain_income_a_percent !== null ? $level->chain_income_a_percent . '%' : 'Default' }}
+                                        /
+                                        {{ $level->chain_income_b_percent !== null ? $level->chain_income_b_percent . '%' : 'Default' }}
+                                        /
+                                        {{ $level->chain_income_c_percent !== null ? $level->chain_income_c_percent . '%' : 'Default' }}
+                                    </td>
                                     <td>
                                         @if ($level->is_active)
                                             <span class="badge bg-success">Active</span>

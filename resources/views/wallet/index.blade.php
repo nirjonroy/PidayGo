@@ -590,7 +590,13 @@
                             <div class="wallet-level-card__value">{{ number_format((float) $level->min_reservation, 4) }} - {{ number_format((float) $level->max_reservation, 4) }}</div>
                         </div>
                     </div>
-                    <div class="wallet-level-copy">Chain requirements: A {{ (int) $level->chain_requirement_a }}, B {{ (int) $level->chain_requirement_b }}, C {{ (int) $level->chain_requirement_c }}.</div>
+                    <div class="wallet-level-copy">
+                        Chain requirements: A {{ (int) $level->req_chain_a }}, B {{ (int) $level->req_chain_b }}, C {{ (int) $level->req_chain_c }}.
+                        <br>
+                        Chain income %: A {{ $level->chain_income_a_percent !== null ? number_format((float) $level->chain_income_a_percent, 3) . '%' : 'Default' }},
+                        B {{ $level->chain_income_b_percent !== null ? number_format((float) $level->chain_income_b_percent, 3) . '%' : 'Default' }},
+                        C {{ $level->chain_income_c_percent !== null ? number_format((float) $level->chain_income_c_percent, 3) . '%' : 'Default' }}.
+                    </div>
                 @else
                     <div class="wallet-empty">No active level could be resolved for your account yet.</div>
                 @endif

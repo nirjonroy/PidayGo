@@ -69,6 +69,9 @@ class LevelController extends Controller
             'req_chain_c' => ['nullable', 'integer', 'min:0'],
             'income_min_percent' => ['required', 'numeric', 'min:0'],
             'income_max_percent' => ['required', 'numeric', 'gte:income_min_percent'],
+            'chain_income_a_percent' => ['nullable', 'numeric', 'min:0'],
+            'chain_income_b_percent' => ['nullable', 'numeric', 'min:0'],
+            'chain_income_c_percent' => ['nullable', 'numeric', 'min:0'],
             'is_active' => ['nullable', 'boolean'],
         ]);
 
