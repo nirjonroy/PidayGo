@@ -407,6 +407,9 @@ class ReserveController extends Controller
                 $reservePercentage = (float) $range->reserve_percentage;
                 [$computedReserveAmount, $reserveMode] = $this->resolveReserveAmount($walletBalance, $reservePercentage);
                 $isUnlocked = $qualifiedLevelIds->contains($plan->level_id);
+                $matchesWalletBalanceRange = $rangeMax <= 0
+                    ? $walletBalance >= $rangeMin
+                    : ($walletBalance + 0.00000001 >= $rangeMin && $walletBalance <= $rangeMax + 0.00000001);
                 $usedToday = (int) ($dailyStarts[$plan->id] ?? 0);
                 $dailyLimit = $plan->max_sells_per_day;
                 $dailyRemaining = $dailyLimit === null ? null : max(0, (int) $dailyLimit - $usedToday);
@@ -418,6 +421,7 @@ class ReserveController extends Controller
                     && $isUnlocked
                     && empty($activeReserve)
                     && $hasConfiguredRange
+                    && $matchesWalletBalanceRange
                     && $reservePercentage > 0
                     && $computedReserveAmount > 0
                     && $hasSufficientBalance
@@ -443,6 +447,9 @@ class ReserveController extends Controller
                         $availabilityNote = 'Complete your current reserve first.';
                         $actionLabel = 'Unavailable';
                     }
+                } elseif (!$matchesWalletBalanceRange) {
+                    $availabilityNote = 'Requires wallet balance in the range ' . $rangeLabel . '.';
+                    $actionLabel = 'Not Applicable';
                 } elseif (!$hasSufficientBalance) {
                     $availabilityNote = 'This option requires ' . $this->formatDisplayAmount($computedReserveAmount) . ' USDT, which is higher than your available wallet balance.';
                     $actionLabel = 'Insufficient Balance';
@@ -464,6 +471,7 @@ class ReserveController extends Controller
                 $range->setAttribute('computed_reserve_amount', $computedReserveAmount);
                 $range->setAttribute('computed_reserve_label', $this->formatDisplayAmount($computedReserveAmount) . ' USDT');
                 $range->setAttribute('is_unlocked', $isUnlocked);
+                $range->setAttribute('matches_wallet_balance_range', $matchesWalletBalanceRange);
                 $range->setAttribute('used_today', $usedToday);
                 $range->setAttribute('daily_remaining', $dailyRemaining);
                 $range->setAttribute('can_reserve', $canReserve);
