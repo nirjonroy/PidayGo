@@ -20,6 +20,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use RuntimeException;
 use Illuminate\View\View;
 
@@ -35,6 +36,7 @@ class ReserveController extends Controller
             ->with(['plan', 'level'])
             ->orderByDesc('updated_at')
             ->first();
+        $activeReserve = $this->normalizeActiveReserve($activeReserve);
         $activeReserveSellUnlocked = $activeReserve?->isSellUnlocked() ?? false;
         $level = $levelResolver->resolve($user);
         $reserveEnabled = $featureFlagService->isEnabled('reserve_enabled');
@@ -99,6 +101,12 @@ class ReserveController extends Controller
             'reserve_plan_range_id' => ['required', 'exists:reserve_plan_ranges,id'],
         ]);
 
+        if (!Schema::hasColumn('user_reserves', 'sell_available_at')) {
+            return back()->withErrors([
+                'reserve_plan_id' => 'Your database is missing the latest reserve update. Run php artisan migrate --force, then try reserve again.',
+            ]);
+        }
+
         $activeReserve = UserReserve::where('user_id', $user->id)
             ->where('status', 'confirmed')
             ->first();
@@ -123,6 +131,12 @@ class ReserveController extends Controller
 
         $reserveAmount = (float) $option->getAttribute('computed_reserve_amount');
         $plan = $option->plan;
+
+        if ($walletBalance + 0.00000001 < $reserveAmount) {
+            return back()->withErrors([
+                'reserve_plan_id' => 'This reserve option requires ' . number_format($reserveAmount, 8) . ' USDT, but your available wallet balance is lower.',
+            ]);
+        }
 
         try {
             DB::transaction(function () use ($user, $option, $reserveAmount, $plan, $userReserveService, $walletService) {
@@ -168,6 +182,7 @@ class ReserveController extends Controller
                             'profit_min_percent' => $plan->profit_min_percent,
                             'profit_max_percent' => $plan->profit_max_percent,
                             'daily_limit' => $plan->max_sells_per_day,
+                            'sell_unlock_timezone' => $this->reserveTimezone(),
                         ],
                     ]
                 );
@@ -182,6 +197,10 @@ class ReserveController extends Controller
                 ]);
             });
         } catch (RuntimeException $exception) {
+            if ($exception->getMessage() !== 'Insufficient balance.') {
+                throw $exception;
+            }
+
             return back()->withErrors([
                 'reserve_plan_id' => 'This reserve option requires ' . number_format($reserveAmount, 8) . ' USDT, but your available wallet balance is lower.',
             ]);
@@ -222,6 +241,7 @@ class ReserveController extends Controller
             ->where('status', 'confirmed')
             ->with(['plan', 'level'])
             ->first();
+        $reserve = $this->normalizeActiveReserve($reserve);
 
         if (!$reserve) {
             return redirect()->route('reserve.index')->withErrors(['reserve_plan_id' => 'Confirm a reserve to sell.']);
@@ -229,7 +249,7 @@ class ReserveController extends Controller
 
         if (!$reserve->isSellUnlocked()) {
             return redirect()->route('reserve.index')->withErrors([
-                'reserve_plan_id' => 'Sell PI is locked until ' . optional($reserve->sell_available_at)->format('M d, Y h:i A') . '.',
+                'reserve_plan_id' => 'Sell PI is locked until ' . $this->formatReserveDateTime($reserve->sell_available_at) . '.',
             ]);
         }
 
@@ -263,6 +283,7 @@ class ReserveController extends Controller
         $reserve = UserReserve::where('user_id', $request->user()->id)
             ->where('status', 'confirmed')
             ->first();
+        $reserve = $this->normalizeActiveReserve($reserve);
 
         if (!$reserve || !$reserve->plan) {
             return back()->withErrors(['sale_amount' => 'No active reserve found.']);
@@ -270,7 +291,7 @@ class ReserveController extends Controller
 
         if (!$reserve->isSellUnlocked()) {
             return back()->withErrors([
-                'sale_amount' => 'Sell PI is locked until ' . optional($reserve->sell_available_at)->format('M d, Y h:i A') . '.',
+                'sale_amount' => 'Sell PI is locked until ' . $this->formatReserveDateTime($reserve->sell_available_at) . '.',
             ]);
         }
 
@@ -378,7 +399,7 @@ class ReserveController extends Controller
 
         $activeRangeId = (int) data_get($activeReserve?->meta, 'reserve_plan_range_id', 0);
         $activeReserveSellUnlocked = $activeReserve?->isSellUnlocked() ?? false;
-        $activeReserveSellAvailableLabel = $activeReserve?->sell_available_at?->format('M d, Y h:i A');
+        $activeReserveSellAvailableLabel = $this->formatReserveDateTime($activeReserve?->sell_available_at);
 
         return ReservePlan::query()
             ->with(['level', 'ranges'])
@@ -421,7 +442,6 @@ class ReserveController extends Controller
                     && $isUnlocked
                     && empty($activeReserve)
                     && $hasConfiguredRange
-                    && $matchesWalletBalanceRange
                     && $reservePercentage > 0
                     && $computedReserveAmount > 0
                     && $hasSufficientBalance
@@ -447,9 +467,6 @@ class ReserveController extends Controller
                         $availabilityNote = 'Complete your current reserve first.';
                         $actionLabel = 'Unavailable';
                     }
-                } elseif (!$matchesWalletBalanceRange) {
-                    $availabilityNote = 'Requires wallet balance in the range ' . $rangeLabel . '.';
-                    $actionLabel = 'Not Applicable';
                 } elseif (!$hasSufficientBalance) {
                     $availabilityNote = 'This option requires ' . $this->formatDisplayAmount($computedReserveAmount) . ' USDT, which is higher than your available wallet balance.';
                     $actionLabel = 'Insufficient Balance';
@@ -457,7 +474,9 @@ class ReserveController extends Controller
                     $availabilityNote = 'Daily limit reached for this plan.';
                     $actionLabel = 'Limit Reached';
                 } else {
-                    $availabilityNote = 'Available now for your current level.';
+                    $availabilityNote = $matchesWalletBalanceRange
+                        ? 'Available now for your current level.'
+                        : 'Available for your current level. This reserve uses the selected criteria band ' . $rangeLabel . '.';
                     $actionLabel = 'Reserve Now';
                 }
 
@@ -526,14 +545,55 @@ class ReserveController extends Controller
         return [round(($walletBalance * $reservePercentage) / 100, 8), 'percentage'];
     }
 
-    private function nextSellUnlockAt(): Carbon
+    private function reserveTimezone(): string
     {
-        $unlockAt = now()->copy()->setTime(6, 0, 0);
+        return 'Asia/Dhaka';
+    }
 
-        if (now()->gte($unlockAt)) {
+    private function formatReserveDateTime(?Carbon $dateTime): ?string
+    {
+        return $dateTime
+            ? $dateTime->copy()->timezone($this->reserveTimezone())->format('M d, Y h:i A')
+            : null;
+    }
+
+    private function normalizeActiveReserve(?UserReserve $reserve): ?UserReserve
+    {
+        if (!$reserve || !$reserve->confirmed_at || !Schema::hasColumn('user_reserves', 'sell_available_at')) {
+            return $reserve;
+        }
+
+        $expectedUnlockAt = $this->nextSellUnlockAt($reserve->confirmed_at);
+        $meta = (array) ($reserve->meta ?? []);
+        $timezone = $this->reserveTimezone();
+        $currentUnlockAt = $reserve->sell_available_at;
+        $needsSync = !$currentUnlockAt
+            || abs($currentUnlockAt->getTimestamp() - $expectedUnlockAt->getTimestamp()) >= 60
+            || ($meta['sell_unlock_timezone'] ?? null) !== $timezone;
+
+        if (!$needsSync) {
+            return $reserve;
+        }
+
+        $meta['sell_unlock_timezone'] = $timezone;
+        $reserve->fill([
+            'sell_available_at' => $expectedUnlockAt,
+            'meta' => $meta,
+        ]);
+        $reserve->save();
+
+        return $reserve->fresh(['plan', 'level']) ?? $reserve;
+    }
+
+    private function nextSellUnlockAt(?Carbon $baseAt = null): Carbon
+    {
+        $baseLocal = ($baseAt ? $baseAt->copy() : now())->timezone($this->reserveTimezone());
+        $unlockAt = $baseLocal->copy()->setTime(6, 0, 0);
+
+        if ($baseLocal->gte($unlockAt)) {
             $unlockAt->addDay();
         }
 
-        return $unlockAt;
+        return $unlockAt->utc();
     }
 }

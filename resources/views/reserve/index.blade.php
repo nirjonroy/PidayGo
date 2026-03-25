@@ -13,11 +13,20 @@
     $reserveStartedCount = $recentReserveLedgers->where('reason', 'reserve_started')->count();
     $recentSellCount = $recentReserveSales->count();
     $activeLevelId = optional($reserveOptions->firstWhere('is_active_option', true))->getAttribute('level_id');
+    $currentLevelId = $level?->id;
     $availableLevelId = optional($reserveOptions->firstWhere('can_reserve', true))->getAttribute('level_id');
-    $initialLevelId = $activeLevelId ?? $availableLevelId ?? optional($reserveOptions->first())->getAttribute('level_id');
+    $unlockedLevelId = optional($reserveOptions->firstWhere('is_unlocked', true))->getAttribute('level_id');
+    $initialLevelId = $activeLevelId ?? $currentLevelId ?? $availableLevelId ?? $unlockedLevelId ?? optional($reserveOptions->first())->getAttribute('level_id');
     $levelGroups = $reserveOptions->groupBy('level_id');
-    $activeReserveConfirmedAt = !empty($activeReserve) ? optional($activeReserve->confirmed_at)->format('M d, Y h:i A') : null;
-    $activeReserveSellAvailableAt = !empty($activeReserve) ? optional($activeReserve->sell_available_at)->format('M d, Y h:i A') : null;
+    $activeReserveConfirmedAt = !empty($activeReserve) && $activeReserve->confirmed_at
+        ? $activeReserve->confirmed_at->copy()->timezone('Asia/Dhaka')->format('M d, Y h:i A')
+        : null;
+    $activeReserveSellAvailableAt = !empty($activeReserve) && $activeReserve->sell_available_at
+        ? $activeReserve->sell_available_at->copy()->timezone('Asia/Dhaka')->format('M d, Y h:i A')
+        : null;
+    $activeReserveSellAvailableIso = !empty($activeReserve) && $activeReserve->sell_available_at
+        ? $activeReserve->sell_available_at->copy()->timezone('Asia/Dhaka')->toIso8601String()
+        : null;
     $planPayload = $reserveOptions->map(function ($option) {
         return [
             'id' => (int) $option->id,
@@ -29,6 +38,7 @@
             'reserveAmountLabel' => $option->getAttribute('computed_reserve_label'),
             'dailyLimit' => is_null($option->plan->max_sells_per_day) ? 'Unlimited' : (string) $option->plan->max_sells_per_day,
             'remainingToday' => is_null($option->daily_remaining) ? 'Unlimited' : (string) $option->daily_remaining,
+            'isUnlocked' => (bool) $option->is_unlocked,
             'canReserve' => (bool) $option->can_reserve,
             'isActiveOption' => (bool) $option->is_active_option,
             'activeSellUnlocked' => (bool) $option->getAttribute('active_sell_unlocked'),
@@ -56,6 +66,9 @@
                         You already have an active reserve. Sell PI is unlocked now, and after sell the locked reserve amount plus profit will be credited to your wallet.
                     @else
                         You already have an active reserve. The amount is locked and Sell PI will unlock at {{ $activeReserveSellAvailableAt ?? '6:00 AM' }}.
+                        @if ($activeReserveSellAvailableIso)
+                            <strong class="ms-2" data-countdown-target="{{ $activeReserveSellAvailableIso }}" data-countdown-prefix="Unlocks in " data-countdown-expired="Sell PI is unlocked now.">Unlocks in --:--:--</strong>
+                        @endif
                     @endif
                 </span>
                 <button type="button" class="btn btn-sm btn-primary" data-open-reserve-modal>{{ $activeReserveSellUnlocked ? 'Sell PI Now' : 'View Lock' }}</button>
@@ -136,7 +149,11 @@
                                     @if ($activeReserveSellUnlocked)
                                         Open Sell PI now to credit the locked reserve amount and profit back to your wallet.
                                     @else
-                                        This reserve stays locked until {{ $activeReserveSellAvailableAt ?? '6:00 AM' }}. After that, Sell PI will become available.
+                                        This reserve stays locked until {{ $activeReserveSellAvailableAt ?? '6:00 AM' }}.
+                                        @if ($activeReserveSellAvailableIso)
+                                            <span data-countdown-target="{{ $activeReserveSellAvailableIso }}" data-countdown-prefix="Unlocks in " data-countdown-expired="Sell PI is unlocked now.">Unlocks in --:--:--</span>
+                                        @endif
+                                        After that, Sell PI will become available.
                                     @endif
                                 </div>
                             </div>

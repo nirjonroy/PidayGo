@@ -1,3 +1,8 @@
+@php
+    $reserveConfirmedAt = $activeReserve->confirmed_at?->copy()->timezone('Asia/Dhaka')->format('M d, Y h:i A');
+    $reserveSellAvailableAt = $activeReserve->sell_available_at?->copy()->timezone('Asia/Dhaka')->format('M d, Y h:i A');
+@endphp
+
 <div class="reserve-modal" id="reserve-sell-modal" aria-hidden="true">
     <div class="reserve-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="reserve-sell-modal-title">
         <button type="button" class="reserve-modal__close" aria-label="Close sell PI popup" data-close-reserve-modal>&times;</button>
@@ -12,7 +17,7 @@
                     @if ($activeReserve->isSellUnlocked())
                         Your reserve is unlocked. Choose a PI item, complete the sell, and your locked reserve amount plus profit will be credited back to your wallet.
                     @else
-                        Your reserve amount is locked. Sell PI will unlock at {{ optional($activeReserve->sell_available_at)->format('M d, Y h:i A') }}.
+                        Your reserve amount is locked. Sell PI will unlock at {{ $reserveSellAvailableAt }}.
                     @endif
                 </p>
             </div>
@@ -29,15 +34,15 @@
                     <div>Profit Range: {{ $activeReserve->plan?->profit_min_percent }}% - {{ $activeReserve->plan?->profit_max_percent }}%</div>
                     <div>Max Sells Per Reserve: {{ $activeReserve->plan?->max_sells ?? 'Unlimited' }}</div>
                     <div>Daily Limit: {{ $activeReserve->plan?->max_sells_per_day ?? 'Unlimited' }}</div>
-                    <div>Reserved At: {{ optional($activeReserve->confirmed_at)->format('M d, Y h:i A') }}</div>
-                    <div>Sell Unlocks At: {{ optional($activeReserve->sell_available_at)->format('M d, Y h:i A') ?? 'Now' }}</div>
+                    <div>Reserved At: {{ $reserveConfirmedAt }}</div>
+                    <div>Sell Unlocks At: {{ $reserveSellAvailableAt ?? 'Now' }}</div>
                 </div>
             </div>
 
             <div class="reserve-modal__panel">
                 @if (!$activeReserve->isSellUnlocked())
                     <h5>Sell PI Locked</h5>
-                    <div class="text-muted">This reserve stays locked until {{ optional($activeReserve->sell_available_at)->format('M d, Y h:i A') }}. After that time, Sell PI will be available here.</div>
+                    <div class="text-muted">This reserve stays locked until {{ $reserveSellAvailableAt }}. After that time, Sell PI will be available here.</div>
                 @elseif (!$nftEnabled)
                     <h5>Sell PI</h5>
                     <div class="text-muted">PI selling is currently disabled.</div>

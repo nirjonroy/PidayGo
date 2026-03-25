@@ -26,6 +26,47 @@ document.addEventListener('DOMContentLoaded', function () {
     var plans = planDataElement ? JSON.parse(planDataElement.textContent || '[]') : [];
     var shouldAutoOpenSellModal = @json((bool) session('open_sell_modal'));
 
+    function startCountdowns() {
+        var countdowns = document.querySelectorAll('[data-countdown-target]');
+        if (!countdowns.length) return;
+
+        function formatCountdown(diffMs) {
+            var totalSeconds = Math.max(0, Math.floor(diffMs / 1000));
+            var days = Math.floor(totalSeconds / 86400);
+            var hours = Math.floor((totalSeconds % 86400) / 3600);
+            var minutes = Math.floor((totalSeconds % 3600) / 60);
+            var seconds = totalSeconds % 60;
+            var time = [hours, minutes, seconds].map(function (part) {
+                return String(part).padStart(2, '0');
+            }).join(':');
+
+            return days > 0 ? days + 'd ' + time : time;
+        }
+
+        function updateCountdowns() {
+            var now = Date.now();
+
+            countdowns.forEach(function (node) {
+                var targetValue = node.getAttribute('data-countdown-target');
+                if (!targetValue) return;
+
+                var targetTime = Date.parse(targetValue);
+                if (Number.isNaN(targetTime)) return;
+
+                var diff = targetTime - now;
+                var prefix = node.getAttribute('data-countdown-prefix') || '';
+                var expiredText = node.getAttribute('data-countdown-expired') || 'Unlocked now.';
+
+                node.textContent = diff <= 0
+                    ? expiredText
+                    : prefix + formatCountdown(diff);
+            });
+        }
+
+        updateCountdowns();
+        window.setInterval(updateCountdowns, 1000);
+    }
+
     function setLoaderCopy(title, copy) {
         if (reserveLoaderTitle && title) reserveLoaderTitle.textContent = title;
         if (reserveLoaderCopy && copy) reserveLoaderCopy.textContent = copy;
@@ -69,7 +110,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if (levelPlans.length > 0) {
             var activePlan = levelPlans.find(function (plan) { return plan.isActiveOption; });
             var availablePlan = levelPlans.find(function (plan) { return plan.canReserve; });
-            planSelect.value = String((activePlan || availablePlan || levelPlans[0]).id);
+            var unlockedPlan = levelPlans.find(function (plan) { return plan.isUnlocked; });
+            planSelect.value = String((activePlan || availablePlan || unlockedPlan || levelPlans[0]).id);
         }
     }
     function updatePlanDetails() {
@@ -151,6 +193,7 @@ document.addEventListener('DOMContentLoaded', function () {
             showLoader(form.dataset.loaderTitle || 'Processing', form.dataset.loaderCopy || 'Please wait while we complete your request.');
         });
     });
+    startCountdowns();
     if (shouldAutoOpenSellModal && sellModal && !document.getElementById('notif-modal')) {
         openSellModal();
     }
