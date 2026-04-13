@@ -363,7 +363,7 @@
                                         <tr>
                                             <td>
                                                 <span class="reserve-table-title">{{ $sale->nftItem?->title ?: ('PI #' . $sale->nft_item_id) }}</span>
-                                                <span class="reserve-table-subtext">NFT sale #{{ $sale->id }}</span>
+                                                <span class="reserve-table-subtext">PI sale #{{ $sale->id }}</span>
                                             </td>
                                             <td>{{ number_format((float) $sale->sale_amount, 8) }}</td>
                                             <td>{{ number_format((float) $sale->profit_percent, 3) }}%</td>
@@ -382,7 +382,7 @@
                                     <div class="reserve-mobile-top">
                                         <div>
                                             <div class="reserve-table-title">{{ $sale->nftItem?->title ?: ('PI #' . $sale->nft_item_id) }}</div>
-                                            <div class="reserve-table-subtext">NFT sale #{{ $sale->id }}</div>
+                                            <div class="reserve-table-subtext">PI sale #{{ $sale->id }}</div>
                                         </div>
                                         <span class="reserve-amount is-credit">+{{ number_format((float) $sale->profit_amount, 8) }}</span>
                                     </div>

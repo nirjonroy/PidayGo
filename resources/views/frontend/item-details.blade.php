@@ -1,5 +1,34 @@
 @extends('layouts.frontend')
 
+@push('styles')
+<style>
+    .price-token {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 40px;
+        height: 28px;
+        padding: 0 10px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #ffffff;
+        background: linear-gradient(135deg, #16a34a, #0f766e);
+        box-shadow: 0 10px 18px rgba(15, 118, 110, 0.2);
+    }
+    #nft-item-details .nft-image-wrapper {
+        position: relative;
+        z-index: 1;
+    }
+    #nft-item-details .image-autosize {
+        position: relative;
+        z-index: 1;
+    }
+</style>
+@endpush
+
 @section('content')
 <section id="nft-item-details" aria-label="section" class="sm-mt-0">
                 <div class="container">
@@ -202,11 +231,8 @@
 
                                     <h6>Price</h6>
                                     <div class="nft-item-price">
-                                        <img src="{{ asset('frontend/images/misc/ethereum.svg') }}" alt="">
+                                        <span class="price-token">USDT</span>
                                         <span>{{ $item->price ? number_format($item->price, 4) : 'N/A' }}</span>
-                                        @if ($item->price)
-                                            (USDT)
-                                        @endif
                                     </div>
 
                                     <!-- Button trigger modal -->

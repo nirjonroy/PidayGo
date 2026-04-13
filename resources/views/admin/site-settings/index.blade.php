@@ -77,7 +77,7 @@
                     <strong>Feature Flags:</strong>
                     <div class="mt-1">
                         <span class="badge {{ $setting->sellers_enabled ? 'bg-success' : 'bg-secondary' }}">Sellers {{ $setting->sellers_enabled ? 'On' : 'Off' }}</span>
-                        <span class="badge {{ $setting->nft_enabled ? 'bg-success' : 'bg-secondary' }}">NFTs {{ $setting->nft_enabled ? 'On' : 'Off' }}</span>
+                        <span class="badge {{ $setting->nft_enabled ? 'bg-success' : 'bg-secondary' }}">PI {{ $setting->nft_enabled ? 'On' : 'Off' }}</span>
                         <span class="badge {{ $setting->bids_enabled ? 'bg-success' : 'bg-secondary' }}">Bids {{ $setting->bids_enabled ? 'On' : 'Off' }}</span>
                         <span class="badge {{ $setting->reserve_enabled ? 'bg-success' : 'bg-secondary' }}">Reserve {{ $setting->reserve_enabled ? 'On' : 'Off' }}</span>
                     </div>
@@ -100,3 +100,4 @@
         </div>
     @endif
 @endsection
+

@@ -304,7 +304,7 @@ class ReserveController extends Controller
             ->where('status', 'published')
             ->first();
         if (!$nftItem) {
-            return back()->withErrors(['sale_amount' => 'Selected NFT is not available.']);
+            return back()->withErrors(['sale_amount' => 'Selected PI is not available.']);
         }
         $min = (float) $reserve->plan->profit_min_percent;
         $max = (float) $reserve->plan->profit_max_percent;

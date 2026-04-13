@@ -10,7 +10,7 @@ Public:
 - `/` Home
 - `/blog` Blog list
 - `/blog/{slug}` Blog post
-- `/explore` Explore (NFTs)
+- `/explore` Explore (PI)
 - `/rankings` Rankings
 - `/login` Login
 - `/register/{ref?}` Register (referral code required)
@@ -75,7 +75,7 @@ Key areas:
 - Deposits: review, approve, reject, expire.
 - Withdrawals: review, approve, reject.
 - Deposit Addresses: manage USDT deposit addresses.
-- Sellers, NFTs, Bids: manage marketplace data.
+- Sellers, PI, Bids: manage marketplace data.
 - Notifications and Alerts: manage admin and user alerts.
 - Support: review and respond to tickets.
 - Chain Bonus: configure referral bonuses.
@@ -98,7 +98,7 @@ Logos:
 **Feature Flags**
 Enable or disable modules in Site Settings:
 - Sellers
-- NFTs/Explore
+- PI/Explore
 - Bids
 - Reserve
 - 2FA
@@ -171,3 +171,4 @@ This document covers:
 - Configuration and deployment notes
 
 If you need a PDF or a shorter client quick guide, let me know.
+

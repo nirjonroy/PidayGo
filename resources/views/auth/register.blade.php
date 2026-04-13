@@ -3,7 +3,7 @@
 @section('content')
     @include('frontend.partials.page-banner', [
         'title' => 'Create Account',
-        'subtitle' => 'Join PidayGo to start collecting NFTs.',
+        'subtitle' => 'Join PidayGo to start collecting PI.',
     ])
 
     <section aria-label="section">
@@ -73,3 +73,4 @@
         </div>
     </section>
 @endsection
+

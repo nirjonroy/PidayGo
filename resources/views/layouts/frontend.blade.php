@@ -33,7 +33,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <meta content="PidayGo - NFT Marketplace" name="description" />
+    <meta content="PidayGo - PI Marketplace" name="description" />
     <meta content="" name="keywords" />
     <meta content="" name="author" />
     <!-- CSS Files
@@ -1161,7 +1161,7 @@
                 $footerLinks = $footerLinks ?? collect();
                 $defaults = [
                     'marketplace' => [
-                        ['label' => 'All NFTs', 'url' => route('explore')],
+                        ['label' => 'All PI', 'url' => route('explore')],
                         ['label' => 'Art', 'url' => route('explore')],
                         ['label' => 'Music', 'url' => route('explore')],
                         ['label' => 'Domain Names', 'url' => route('explore')],
@@ -1620,3 +1620,4 @@
 </body>
 
 </html>
+

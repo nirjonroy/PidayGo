@@ -6,7 +6,7 @@
                     <div class="container">
                         <div class="row align-items-center">
                             <div class="col-lg-6 mb-sm-30">
-                                <h1>{{ $heroHeadline ?? 'Explore, collect, and sell extraordinary NFTs' }}</h1>
+                                <h1>{{ $heroHeadline ?? 'Explore, collect, and sell extraordinary PI' }}</h1>
                                 <p class="lead">
                                     {{ $heroSubtitle ?? 'Welcome to the future, you can buy and sell awesome artworks form here. The world largest digital marketplace for non-fungible tokens.' }}
                                 </p>
@@ -246,7 +246,7 @@
                 <div class="container">
                     <div class="row">
                         <div class="col-lg-12">
-                            <h2>Trending NFTs</h2>
+                            <h2>Trending PI</h2>
                             <div id="items-carousel-s2" class="owl-carousel wow fadeIn">
                                   @forelse ($trendingItems as $item)
                                       @php
@@ -442,6 +442,7 @@
             @endif
 
 @endsection
+
 
 
 

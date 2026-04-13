@@ -1,6 +1,6 @@
 @extends('layouts.admin-panel')
 
-@section('page-title', $item->exists ? 'Edit NFT Item' : 'Create NFT Item')
+@section('page-title', $item->exists ? 'Edit PI Item' : 'Create PI Item')
 
 @section('content')
   <div class="card">
@@ -125,3 +125,4 @@
     </div>
   </div>
 @endsection
+

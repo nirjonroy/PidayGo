@@ -378,7 +378,7 @@
                 <li class="nav-item">
                   <a href="{{ route('admin.nft-items.index') }}" class="nav-link {{ request()->routeIs('admin.nft-items.*') ? 'active' : '' }}">
                     <i class="nav-icon bi bi-grid"></i>
-                    <p>NFT Items</p>
+                    <p>PI Items</p>
                   </a>
                 </li>
               @endif
@@ -567,3 +567,4 @@
     @stack('scripts')
   </body>
 </html>
+

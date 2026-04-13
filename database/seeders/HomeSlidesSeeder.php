@@ -15,7 +15,7 @@ class HomeSlidesSeeder extends Seeder
 
         $slides = [
             [
-                'title' => 'Discover Rare NFTs',
+                'title' => 'Discover Rare PI',
                 'subtitle' => 'Curated collections updated weekly.',
                 'button_text' => 'Explore',
                 'button_url' => '/explore',
@@ -48,3 +48,4 @@ class HomeSlidesSeeder extends Seeder
         }
     }
 }
+

@@ -1,7 +1,7 @@
 @extends('layouts.frontend')
 
 @section('content')
-@include('frontend.partials.page-banner', ['title' => 'Top NFTs'])
+@include('frontend.partials.page-banner', ['title' => 'Top PI'])
 
 
             <!-- section begin -->
@@ -234,3 +234,4 @@
             </section>
 
 @endsection
+

@@ -49,7 +49,7 @@ class NftItemController extends Controller
         $item->save();
         ActivityLog::record('nft.item.created', $request->user('admin'), $item);
 
-        return redirect()->route('admin.nft-items.index')->with('status', 'NFT item created.');
+        return redirect()->route('admin.nft-items.index')->with('status', 'PI item created.');
     }
 
     public function edit(NftItem $nftItem): View
@@ -87,7 +87,7 @@ class NftItemController extends Controller
         $nftItem->save();
         ActivityLog::record('nft.item.updated', $request->user('admin'), $nftItem);
 
-        return redirect()->route('admin.nft-items.index')->with('status', 'NFT item updated.');
+        return redirect()->route('admin.nft-items.index')->with('status', 'PI item updated.');
     }
 
     public function toggle(Request $request, NftItem $nftItem): RedirectResponse
@@ -95,7 +95,7 @@ class NftItemController extends Controller
         $nftItem->update(['is_active' => !$nftItem->is_active]);
         ActivityLog::record('nft.item.toggled', $request->user('admin'), $nftItem);
 
-        return back()->with('status', 'NFT item status updated.');
+        return back()->with('status', 'PI item status updated.');
     }
 
     public function destroy(Request $request, NftItem $nftItem): RedirectResponse
@@ -107,7 +107,7 @@ class NftItemController extends Controller
         $nftItem->delete();
         ActivityLog::record('nft.item.deleted', $request->user('admin'), $nftItem);
 
-        return back()->with('status', 'NFT item deleted.');
+        return back()->with('status', 'PI item deleted.');
     }
 
     private function validatePayload(Request $request, bool $requireImage, ?int $ignoreId = null): array
@@ -150,3 +150,4 @@ class NftItemController extends Controller
         return $slug;
     }
 }
+

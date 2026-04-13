@@ -199,7 +199,7 @@
                     <div class="form-check mb-2">
                         <input type="hidden" name="nft_enabled" value="0">
                         <input class="form-check-input" type="checkbox" id="nft_enabled" name="nft_enabled" value="1" {{ old('nft_enabled', $setting->nft_enabled ?? true) ? 'checked' : '' }}>
-                        <label class="form-check-label" for="nft_enabled">Enable NFTs/Explore</label>
+                        <label class="form-check-label" for="nft_enabled">Enable PI/Explore</label>
                     </div>
                     <div class="form-check mb-2">
                         <input type="hidden" name="bids_enabled" value="0">
@@ -229,3 +229,4 @@
         </div>
     </div>
 @endsection
+

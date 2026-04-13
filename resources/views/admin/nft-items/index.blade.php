@@ -1,10 +1,10 @@
 @extends('layouts.admin-panel')
 
-@section('page-title', 'NFT Items')
+@section('page-title', 'PI Items')
 
 @section('content')
   <div class="mb-3">
-    <a href="{{ route('admin.nft-items.create') }}" class="btn btn-primary">Add NFT Item</a>
+    <a href="{{ route('admin.nft-items.create') }}" class="btn btn-primary">Add PI Item</a>
   </div>
 
   <div class="card">
@@ -72,7 +72,7 @@
               </tr>
             @empty
               <tr>
-                <td colspan="10" class="text-center text-muted">No NFT items yet.</td>
+                <td colspan="10" class="text-center text-muted">No PI items yet.</td>
               </tr>
             @endforelse
           </tbody>
@@ -81,3 +81,4 @@
     </div>
   </div>
 @endsection
+

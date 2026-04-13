@@ -9,7 +9,7 @@
         @csrf
 
         <div class="mb-3">
-          <label class="form-label" for="nft_item_id">NFT Item</label>
+          <label class="form-label" for="nft_item_id">PI Item</label>
           <select id="nft_item_id" name="nft_item_id" class="form-select" required>
             <option value="">-- Select Item --</option>
             @foreach ($items as $item)
@@ -56,3 +56,4 @@
     </div>
   </div>
 @endsection
+
