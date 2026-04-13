@@ -32,6 +32,7 @@
                         </button>
                         <div id="mobile-profile-menu" class="mobile-profile-menu">
                             <a href="{{ route('dashboard') }}"><i class="fa fa-dashboard menu-icon" aria-hidden="true"></i>Dashboard</a>
+                            <a href="{{ route('marketplace') }}"><i class="fa fa-shopping-bag menu-icon" aria-hidden="true"></i>Marketplace</a>
                             <a href="{{ route('wallet.index') }}"><i class="fa fa-wallet menu-icon" aria-hidden="true"></i>Wallet</a>
                             <a href="{{ route('wallet.deposit') }}"><i class="fa fa-arrow-circle-down menu-icon" aria-hidden="true"></i>Deposit</a>
                             <a href="{{ route('wallet.withdrawals') }}"><i class="fa fa-arrow-circle-up menu-icon" aria-hidden="true"></i>Withdrawals</a>
@@ -58,6 +59,7 @@
                         <li><a href="{{ route('explore') }}">Explore<span></span></a></li>
                         <li><a href="{{ route('rankings') }}">Rankings<span></span></a></li>
                     @endif
+                    <li><a href="{{ route('marketplace') }}">Marketplace<span></span></a></li>
                     @guest
                         <li class="menu-mobile-only">
                             <a href="{{ route('login') }}">
@@ -85,6 +87,7 @@
                             </a>
                             <ul>
                                 <li><a href="{{ route('dashboard') }}"><i class="fa fa-dashboard menu-icon" aria-hidden="true"></i>Dashboard</a></li>
+                                <li><a href="{{ route('marketplace') }}"><i class="fa fa-shopping-bag menu-icon" aria-hidden="true"></i>Marketplace</a></li>
                                 <li><a href="{{ route('wallet.index') }}"><i class="fa fa-wallet menu-icon" aria-hidden="true"></i>Wallet</a></li>
                                 <li><a href="{{ route('wallet.deposit') }}"><i class="fa fa-arrow-circle-down menu-icon" aria-hidden="true"></i>Deposit</a></li>
                                 <li><a href="{{ route('wallet.withdrawals') }}"><i class="fa fa-arrow-circle-up menu-icon" aria-hidden="true"></i>Withdrawals</a></li>

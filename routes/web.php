@@ -65,6 +65,9 @@ Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
 Route::get('/explore', [FrontendController::class, 'explore'])->middleware('feature:nft_enabled')->name('explore');
 Route::get('/item/{slug}', [FrontendController::class, 'itemDetails'])->middleware('feature:nft_enabled')->name('item.details');
+Route::get('/marketplace', function () {
+    return view('frontend.marketplace');
+})->name('marketplace');
 Route::get('/rankings', function () {
     return view('frontend.rankings');
 })->name('rankings');

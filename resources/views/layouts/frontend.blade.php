@@ -1022,7 +1022,7 @@
                 height: auto;
                 min-height: 78px;
                 display: grid;
-                grid-template-columns: repeat(4, minmax(0, 1fr));
+                grid-template-columns: repeat(5, minmax(0, 1fr));
                 gap: 6px;
                 padding: 8px;
                 border-radius: 22px;
@@ -1041,19 +1041,19 @@
                 align-items: center;
                 justify-content: center;
                 gap: 4px;
-                min-height: 58px;
+                min-height: 56px;
                 padding: 8px 4px;
                 border-radius: 16px;
                 color: rgba(255, 255, 255, 0.78);
                 text-decoration: none;
-                font-size: 10px;
+                font-size: 9px;
                 font-weight: 700;
                 letter-spacing: 0.01em;
                 line-height: 1.15;
                 transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease;
             }
             .mobile-quick-actions__item i {
-                font-size: 17px;
+                font-size: 16px;
             }
             .mobile-quick-actions__item:hover,
             .mobile-quick-actions__item:focus {
@@ -1136,6 +1136,10 @@
                 <a href="{{ route('dashboard') }}" class="mobile-quick-actions__item {{ request()->routeIs('dashboard') ? 'is-active' : '' }}">
                     <i class="fa fa-th-large" aria-hidden="true"></i>
                     <span>PI</span>
+                </a>
+                <a href="{{ route('marketplace') }}" class="mobile-quick-actions__item {{ request()->routeIs('marketplace') ? 'is-active' : '' }}">
+                    <i class="fa fa-shopping-bag" aria-hidden="true"></i>
+                    <span>Market</span>
                 </a>
                 <a href="{{ route('reserve.index') }}" class="mobile-quick-actions__item {{ request()->routeIs('reserve.*') ? 'is-active' : '' }}">
                     <i class="fa fa-lock" aria-hidden="true"></i>

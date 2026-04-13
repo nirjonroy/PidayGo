@@ -26,13 +26,6 @@
                         <div class="col-lg-12">
 
                             <div class="items_filter">
-                                <form action="blank.php" class="row form-dark" id="form_quick_search" method="post" name="form_quick_search">
-                                    <div class="col text-center">
-                                        <input class="form-control" id="name_1" name="name_1" placeholder="search item here..." type="text" /> <a href="#" id="btn-submit"><i class="fa fa-search bg-color-secondary"></i></a>
-                                        <div class="clearfix"></div>
-                                    </div>
-                                </form>
-
                                 <div id="item_category" class="dropdown">
                                     <a href="#" class="btn-selector">All categories</a>
                                     <ul>
