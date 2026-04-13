@@ -67,7 +67,7 @@
                     @else
                         You already have an active reserve. The amount is locked and Sell PI will unlock at {{ $activeReserveSellAvailableAt ?? '6:00 AM' }}.
                         @if ($activeReserveSellAvailableIso)
-                            <strong class="ms-2" data-countdown-target="{{ $activeReserveSellAvailableIso }}" data-countdown-prefix="Unlocks in " data-countdown-expired="Sell PI is unlocked now.">Unlocks in --:--:--</strong>
+                            <strong class="ms-2 reserve-countdown-badge" data-countdown-target="{{ $activeReserveSellAvailableIso }}" data-countdown-prefix="Unlocks in " data-countdown-expired="Sell PI is unlocked now.">Unlocks in --:--:--</strong>
                         @endif
                     @endif
                 </span>
@@ -151,7 +151,7 @@
                                     @else
                                         This reserve stays locked until {{ $activeReserveSellAvailableAt ?? '6:00 AM' }}.
                                         @if ($activeReserveSellAvailableIso)
-                                            <span data-countdown-target="{{ $activeReserveSellAvailableIso }}" data-countdown-prefix="Unlocks in " data-countdown-expired="Sell PI is unlocked now.">Unlocks in --:--:--</span>
+                                            <span class="reserve-countdown-badge" data-countdown-target="{{ $activeReserveSellAvailableIso }}" data-countdown-prefix="Unlocks in " data-countdown-expired="Sell PI is unlocked now.">Unlocks in --:--:--</span>
                                         @endif
                                         After that, Sell PI will become available.
                                     @endif

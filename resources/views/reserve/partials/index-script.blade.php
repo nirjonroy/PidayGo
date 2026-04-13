@@ -60,6 +60,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 node.textContent = diff <= 0
                     ? expiredText
                     : prefix + formatCountdown(diff);
+
+                if (diff > 0 && node.classList.contains('reserve-countdown-badge')) {
+                    node.classList.remove('is-ticking');
+                    void node.offsetWidth;
+                    node.classList.add('is-ticking');
+                }
             });
         }
 

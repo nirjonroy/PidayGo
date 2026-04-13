@@ -304,6 +304,34 @@
         background: rgba(148, 163, 184, 0.16);
         color: #475569;
     }
+    .reserve-countdown-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #55308c;
+        background: rgba(var(--primary-color-rgb), 0.12);
+        border: 1px solid rgba(var(--primary-color-rgb), 0.2);
+        position: relative;
+        overflow: hidden;
+    }
+    .reserve-countdown-badge::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: #f0a83a;
+        box-shadow: 0 0 0 rgba(240, 168, 58, 0.6);
+        animation: reserve-countdown-pulse 1.4s ease-in-out infinite;
+    }
+    .reserve-countdown-badge.is-ticking {
+        animation: reserve-countdown-pop 0.25s ease-out;
+    }
     .reserve-history-wrap {
         padding: 0;
         overflow: hidden;
@@ -633,6 +661,11 @@
         color: #cbd5e1;
         background: rgba(148, 163, 184, 0.18);
     }
+    .dark-scheme .reserve-countdown-badge {
+        color: #f3e8ff;
+        background: rgba(147, 51, 234, 0.2);
+        border-color: rgba(147, 51, 234, 0.3);
+    }
     .dark-scheme .reserve-loader__card {
         background: #11131f;
         border: 1px solid rgba(255, 255, 255, 0.08);
@@ -654,6 +687,15 @@
     @keyframes reserve-loader-slide {
         0% { transform: translateX(-120%); }
         100% { transform: translateX(260%); }
+    }
+    @keyframes reserve-countdown-pulse {
+        0%, 100% { transform: scale(1); box-shadow: 0 0 0 rgba(240, 168, 58, 0.55); }
+        50% { transform: scale(1.4); box-shadow: 0 0 0 8px rgba(240, 168, 58, 0); }
+    }
+    @keyframes reserve-countdown-pop {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.03); }
+        100% { transform: scale(1); }
     }
     @media (max-width: 1399.98px) {
         .reserve-overview,
