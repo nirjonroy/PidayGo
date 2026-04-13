@@ -1,7 +1,7 @@
 @extends('layouts.frontend')
 
 @section('content')
-@include('frontend.partials.page-banner', ['title' => 'Bank Accounts'])
+@include('frontend.partials.page-banner', ['title' => 'Crypto Wallets'])
 
 <section aria-label="section">
     <div class="container">
@@ -10,7 +10,7 @@
         @endif
 
         <div class="d-flex gap-2 mb-3">
-            <a class="btn-main" href="{{ route('profile.bank.create') }}">Add Bank Account</a>
+            <a class="btn-main" href="{{ route('profile.bank.create') }}">Add Crypto Wallet</a>
             <a class="btn-main btn-light" href="{{ route('profile.edit') }}">Back to Profile</a>
         </div>
 
@@ -23,10 +23,10 @@
                         <table class="table table-borderless table-striped align-middle">
                             <thead>
                                 <tr>
-                                    <th>Bank</th>
-                                    <th>Account Name</th>
-                                    <th>Account Number</th>
-                                    <th>Currency</th>
+                                    <th>Network</th>
+                                    <th>Wallet Address</th>
+                                    <th>Label</th>
+                                    <th>Memo/Tag</th>
                                     <th>Default</th>
                                     <th style="width:220px;">Actions</th>
                                 </tr>
@@ -34,10 +34,16 @@
                             <tbody>
                                 @foreach ($accounts as $account)
                                     <tr>
-                                        <td>{{ $account->bank_name }}</td>
-                                        <td>{{ $account->account_name }}</td>
-                                        <td>{{ $account->account_number }}</td>
-                                        <td>{{ $account->currency ?? '-' }}</td>
+                                        <td>{{ $account->network ?? '-' }}</td>
+                                        <td>
+                                            @php
+                                                $address = $account->wallet_address;
+                                                $masked = $address ? substr($address, 0, 6) . '...' . substr($address, -4) : '-';
+                                            @endphp
+                                            {{ $masked }}
+                                        </td>
+                                        <td>{{ $account->address_label ?? '-' }}</td>
+                                        <td>{{ $account->memo_tag ?? '-' }}</td>
                                         <td>
                                             @if ($account->is_default)
                                                 <span class="badge bg-success">Default</span>

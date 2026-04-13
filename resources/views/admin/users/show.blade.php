@@ -98,36 +98,34 @@
 
     <div class="card">
         <div class="card-body">
-            <h5 class="mb-3">Bank Accounts</h5>
+            <h5 class="mb-3">Crypto Wallets</h5>
             @if ($user->bankAccounts->isEmpty())
-                <p class="text-muted">No bank accounts on file.</p>
+                <p class="text-muted">No crypto wallets on file.</p>
             @else
                 <div class="table-responsive">
                     <table class="table table-striped align-middle">
                         <thead>
                             <tr>
-                                <th>Bank</th>
-                                <th>Account Name</th>
-                                <th>Account Number</th>
-                                <th>Branch</th>
-                                <th>Routing</th>
-                                <th>SWIFT</th>
-                                <th>IFSC</th>
-                                <th>Currency</th>
+                                <th>Network</th>
+                                <th>Wallet Address</th>
+                                <th>Label</th>
+                                <th>Memo/Tag</th>
                                 <th>Default</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($user->bankAccounts as $account)
                                 <tr>
-                                    <td>{{ $account->bank_name }}</td>
-                                    <td>{{ $account->account_name }}</td>
-                                    <td>{{ $account->account_number }}</td>
-                                    <td>{{ $account->branch ?? '-' }}</td>
-                                    <td>{{ $account->routing_number ?? '-' }}</td>
-                                    <td>{{ $account->swift_code ?? '-' }}</td>
-                                    <td>{{ $account->ifsc_code ?? '-' }}</td>
-                                    <td>{{ $account->currency ?? '-' }}</td>
+                                    <td>{{ $account->network ?? '-' }}</td>
+                                    <td>
+                                        @php
+                                            $address = $account->wallet_address;
+                                            $masked = $address ? substr($address, 0, 6) . '...' . substr($address, -4) : '-';
+                                        @endphp
+                                        {{ $masked }}
+                                    </td>
+                                    <td>{{ $account->address_label ?? '-' }}</td>
+                                    <td>{{ $account->memo_tag ?? '-' }}</td>
                                     <td>
                                         @if ($account->is_default)
                                             <span class="badge bg-success">Default</span>

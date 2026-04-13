@@ -27,7 +27,7 @@ class BankAccountController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $data = $this->validatePayload($request, true);
+        $data = $this->validatePayload($request);
         $data['user_id'] = $request->user()->id;
 
         DB::transaction(function () use ($data, $request) {
@@ -54,7 +54,7 @@ class BankAccountController extends Controller
     {
         $this->authorizeOwnership($request, $bankAccount);
 
-        $data = $this->validatePayload($request, false);
+        $data = $this->validatePayload($request);
 
         DB::transaction(function () use ($data, $bankAccount, $request) {
             if (!empty($data['is_default'])) {
@@ -94,26 +94,18 @@ class BankAccountController extends Controller
         }
     }
 
-    private function validatePayload(Request $request, bool $requireAccountNumber): array
+    private function validatePayload(Request $request): array
     {
         $rules = [
-            'bank_name' => ['required', 'string', 'max:120'],
-            'account_name' => ['required', 'string', 'max:120'],
-            'account_number' => [$requireAccountNumber ? 'required' : 'nullable', 'string', 'max:255'],
-            'branch' => ['nullable', 'string', 'max:120'],
-            'routing_number' => ['nullable', 'string', 'max:120'],
-            'swift_code' => ['nullable', 'string', 'max:120'],
-            'ifsc_code' => ['nullable', 'string', 'max:120'],
-            'currency' => ['nullable', 'string', 'max:20'],
+            'network' => ['required', 'string', 'max:30'],
+            'wallet_address' => ['required', 'string', 'max:255'],
+            'address_label' => ['nullable', 'string', 'max:120'],
+            'memo_tag' => ['nullable', 'string', 'max:120'],
             'is_default' => ['nullable', 'boolean'],
         ];
 
         $validated = $request->validate($rules);
         $validated['is_default'] = (bool) ($validated['is_default'] ?? false);
-
-        if (!$requireAccountNumber && empty($validated['account_number'])) {
-            unset($validated['account_number']);
-        }
 
         return $validated;
     }

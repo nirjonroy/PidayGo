@@ -50,10 +50,17 @@
                             <td>
                                 <div class="small"><strong>KYC:</strong> {{ $request->user->isKycApproved() ? 'Approved' : 'Pending' }}</div>
                                 @if ($defaultBank)
-                                    <div class="small"><strong>Bank:</strong> {{ $defaultBank->bank_name }}</div>
-                                    <div class="small"><strong>Acc:</strong> {{ $defaultBank->account_number }}</div>
+                                    <div class="small"><strong>Network:</strong> {{ $defaultBank->network ?? '-' }}</div>
+                                    @php
+                                        $address = $defaultBank->wallet_address;
+                                        $masked = $address ? substr($address, 0, 6) . '...' . substr($address, -4) : '-';
+                                    @endphp
+                                    <div class="small"><strong>Address:</strong> {{ $masked }}</div>
+                                    @if ($defaultBank->memo_tag)
+                                        <div class="small"><strong>Memo/Tag:</strong> {{ $defaultBank->memo_tag }}</div>
+                                    @endif
                                 @else
-                                    <div class="small text-muted">No bank on file</div>
+                                    <div class="small text-muted">No crypto wallet on file</div>
                                 @endif
                                 <a class="small" href="{{ route('admin.users.show', $request->user) }}">View full profile</a>
                             </td>

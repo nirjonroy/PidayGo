@@ -1,7 +1,7 @@
 @extends('layouts.frontend')
 
 @section('content')
-@include('frontend.partials.page-banner', ['title' => $account->exists ? 'Edit Bank Account' : 'Add Bank Account'])
+@include('frontend.partials.page-banner', ['title' => $account->exists ? 'Edit Crypto Wallet' : 'Add Crypto Wallet'])
 
 <section aria-label="section">
     <div class="container">
@@ -14,55 +14,39 @@
                     @endif
 
                     <div class="mb-2">
-                        <label class="form-label">Bank Name</label>
-                        <input name="bank_name" class="form-control" value="{{ old('bank_name', $account->bank_name) }}" required>
-                        @error('bank_name')
+                        <label class="form-label">Network</label>
+                        <select name="network" class="form-control" required>
+                            @php
+                                $networkOptions = ['BEP20', 'TRC20', 'ERC20', 'Solana', 'Polygon'];
+                                $selectedNetwork = old('network', $account->network);
+                            @endphp
+                            <option value="" disabled {{ $selectedNetwork ? '' : 'selected' }}>Select network</option>
+                            @foreach ($networkOptions as $option)
+                                <option value="{{ $option }}" {{ $selectedNetwork === $option ? 'selected' : '' }}>{{ $option }}</option>
+                            @endforeach
+                        </select>
+                        @error('network')
                             <div class="text-danger">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div class="mb-2">
-                        <label class="form-label">Account Name</label>
-                        <input name="account_name" class="form-control" value="{{ old('account_name', $account->account_name) }}" required>
-                        @error('account_name')
-                            <div class="text-danger">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-2">
-                        <label class="form-label">Account Number</label>
-                        <input name="account_number" class="form-control" value="{{ old('account_number', $account->account_number) }}" {{ $account->exists ? '' : 'required' }}>
-                        <small class="text-muted">{{ $account->exists ? 'Leave blank to keep existing number.' : '' }}</small>
-                        @error('account_number')
+                        <label class="form-label">Wallet Address</label>
+                        <input name="wallet_address" class="form-control" value="{{ old('wallet_address', $account->wallet_address) }}" required>
+                        @error('wallet_address')
                             <div class="text-danger">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-2">
-                            <label class="form-label">Branch</label>
-                            <input name="branch" class="form-control" value="{{ old('branch', $account->branch) }}">
+                            <label class="form-label">Address Label</label>
+                            <input name="address_label" class="form-control" value="{{ old('address_label', $account->address_label) }}">
                         </div>
                         <div class="col-md-6 mb-2">
-                            <label class="form-label">Routing Number</label>
-                            <input name="routing_number" class="form-control" value="{{ old('routing_number', $account->routing_number) }}">
+                            <label class="form-label">Memo/Tag (optional)</label>
+                            <input name="memo_tag" class="form-control" value="{{ old('memo_tag', $account->memo_tag) }}">
                         </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-2">
-                            <label class="form-label">SWIFT Code</label>
-                            <input name="swift_code" class="form-control" value="{{ old('swift_code', $account->swift_code) }}">
-                        </div>
-                        <div class="col-md-6 mb-2">
-                            <label class="form-label">IFSC Code</label>
-                            <input name="ifsc_code" class="form-control" value="{{ old('ifsc_code', $account->ifsc_code) }}">
-                        </div>
-                    </div>
-
-                    <div class="mb-2">
-                        <label class="form-label">Currency</label>
-                        <input name="currency" class="form-control" value="{{ old('currency', $account->currency) }}">
                     </div>
 
                     <div class="form-check mb-3">

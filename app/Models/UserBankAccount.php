@@ -13,14 +13,10 @@ class UserBankAccount extends Model
 
     protected $fillable = [
         'user_id',
-        'bank_name',
-        'account_name',
-        'account_number',
-        'branch',
-        'routing_number',
-        'swift_code',
-        'ifsc_code',
-        'currency',
+        'network',
+        'wallet_address',
+        'address_label',
+        'memo_tag',
         'is_default',
     ];
 
@@ -33,17 +29,17 @@ class UserBankAccount extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function setAccountNumberAttribute(?string $value): void
+    public function setWalletAddressAttribute(?string $value): void
     {
         if ($value === null || $value === '') {
-            $this->attributes['account_number'] = null;
+            $this->attributes['wallet_address'] = null;
             return;
         }
 
-        $this->attributes['account_number'] = Crypt::encryptString($value);
+        $this->attributes['wallet_address'] = Crypt::encryptString($value);
     }
 
-    public function getAccountNumberAttribute($value): ?string
+    public function getWalletAddressAttribute($value): ?string
     {
         if (!$value) {
             return null;
