@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Services\FeatureFlagService;
 use App\Services\SiteSettingService;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -27,6 +28,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        Paginator::useBootstrapFive();
+
         View::composer('layouts.frontend', function ($view) {
             if (!Schema::hasTable('site_settings')) {
                 $view->with([

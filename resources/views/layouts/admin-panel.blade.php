@@ -71,6 +71,11 @@
         font-weight: 800;
         color: #0f172a;
       }
+      .content-wrapper img,
+      .content-wrapper .image-autosize {
+        position: relative !important;
+        z-index: 1;
+      }
       .admin-popup-close {
         width: 40px;
         height: 40px;

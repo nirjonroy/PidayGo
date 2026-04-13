@@ -13948,8 +13948,9 @@ a.read_more i {
 }
 
 #nft-item-details .image-autosize {
-    position: fixed;
+    position: relative;
     max-width: 100%;
+    height: auto;
 }
 
 #nft-item-details .nft-image-wrapper {
