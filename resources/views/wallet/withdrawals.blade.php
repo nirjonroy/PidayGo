@@ -33,13 +33,6 @@
                         <span class="transaction-icon" aria-hidden="true"><i class="fa fa-arrow-circle-up"></i></span>
                     </div>
 
-                    <div class="transaction-action-grid">
-                        <a href="{{ route('wallet.index') }}" class="btn-main btn-light transaction-action-btn"><i class="fa fa-wallet" aria-hidden="true"></i><span>Wallet</span></a>
-                        <a href="{{ route('wallet.deposit') }}" class="btn-main transaction-action-btn"><i class="fa fa-arrow-circle-down" aria-hidden="true"></i><span>Deposit</span></a>
-                        <a href="{{ route('reserve.index') }}" class="btn-main transaction-action-btn"><i class="fa fa-lock" aria-hidden="true"></i><span>Reserve</span></a>
-                        <a href="{{ route('stake.index') }}" class="btn-main btn-light transaction-action-btn"><i class="fa fa-line-chart" aria-hidden="true"></i><span>Stake</span></a>
-                    </div>
-
                     <div class="transaction-summary-grid">
                         <div class="transaction-summary-card">
                             <div class="transaction-meta-label">Available Balance</div>

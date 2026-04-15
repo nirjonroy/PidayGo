@@ -465,13 +465,6 @@
                         <span class="stake-icon" aria-hidden="true"><i class="fa fa-line-chart"></i></span>
                     </div>
 
-                    <div class="stake-action-grid">
-                        <a href="{{ route('wallet.index') }}" class="btn-main stake-action-btn"><i class="fa fa-wallet" aria-hidden="true"></i><span>Wallet</span></a>
-                        <a href="{{ route('wallet.deposit') }}" class="btn-main btn-light stake-action-btn"><i class="fa fa-arrow-circle-down" aria-hidden="true"></i><span>Deposit</span></a>
-                        <a href="{{ route('wallet.withdrawals') }}" class="btn-main btn-light stake-action-btn"><i class="fa fa-arrow-circle-up" aria-hidden="true"></i><span>Withdraw</span></a>
-                        <a href="{{ route('reserve.index') }}" class="btn-main stake-action-btn"><i class="fa fa-lock" aria-hidden="true"></i><span>Reserve</span></a>
-                    </div>
-
                     <div class="stake-glance-grid">
                         <div class="stake-card">
                             <div class="stake-meta-label">Current Level</div>

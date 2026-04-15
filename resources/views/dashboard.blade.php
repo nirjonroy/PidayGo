@@ -674,7 +674,25 @@
             border-radius: 22px;
         }
         .dashboard-profile {
-            flex-direction: column;
+            display: grid;
+            grid-template-columns: 76px minmax(0, 1fr);
+            align-items: start;
+            column-gap: 14px;
+            row-gap: 12px;
+        }
+        .dashboard-profile-body {
+            display: contents;
+        }
+        .dashboard-identity-grid {
+            display: contents;
+        }
+        .dashboard-identity-card--uid,
+        .dashboard-identity-card--level {
+            grid-column: 1 / -1;
+        }
+        .dashboard-identity-card--name {
+            grid-column: 2;
+            min-width: 0;
         }
         .dashboard-avatar,
         .dashboard-avatar-fallback {
@@ -750,7 +768,7 @@
                                     </div>
                                 </div>
 
-                                <div class="dashboard-identity-card">
+                                <div class="dashboard-identity-card dashboard-identity-card--level">
                                     <div class="dashboard-meta-label">Level Info</div>
                                     <div class="dashboard-identity-value dashboard-identity-value--level">
                                         <i class="fa fa-trophy" aria-hidden="true"></i>

@@ -55,6 +55,11 @@
         gap: 16px;
         margin-bottom: 20px;
     }
+    .wallet-section-head--accordion {
+        margin-bottom: 0;
+        flex: 1 1 auto;
+        min-width: 0;
+    }
     .wallet-section-title {
         margin: 0;
         font-size: clamp(24px, 3vw, 30px);
@@ -65,6 +70,61 @@
     .wallet-section-copy {
         margin: 8px 0 0;
         color: #64748b;
+    }
+    .wallet-ledger-panel {
+        padding: 0;
+    }
+    .wallet-ledger-summary {
+        list-style: none;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 28px;
+        cursor: pointer;
+        user-select: none;
+    }
+    .wallet-ledger-summary::-webkit-details-marker {
+        display: none;
+    }
+    .wallet-ledger-summary:focus-visible {
+        outline: 2px solid rgba(var(--primary-color-rgb), 0.45);
+        outline-offset: -6px;
+        border-radius: 24px;
+    }
+    .wallet-ledger-summary-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 12px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(var(--primary-color-rgb), 0.1);
+        color: #0f172a;
+        font-size: 13px;
+        font-weight: 700;
+    }
+    .wallet-ledger-chevron {
+        width: 44px;
+        height: 44px;
+        flex: 0 0 44px;
+        border-radius: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(var(--primary-color-rgb), 0.1);
+        color: #0f172a;
+        font-size: 18px;
+        transition: transform 0.2s ease, background 0.2s ease;
+    }
+    .wallet-ledger-panel[open] .wallet-ledger-chevron {
+        transform: rotate(180deg);
+    }
+    .wallet-ledger-panel[open] .wallet-ledger-summary {
+        padding-bottom: 20px;
+    }
+    .wallet-ledger-collapse {
+        padding: 0 28px 28px;
     }
     .wallet-balance-card,
     .wallet-summary-card,
@@ -356,6 +416,11 @@
         color: #cbd5e1;
         background: rgba(148, 163, 184, 0.18);
     }
+    .dark-scheme .wallet-ledger-summary-badge,
+    .dark-scheme .wallet-ledger-chevron {
+        background: rgba(255, 255, 255, 0.08);
+        color: #f8fafc;
+    }
     @media (max-width: 991.98px) {
         .wallet-overview {
             grid-template-columns: 1fr;
@@ -363,6 +428,11 @@
         .wallet-panel {
             padding: 24px;
             border-radius: 24px;
+        }
+        .wallet-ledger-summary,
+        .wallet-ledger-collapse {
+            padding-left: 24px;
+            padding-right: 24px;
         }
     }
     @media (max-width: 767.98px) {
@@ -381,6 +451,13 @@
         {
             display: grid;
         }
+        .wallet-ledger-summary {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .wallet-ledger-chevron {
+            align-self: flex-end;
+        }
     }
     @media (max-width: 575.98px) {
         .wallet-panel {
@@ -392,6 +469,11 @@
         .wallet-ledger-mobile-top,
         .wallet-ledger-mobile-meta {
             flex-direction: column;
+        }
+        .wallet-ledger-summary,
+        .wallet-ledger-collapse {
+            padding-left: 20px;
+            padding-right: 20px;
         }
     }
 </style>
@@ -464,101 +546,112 @@
                 </div>
             </div>
 
-            <div class="wallet-panel">
-                <div class="wallet-section-head">
-                    <div>
-                        <div class="wallet-meta-label">Wallet Activity</div>
-                        <h2 class="wallet-section-title">Recent Wallet Ledger</h2>
-                        <p class="wallet-section-copy">Latest credits and debits from your account, including reserve profits, chain income, and staking rewards.</p>
+            <details class="wallet-panel wallet-ledger-panel">
+                <summary class="wallet-ledger-summary">
+                    <div class="wallet-section-head wallet-section-head--accordion">
+                        <div>
+                            <div class="wallet-meta-label">Wallet Activity</div>
+                            <h2 class="wallet-section-title">Recent Wallet Ledger</h2>
+                            <p class="wallet-section-copy">Latest credits and debits from your account, including reserve profits, chain income, and staking rewards.</p>
+                            <span class="wallet-ledger-summary-badge">
+                                <i class="fa fa-angle-down" aria-hidden="true"></i>
+                                Tap to open ledger
+                            </span>
+                        </div>
                     </div>
-                </div>
+                    <span class="wallet-ledger-chevron" aria-hidden="true">
+                        <i class="fa fa-chevron-down"></i>
+                    </span>
+                </summary>
 
-                @if ($recentWalletLedgers->isEmpty())
-                    <div class="wallet-empty">No ledger entries found yet.</div>
-                @else
-                    <div class="wallet-ledger-wrap">
-                        <table class="table wallet-ledger-table align-middle">
-                            <thead>
-                                <tr>
-                                    <th>Type</th>
-                                    <th>Amount</th>
-                                    <th>Reference</th>
-                                    <th>Date</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($recentWalletLedgers as $ledger)
-                                    @php
-                                        $amount = (float) $ledger->amount;
-                                        $referenceLabel = $ledger->reference_type && $ledger->reference_id ? class_basename($ledger->reference_type) . ' #' . $ledger->reference_id : '-';
-                                        $chainSourceUser = $ledger->relationLoaded('chainSourceUser') ? $ledger->getRelation('chainSourceUser') : null;
-                                        $chainSourceLabel = null;
-                                        if ($ledger->type === 'chain_income') {
-                                            $sourceUserId = (int) data_get($ledger->meta, 'source_user_id', 0);
-                                            $chainSourceLabel = $chainSourceUser ? ($chainSourceUser->profile?->username ?: $chainSourceUser->name) : ($sourceUserId > 0 ? 'User #' . $sourceUserId : null);
-                                        }
-                                    @endphp
+                <div class="wallet-ledger-collapse">
+                    @if ($recentWalletLedgers->isEmpty())
+                        <div class="wallet-empty">No ledger entries found yet.</div>
+                    @else
+                        <div class="wallet-ledger-wrap">
+                            <table class="table wallet-ledger-table align-middle">
+                                <thead>
                                     <tr>
-                                        <td>
-                                            <span class="wallet-ledger-type">{{ \Illuminate\Support\Str::headline(str_replace('_', ' ', $ledger->type)) }}</span>
+                                        <th>Type</th>
+                                        <th>Amount</th>
+                                        <th>Reference</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($recentWalletLedgers as $ledger)
+                                        @php
+                                            $amount = (float) $ledger->amount;
+                                            $referenceLabel = $ledger->reference_type && $ledger->reference_id ? class_basename($ledger->reference_type) . ' #' . $ledger->reference_id : '-';
+                                            $chainSourceUser = $ledger->relationLoaded('chainSourceUser') ? $ledger->getRelation('chainSourceUser') : null;
+                                            $chainSourceLabel = null;
+                                            if ($ledger->type === 'chain_income') {
+                                                $sourceUserId = (int) data_get($ledger->meta, 'source_user_id', 0);
+                                                $chainSourceLabel = $chainSourceUser ? ($chainSourceUser->profile?->username ?: $chainSourceUser->name) : ($sourceUserId > 0 ? 'User #' . $sourceUserId : null);
+                                            }
+                                        @endphp
+                                        <tr>
+                                            <td>
+                                                <span class="wallet-ledger-type">{{ \Illuminate\Support\Str::headline(str_replace('_', ' ', $ledger->type)) }}</span>
+                                                @if (is_array($ledger->meta) && isset($ledger->meta['day']))
+                                                    <span class="wallet-ledger-subtext">Reward day {{ $ledger->meta['day'] }}</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <span class="wallet-amount-line is-table wallet-ledger-amount {{ $amount < 0 ? 'is-debit' : 'is-credit' }}">
+                                                    <span class="wallet-usdt-icon" aria-hidden="true">USDT</span>
+                                                    <span>{{ $amount >= 0 ? '+' : '' }}{{ number_format($amount, 8) }}</span>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @if ($chainSourceLabel)
+                                                    <span class="wallet-ledger-source">{{ $chainSourceLabel }}</span>
+                                                @endif
+                                                <span class="wallet-ledger-subtext">{{ $referenceLabel }}</span>
+                                            </td>
+                                            <td><span class="wallet-ledger-subtext">{{ optional($ledger->created_at)->format('M d, Y h:i A') }}</span></td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="wallet-ledger-mobile">
+                            @foreach ($recentWalletLedgers as $ledger)
+                                @php
+                                    $amount = (float) $ledger->amount;
+                                    $referenceLabel = $ledger->reference_type && $ledger->reference_id ? class_basename($ledger->reference_type) . ' #' . $ledger->reference_id : '-';
+                                    $chainSourceUser = $ledger->relationLoaded('chainSourceUser') ? $ledger->getRelation('chainSourceUser') : null;
+                                    $chainSourceLabel = null;
+                                    if ($ledger->type === 'chain_income') {
+                                        $sourceUserId = (int) data_get($ledger->meta, 'source_user_id', 0);
+                                        $chainSourceLabel = $chainSourceUser ? ($chainSourceUser->profile?->username ?: $chainSourceUser->name) : ($sourceUserId > 0 ? 'User #' . $sourceUserId : null);
+                                    }
+                                @endphp
+                                <div class="wallet-ledger-mobile-card">
+                                    <div class="wallet-ledger-mobile-top">
+                                        <div>
+                                            <div class="wallet-ledger-type">{{ \Illuminate\Support\Str::headline(str_replace('_', ' ', $ledger->type)) }}</div>
                                             @if (is_array($ledger->meta) && isset($ledger->meta['day']))
                                                 <span class="wallet-ledger-subtext">Reward day {{ $ledger->meta['day'] }}</span>
                                             @endif
-                                        </td>
-                                        <td>
-                                            <span class="wallet-amount-line is-table wallet-ledger-amount {{ $amount < 0 ? 'is-debit' : 'is-credit' }}">
-                                                <span class="wallet-usdt-icon" aria-hidden="true">USDT</span>
-                                                <span>{{ $amount >= 0 ? '+' : '' }}{{ number_format($amount, 8) }}</span>
-                                            </span>
-                                        </td>
-                                        <td>
-                                            @if ($chainSourceLabel)
-                                                <span class="wallet-ledger-source">{{ $chainSourceLabel }}</span>
-                                            @endif
-                                            <span class="wallet-ledger-subtext">{{ $referenceLabel }}</span>
-                                        </td>
-                                        <td><span class="wallet-ledger-subtext">{{ optional($ledger->created_at)->format('M d, Y h:i A') }}</span></td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div class="wallet-ledger-mobile">
-                        @foreach ($recentWalletLedgers as $ledger)
-                            @php
-                                $amount = (float) $ledger->amount;
-                                $referenceLabel = $ledger->reference_type && $ledger->reference_id ? class_basename($ledger->reference_type) . ' #' . $ledger->reference_id : '-';
-                                $chainSourceUser = $ledger->relationLoaded('chainSourceUser') ? $ledger->getRelation('chainSourceUser') : null;
-                                $chainSourceLabel = null;
-                                if ($ledger->type === 'chain_income') {
-                                    $sourceUserId = (int) data_get($ledger->meta, 'source_user_id', 0);
-                                    $chainSourceLabel = $chainSourceUser ? ($chainSourceUser->profile?->username ?: $chainSourceUser->name) : ($sourceUserId > 0 ? 'User #' . $sourceUserId : null);
-                                }
-                            @endphp
-                            <div class="wallet-ledger-mobile-card">
-                                <div class="wallet-ledger-mobile-top">
-                                    <div>
-                                        <div class="wallet-ledger-type">{{ \Illuminate\Support\Str::headline(str_replace('_', ' ', $ledger->type)) }}</div>
-                                        @if (is_array($ledger->meta) && isset($ledger->meta['day']))
-                                            <span class="wallet-ledger-subtext">Reward day {{ $ledger->meta['day'] }}</span>
-                                        @endif
+                                        </div>
+                                        <span class="wallet-amount-line is-table wallet-ledger-amount {{ $amount < 0 ? 'is-debit' : 'is-credit' }}">
+                                            <span class="wallet-usdt-icon" aria-hidden="true">USDT</span>
+                                            <span>{{ $amount >= 0 ? '+' : '' }}{{ number_format($amount, 8) }}</span>
+                                        </span>
                                     </div>
-                                    <span class="wallet-amount-line is-table wallet-ledger-amount {{ $amount < 0 ? 'is-debit' : 'is-credit' }}">
-                                        <span class="wallet-usdt-icon" aria-hidden="true">USDT</span>
-                                        <span>{{ $amount >= 0 ? '+' : '' }}{{ number_format($amount, 8) }}</span>
-                                    </span>
+                                    <div class="wallet-ledger-mobile-meta"><span>Reference</span><strong>{{ $referenceLabel }}</strong></div>
+                                    @if ($chainSourceLabel)
+                                        <div class="wallet-ledger-mobile-meta"><span>From</span><strong>{{ $chainSourceLabel }}</strong></div>
+                                    @endif
+                                    <div class="wallet-ledger-mobile-meta"><span>Date</span><strong>{{ optional($ledger->created_at)->format('M d, Y h:i A') }}</strong></div>
                                 </div>
-                                <div class="wallet-ledger-mobile-meta"><span>Reference</span><strong>{{ $referenceLabel }}</strong></div>
-                                @if ($chainSourceLabel)
-                                    <div class="wallet-ledger-mobile-meta"><span>From</span><strong>{{ $chainSourceLabel }}</strong></div>
-                                @endif
-                                <div class="wallet-ledger-mobile-meta"><span>Date</span><strong>{{ optional($ledger->created_at)->format('M d, Y h:i A') }}</strong></div>
-                            </div>
-                        @endforeach
-                    </div>
-                @endif
-            </div>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+            </details>
         </div>
     </div>
 </section>

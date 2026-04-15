@@ -1,6 +1,12 @@
 @php
     $reserveConfirmedAt = $activeReserve->confirmed_at?->copy()->timezone('Asia/Dhaka')->format('M d, Y h:i A');
     $reserveSellAvailableAt = $activeReserve->sell_available_at?->copy()->timezone('Asia/Dhaka')->format('M d, Y h:i A');
+    $selectedSellItem = $sellItems->first();
+    $selectedSellItemImage = $selectedSellItem
+        ? (\Illuminate\Support\Str::startsWith($selectedSellItem->image_path, 'frontend/')
+            ? asset($selectedSellItem->image_path)
+            : asset('storage/' . $selectedSellItem->image_path))
+        : '';
 @endphp
 
 <div class="reserve-modal" id="reserve-sell-modal" aria-hidden="true">
@@ -15,7 +21,7 @@
                 <h3 class="reserve-modal__title" id="reserve-sell-modal-title">Sell PI</h3>
                 <p class="reserve-modal__copy">
                     @if ($activeReserve->isSellUnlocked())
-                        Your reserve is unlocked. Choose a PI item, complete the sell, and your locked reserve amount plus profit will be credited back to your wallet.
+                        Your reserve is unlocked. Complete the sell and your locked reserve amount plus profit will be credited back to your wallet.
                     @else
                         Your reserve amount is locked. Sell PI will unlock at {{ $reserveSellAvailableAt }}.
                     @endif
@@ -57,30 +63,28 @@
                     <h5>Complete the PI Sell</h5>
                     <form method="POST" action="{{ route('reserve.sell.submit') }}" class="form-border reserve-sell-form" id="sell-pi-form" data-loader-title="Selling PI" data-loader-copy="Please wait while your PI sell and profit are being processed.">
                         @csrf
+                        <input type="hidden" name="nft_item_id" value="{{ $selectedSellItem?->id }}">
                         <div class="reserve-modal__selected">
                             <img
                                 id="reserve-selected-nft-image"
-                                src="{{ \Illuminate\Support\Str::startsWith(optional($sellItems->first())->image_path, 'frontend/') ? asset(optional($sellItems->first())->image_path) : (optional($sellItems->first())->image_path ? asset('storage/' . optional($sellItems->first())->image_path) : '') }}"
+                                src="{{ $selectedSellItemImage }}"
                                 alt="Selected PI"
                             >
                             <div>
-                                <div id="reserve-selected-nft-title" class="fw-semibold">{{ optional($sellItems->first())->title }}</div>
+                                <div id="reserve-selected-nft-title" class="fw-semibold">{{ $selectedSellItem?->title }}</div>
                                 <div class="small text-muted">Profit: {{ $activeReserve->plan?->profit_min_percent }}% - {{ $activeReserve->plan?->profit_max_percent }}%</div>
                                 <div class="small text-muted" id="reserve-selected-nft-price">Reserve Amount: {{ number_format((float) ($activeReserve->amount ?? 0), 8) }} USDT</div>
                             </div>
                         </div>
 
                         <div class="reserve-modal__nft-grid">
-                            @foreach ($sellItems as $item)
-                                <label class="reserve-modal__nft">
-                                    <div class="d-flex align-items-center gap-2">
-                                        <input class="form-check-input reserve-nft-select" type="radio" name="nft_item_id" value="{{ $item->id }}" data-title="{{ $item->title }}" data-image="{{ \Illuminate\Support\Str::startsWith($item->image_path, 'frontend/') ? asset($item->image_path) : asset('storage/' . $item->image_path) }}" @checked($loop->first)>
-                                        <div class="fw-semibold">{{ $item->title }}</div>
-                                    </div>
-                                    <img src="{{ \Illuminate\Support\Str::startsWith($item->image_path, 'frontend/') ? asset($item->image_path) : asset('storage/' . $item->image_path) }}" alt="{{ $item->title }}">
+                            @if ($selectedSellItem)
+                                <div class="reserve-modal__nft">
+                                    <div class="fw-semibold">{{ $selectedSellItem->title }}</div>
+                                    <img src="{{ $selectedSellItemImage }}" alt="{{ $selectedSellItem->title }}">
                                     <div class="small text-muted mt-2">Reserve Amount: {{ number_format((float) ($activeReserve->amount ?? 0), 8) }} USDT</div>
-                                </label>
-                            @endforeach
+                                </div>
+                            @endif
                         </div>
 
                         <div class="mt-3">
@@ -98,3 +102,4 @@
         </div>
     </div>
 </div>
+

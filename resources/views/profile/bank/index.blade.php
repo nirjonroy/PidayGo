@@ -1,5 +1,81 @@
 @extends('layouts.frontend')
 
+@push('styles')
+<style>
+    .bank-action-group {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+    }
+    .bank-action-group form {
+        margin: 0;
+    }
+    .bank-action-btn {
+        min-width: 92px;
+        min-height: 34px;
+        padding: 8px 14px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 700;
+        line-height: 1;
+        text-align: center;
+        text-decoration: none;
+        white-space: nowrap;
+        transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+        transform: none !important;
+    }
+    .bank-action-btn:hover,
+    .bank-action-btn:focus,
+    .bank-action-btn:active {
+        transform: none !important;
+    }
+    .bank-action-btn--edit {
+        border: 1px solid #2563eb;
+        background: rgba(37, 99, 235, 0.1);
+        color: #1d4ed8;
+    }
+    .bank-action-btn--edit:hover,
+    .bank-action-btn--edit:focus {
+        background: rgba(37, 99, 235, 0.16);
+        color: #1e40af;
+    }
+    .bank-action-btn--default {
+        border: 1px solid #16a34a;
+        background: rgba(22, 163, 74, 0.1);
+        color: #15803d;
+    }
+    .bank-action-btn--default:hover,
+    .bank-action-btn--default:focus {
+        background: rgba(22, 163, 74, 0.16);
+        color: #166534;
+    }
+    .bank-action-btn--delete {
+        border: 1px solid #dc2626;
+        background: rgba(220, 38, 38, 0.08);
+        color: #dc2626;
+    }
+    .bank-action-btn--delete:hover,
+    .bank-action-btn--delete:focus {
+        background: rgba(220, 38, 38, 0.14);
+        color: #b91c1c;
+    }
+    @media (max-width: 575.98px) {
+        .bank-action-group {
+            gap: 6px;
+        }
+        .bank-action-btn {
+            min-width: 84px;
+            padding: 7px 12px;
+            font-size: 12px;
+        }
+    }
+</style>
+@endpush
+
 @section('content')
 @include('frontend.partials.page-banner', ['title' => 'Crypto Wallets'])
 
@@ -52,16 +128,18 @@
                                             @endif
                                         </td>
                                         <td>
-                                            <a class="btn btn-sm btn-outline-primary" href="{{ route('profile.bank.edit', $account) }}">Edit</a>
-                                            <form method="POST" action="{{ route('profile.bank.default', $account) }}" style="display:inline;">
+                                            <div class="bank-action-group">
+                                            <a class="bank-action-btn bank-action-btn--edit" href="{{ route('profile.bank.edit', $account) }}">Edit</a>
+                                            <form method="POST" action="{{ route('profile.bank.default', $account) }}">
                                                 @csrf
-                                                <button class="btn btn-sm btn-outline-success" type="submit">Set Default</button>
+                                                <button class="bank-action-btn bank-action-btn--default" type="submit">Set Default</button>
                                             </form>
-                                            <form method="POST" action="{{ route('profile.bank.delete', $account) }}" style="display:inline;" onsubmit="return confirm('Delete this bank account?')">
+                                            <form method="POST" action="{{ route('profile.bank.delete', $account) }}" onsubmit="return confirm('Delete this bank account?')">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+                                                <button class="bank-action-btn bank-action-btn--delete" type="submit">Delete</button>
                                             </form>
+                                            </div>
                                         </td>
                                     </tr>
                                 @endforeach
