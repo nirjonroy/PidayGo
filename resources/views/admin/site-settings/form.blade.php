@@ -189,6 +189,139 @@
                     @error('deposit_review_hours') <div class="text-danger">{{ $message }}</div> @enderror
                 </div>
 
+                <div class="mb-4">
+                    <h5 class="mb-2">Menu Labels</h5>
+                    <div class="form-text mb-3">Leave any field blank to keep the default menu name.</div>
+
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label" for="nav_home_label">Header: Home</label>
+                            <input id="nav_home_label" name="nav_home_label" class="form-control" value="{{ old('nav_home_label', $setting->nav_home_label) }}">
+                            @error('nav_home_label') <div class="text-danger">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label" for="nav_explore_label">Header: Explore</label>
+                            <input id="nav_explore_label" name="nav_explore_label" class="form-control" value="{{ old('nav_explore_label', $setting->nav_explore_label) }}">
+                            @error('nav_explore_label') <div class="text-danger">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label" for="nav_rankings_label">Header: Rankings</label>
+                            <input id="nav_rankings_label" name="nav_rankings_label" class="form-control" value="{{ old('nav_rankings_label', $setting->nav_rankings_label) }}">
+                            @error('nav_rankings_label') <div class="text-danger">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label" for="nav_marketplace_label">Header: Marketplace</label>
+                            <input id="nav_marketplace_label" name="nav_marketplace_label" class="form-control" value="{{ old('nav_marketplace_label', $setting->nav_marketplace_label) }}">
+                            @error('nav_marketplace_label') <div class="text-danger">{{ $message }}</div> @enderror
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label" for="nav_profile_label">Dropdown Trigger: Profile</label>
+                            <input id="nav_profile_label" name="nav_profile_label" class="form-control" value="{{ old('nav_profile_label', $setting->nav_profile_label) }}">
+                            @error('nav_profile_label') <div class="text-danger">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label" for="nav_dashboard_label">Dropdown: Dashboard</label>
+                            <input id="nav_dashboard_label" name="nav_dashboard_label" class="form-control" value="{{ old('nav_dashboard_label', $setting->nav_dashboard_label) }}">
+                            @error('nav_dashboard_label') <div class="text-danger">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label" for="nav_wallet_label">Wallet Label</label>
+                            <input id="nav_wallet_label" name="nav_wallet_label" class="form-control" value="{{ old('nav_wallet_label', $setting->nav_wallet_label) }}">
+                            @error('nav_wallet_label') <div class="text-danger">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label" for="nav_deposit_label">Deposit Label</label>
+                            <input id="nav_deposit_label" name="nav_deposit_label" class="form-control" value="{{ old('nav_deposit_label', $setting->nav_deposit_label) }}">
+                            @error('nav_deposit_label') <div class="text-danger">{{ $message }}</div> @enderror
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label" for="nav_withdrawals_label">Withdrawals Label</label>
+                            <input id="nav_withdrawals_label" name="nav_withdrawals_label" class="form-control" value="{{ old('nav_withdrawals_label', $setting->nav_withdrawals_label) }}">
+                            @error('nav_withdrawals_label') <div class="text-danger">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label" for="nav_stake_label">Stake Label</label>
+                            <input id="nav_stake_label" name="nav_stake_label" class="form-control" value="{{ old('nav_stake_label', $setting->nav_stake_label) }}">
+                            @error('nav_stake_label') <div class="text-danger">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label" for="nav_reserve_label">Reserve Label</label>
+                            <input id="nav_reserve_label" name="nav_reserve_label" class="form-control" value="{{ old('nav_reserve_label', $setting->nav_reserve_label) }}">
+                            @error('nav_reserve_label') <div class="text-danger">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label" for="nav_notifications_label">Notifications Label</label>
+                            <input id="nav_notifications_label" name="nav_notifications_label" class="form-control" value="{{ old('nav_notifications_label', $setting->nav_notifications_label) }}">
+                            @error('nav_notifications_label') <div class="text-danger">{{ $message }}</div> @enderror
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label" for="nav_support_label">Support Label</label>
+                            <input id="nav_support_label" name="nav_support_label" class="form-control" value="{{ old('nav_support_label', $setting->nav_support_label) }}">
+                            @error('nav_support_label') <div class="text-danger">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label" for="nav_profile_settings_label">Profile Settings Label</label>
+                            <input id="nav_profile_settings_label" name="nav_profile_settings_label" class="form-control" value="{{ old('nav_profile_settings_label', $setting->nav_profile_settings_label) }}">
+                            @error('nav_profile_settings_label') <div class="text-danger">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label" for="nav_login_label">Login Label</label>
+                            <input id="nav_login_label" name="nav_login_label" class="form-control" value="{{ old('nav_login_label', $setting->nav_login_label) }}">
+                            @error('nav_login_label') <div class="text-danger">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label" for="nav_register_label">Register Label</label>
+                            <input id="nav_register_label" name="nav_register_label" class="form-control" value="{{ old('nav_register_label', $setting->nav_register_label) }}">
+                            @error('nav_register_label') <div class="text-danger">{{ $message }}</div> @enderror
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label" for="nav_logout_label">Logout Label</label>
+                            <input id="nav_logout_label" name="nav_logout_label" class="form-control" value="{{ old('nav_logout_label', $setting->nav_logout_label) }}">
+                            @error('nav_logout_label') <div class="text-danger">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label" for="nav_mobile_dashboard_label">Mobile Quick Nav: Dashboard</label>
+                            <input id="nav_mobile_dashboard_label" name="nav_mobile_dashboard_label" class="form-control" value="{{ old('nav_mobile_dashboard_label', $setting->nav_mobile_dashboard_label) }}">
+                            @error('nav_mobile_dashboard_label') <div class="text-danger">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label" for="nav_mobile_marketplace_label">Mobile Quick Nav: Marketplace</label>
+                            <input id="nav_mobile_marketplace_label" name="nav_mobile_marketplace_label" class="form-control" value="{{ old('nav_mobile_marketplace_label', $setting->nav_mobile_marketplace_label) }}">
+                            @error('nav_mobile_marketplace_label') <div class="text-danger">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label" for="nav_mobile_reserve_label">Mobile Quick Nav: Reserve</label>
+                            <input id="nav_mobile_reserve_label" name="nav_mobile_reserve_label" class="form-control" value="{{ old('nav_mobile_reserve_label', $setting->nav_mobile_reserve_label) }}">
+                            @error('nav_mobile_reserve_label') <div class="text-danger">{{ $message }}</div> @enderror
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label" for="nav_mobile_stake_label">Mobile Quick Nav: Stake</label>
+                            <input id="nav_mobile_stake_label" name="nav_mobile_stake_label" class="form-control" value="{{ old('nav_mobile_stake_label', $setting->nav_mobile_stake_label) }}">
+                            @error('nav_mobile_stake_label') <div class="text-danger">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label" for="nav_mobile_wallet_label">Mobile Quick Nav: Wallet</label>
+                            <input id="nav_mobile_wallet_label" name="nav_mobile_wallet_label" class="form-control" value="{{ old('nav_mobile_wallet_label', $setting->nav_mobile_wallet_label) }}">
+                            @error('nav_mobile_wallet_label') <div class="text-danger">{{ $message }}</div> @enderror
+                        </div>
+                    </div>
+                </div>
+
                 <div class="mb-3">
                     <h5 class="mb-2">Feature Settings</h5>
                     <div class="form-check mb-2">

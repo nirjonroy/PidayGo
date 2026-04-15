@@ -94,6 +94,42 @@
                         {{ ($setting->kyc_enabled ?? true) ? 'On' : 'Off' }}
                     </span>
                 </div>
+                <div class="mb-3">
+                    <strong>Menu Labels:</strong>
+                    <div class="row mt-2">
+                        @php
+                            $menuLabels = [
+                                'Home' => $setting->nav_home_label,
+                                'Explore' => $setting->nav_explore_label,
+                                'Rankings' => $setting->nav_rankings_label,
+                                'Marketplace' => $setting->nav_marketplace_label,
+                                'Profile' => $setting->nav_profile_label,
+                                'Dashboard' => $setting->nav_dashboard_label,
+                                'Wallet' => $setting->nav_wallet_label,
+                                'Deposit' => $setting->nav_deposit_label,
+                                'Withdrawals' => $setting->nav_withdrawals_label,
+                                'Stake' => $setting->nav_stake_label,
+                                'Reserve' => $setting->nav_reserve_label,
+                                'Notifications' => $setting->nav_notifications_label,
+                                'Support' => $setting->nav_support_label,
+                                'Profile Settings' => $setting->nav_profile_settings_label,
+                                'Login' => $setting->nav_login_label,
+                                'Register' => $setting->nav_register_label,
+                                'Logout' => $setting->nav_logout_label,
+                                'Mobile Dashboard' => $setting->nav_mobile_dashboard_label,
+                                'Mobile Marketplace' => $setting->nav_mobile_marketplace_label,
+                                'Mobile Reserve' => $setting->nav_mobile_reserve_label,
+                                'Mobile Stake' => $setting->nav_mobile_stake_label,
+                                'Mobile Wallet' => $setting->nav_mobile_wallet_label,
+                            ];
+                        @endphp
+                        @foreach ($menuLabels as $label => $value)
+                            <div class="col-md-4 mb-2">
+                                <div><strong>{{ $label }}:</strong> {{ $value ?: 'Default' }}</div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
 
                 <a href="{{ route('admin.site-settings.edit') }}" class="btn btn-primary">Edit Settings</a>
             </div>

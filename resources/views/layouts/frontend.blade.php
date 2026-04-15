@@ -1132,26 +1132,33 @@
         <!-- content close -->
 
         @auth
+            @php
+                $menuLabel = function (string $field, string $default) use ($settings) {
+                    $value = $settings?->{$field};
+
+                    return filled($value) ? $value : $default;
+                };
+            @endphp
             <div class="mobile-quick-actions" role="navigation" aria-label="Quick actions">
                 <a href="{{ route('dashboard') }}" class="mobile-quick-actions__item {{ request()->routeIs('dashboard') ? 'is-active' : '' }}">
                     <i class="fa fa-th-large" aria-hidden="true"></i>
-                    <span>PI</span>
+                    <span>{{ $menuLabel('nav_mobile_dashboard_label', 'PI') }}</span>
                 </a>
                 <a href="{{ route('marketplace') }}" class="mobile-quick-actions__item {{ request()->routeIs('marketplace') ? 'is-active' : '' }}">
                     <i class="fa fa-shopping-bag" aria-hidden="true"></i>
-                    <span>Market</span>
+                    <span>{{ $menuLabel('nav_mobile_marketplace_label', 'Market') }}</span>
                 </a>
                 <a href="{{ route('reserve.index') }}" class="mobile-quick-actions__item {{ request()->routeIs('reserve.*') ? 'is-active' : '' }}">
                     <i class="fa fa-lock" aria-hidden="true"></i>
-                    <span>Reserve</span>
+                    <span>{{ $menuLabel('nav_mobile_reserve_label', 'Reserve') }}</span>
                 </a>
                 <a href="{{ route('stake.index') }}" class="mobile-quick-actions__item {{ request()->routeIs('stake.*', 'staking.*') ? 'is-active' : '' }}">
                     <i class="fa fa-line-chart" aria-hidden="true"></i>
-                    <span>Stake</span>
+                    <span>{{ $menuLabel('nav_mobile_stake_label', 'Stake') }}</span>
                 </a>
                 <a href="{{ route('wallet.index') }}" class="mobile-quick-actions__item {{ request()->routeIs('wallet.*') && !request()->routeIs('wallet.deposit*', 'wallet.withdrawals*') ? 'is-active' : '' }}">
                     <i class="fa fa-wallet" aria-hidden="true"></i>
-                    <span>Wallet</span>
+                    <span>{{ $menuLabel('nav_mobile_wallet_label', 'Wallet') }}</span>
                 </a>
             </div>
         @endauth
