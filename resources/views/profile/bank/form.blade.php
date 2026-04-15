@@ -1,5 +1,24 @@
 @extends('layouts.frontend')
 
+@push('styles')
+<style>
+    .profile-bank-form {
+        display: grid;
+        gap: 12px;
+    }
+    .profile-bank-select {
+        min-height: 52px;
+    }
+    .profile-bank-select option {
+        color: #0f172a;
+        background: #ffffff;
+    }
+    .profile-bank-select option:disabled {
+        color: #64748b;
+    }
+</style>
+@endpush
+
 @section('content')
 @include('frontend.partials.page-banner', ['title' => $account->exists ? 'Edit Crypto Wallet' : 'Add Crypto Wallet'])
 
@@ -7,7 +26,7 @@
     <div class="container">
         <div class="nft__item s2">
             <div class="nft__item_info">
-                <form method="POST" action="{{ $account->exists ? route('profile.bank.update', $account) : route('profile.bank.store') }}">
+                <form method="POST" action="{{ $account->exists ? route('profile.bank.update', $account) : route('profile.bank.store') }}" class="profile-bank-form">
                     @csrf
                     @if ($account->exists)
                         @method('PUT')
@@ -15,7 +34,7 @@
 
                     <div class="mb-2">
                         <label class="form-label">Network</label>
-                        <select name="network" class="form-control" required>
+                        <select name="network" class="form-select profile-bank-select" required>
                             @php
                                 $networkOptions = ['BEP20', 'TRC20', 'ERC20', 'Solana', 'Polygon'];
                                 $selectedNetwork = old('network', $account->network);
