@@ -9,7 +9,7 @@
         <div class="col-auto">
           <label class="form-label">Status</label>
           <select name="status" class="form-select">
-            @foreach (['pending', 'approved', 'rejected', 'expired', 'all'] as $option)
+            @foreach (['pending', 'Completed', 'approved', 'rejected', 'expired', 'all'] as $option)
               <option value="{{ $option }}" @selected($status === $option)>{{ ucfirst($option) }}</option>
             @endforeach
           </select>

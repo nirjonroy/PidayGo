@@ -9,7 +9,7 @@
 
 @php
     $pendingCount = $history->where('status', 'pending')->count();
-    $approvedCount = $history->where('status', 'approved')->count();
+    $approvedCount = $history->whereIn('status', ['approved', 'Completed'])->count();
     $activeAmount = $activeDeposit?->pay_amount ?: $activeDeposit?->amount;
     $activeCurrency = $activeDeposit?->pay_currency ?: $activeDeposit?->currency;
 @endphp
@@ -193,6 +193,7 @@
                                         $statusClass = match ($status) {
                                             'pending' => 'is-pending',
                                             'approved' => 'is-approved',
+                                            'completed' => 'is-completed',
                                             'rejected' => 'is-rejected',
                                             'expired' => 'is-expired',
                                             default => 'is-default',
@@ -220,6 +221,7 @@
                                 $statusClass = match ($status) {
                                     'pending' => 'is-pending',
                                     'approved' => 'is-approved',
+                                    'completed' => 'is-completed',
                                     'rejected' => 'is-rejected',
                                     'expired' => 'is-expired',
                                     default => 'is-default',

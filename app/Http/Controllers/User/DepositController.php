@@ -66,7 +66,7 @@ class DepositController extends Controller
 
         $orderId = 'PDG-' . now()->format('YmdHis') . '-' . $request->user()->id . '-' . Str::upper(Str::random(6));
         $lifetimeMinutes = max(15, min(2880, $reviewHours * 60));
-        $callbackUrl = route('oxapay.webhook');
+        $callbackUrl = route('api.oxapay.callback');
         $returnUrl = route('wallet.deposit.success', ['order_id' => $orderId]);
 
         try {

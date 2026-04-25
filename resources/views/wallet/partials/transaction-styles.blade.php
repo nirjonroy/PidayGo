@@ -246,7 +246,8 @@
         background: rgba(245, 158, 11, 0.16);
         color: #b45309;
     }
-    .transaction-status-badge.is-approved {
+    .transaction-status-badge.is-approved,
+    .transaction-status-badge.is-completed {
         background: rgba(16, 185, 129, 0.12);
         color: #047857;
     }
@@ -374,7 +375,8 @@
         color: #fbbf24;
         background: rgba(245, 158, 11, 0.18);
     }
-    .dark-scheme .transaction-status-badge.is-approved {
+    .dark-scheme .transaction-status-badge.is-approved,
+    .dark-scheme .transaction-status-badge.is-completed {
         color: #86efac;
         background: rgba(16, 185, 129, 0.16);
     }
