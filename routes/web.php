@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\AdminAlertController;
 use App\Http\Controllers\Admin\AdminConversationController;
 use App\Http\Controllers\Admin\AdminMessageController;
 use App\Http\Controllers\Admin\MailSettingsController;
+use App\Http\Controllers\Admin\PaymentSettingController;
 use App\Http\Controllers\Admin\HomeSlideController;
 use App\Http\Controllers\Admin\SiteSettingController;
 use App\Http\Controllers\Admin\StakingPlanController;
@@ -390,6 +391,11 @@ Route::prefix('admin')->name('admin.')->middleware('admin.ip')->group(function (
             Route::get('/mail-settings', [MailSettingsController::class, 'index'])->name('mail-settings.index');
             Route::post('/mail-settings', [MailSettingsController::class, 'update'])->name('mail-settings.update');
             Route::post('/mail-settings/test', [MailSettingsController::class, 'test'])->name('mail-settings.test');
+        });
+
+        Route::middleware('permission:payment.settings.manage|admin.manage')->group(function () {
+            Route::get('/payment-settings', [PaymentSettingController::class, 'index'])->name('payment-settings.index');
+            Route::post('/payment-settings', [PaymentSettingController::class, 'update'])->name('payment-settings.update');
         });
 
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

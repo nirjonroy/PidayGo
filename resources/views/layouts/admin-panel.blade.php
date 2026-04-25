@@ -419,6 +419,14 @@
                   </a>
                 </li>
               @endif
+              @if (auth('admin')->user()?->can('payment.settings.manage') || auth('admin')->user()?->can('admin.manage'))
+                <li class="nav-item">
+                  <a href="{{ route('admin.payment-settings.index') }}" class="nav-link {{ request()->routeIs('admin.payment-settings.*') ? 'active' : '' }}">
+                    <i class="nav-icon bi bi-credit-card"></i>
+                    <p>Payment Settings</p>
+                  </a>
+                </li>
+              @endif
               @if (auth('admin')->user()?->can('reserve.manage'))
                 <li class="nav-item">
                   <a href="{{ route('admin.reserve.index') }}" class="nav-link {{ request()->routeIs('admin.reserve.*') ? 'active' : '' }}">

@@ -191,6 +191,7 @@ return [
          */
         App\Providers\AppServiceProvider::class,
         App\Providers\AuthServiceProvider::class,
+        App\Providers\GatewaySettingServiceProvider::class,
         App\Providers\NotificationServiceProvider::class,
         App\Providers\SiteSettingServiceProvider::class,
         // App\Providers\BroadcastServiceProvider::class,

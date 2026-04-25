@@ -123,6 +123,11 @@ class RolePermissionSeeder extends Seeder
             'guard_name' => 'admin',
         ]);
 
+        $paymentSettingPermission = Permission::firstOrCreate([
+            'name' => 'payment.settings.manage',
+            'guard_name' => 'admin',
+        ]);
+
         $reservePermission = Permission::firstOrCreate([
             'name' => 'reserve.manage',
             'guard_name' => 'admin',
@@ -154,6 +159,7 @@ class RolePermissionSeeder extends Seeder
         $role->givePermissionTo($bidPermission);
         $role->givePermissionTo($supportPermission);
         $role->givePermissionTo($mailPermission);
+        $role->givePermissionTo($paymentSettingPermission);
         $role->givePermissionTo($reservePermission);
         $role->givePermissionTo($chainPermission);
 
