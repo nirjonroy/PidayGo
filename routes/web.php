@@ -77,6 +77,10 @@ Route::get('/media/public/{path}', [PublicMediaController::class, 'show'])
     ->where('path', '.*')
     ->name('media.public');
 
+Route::post('/oxapay/webhook', [DepositController::class, 'webhook'])
+    ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class])
+    ->name('oxapay.webhook');
+
 Route::middleware('guest')->group(function () {
     Route::get('/register/{ref?}', [RegisteredUserController::class, 'create'])->name('register');
     Route::post('/register', [RegisteredUserController::class, 'store'])->name('register.store');
@@ -152,6 +156,7 @@ Route::middleware(['auth', 'verified.if.mail', '2fa.enabled', '2fa.passed', 'kyc
     Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
     Route::get('/wallet/deposit', [DepositController::class, 'create'])->name('wallet.deposit');
     Route::post('/wallet/deposit', [DepositController::class, 'store'])->name('wallet.deposit.store');
+    Route::get('/wallet/deposit/success', [DepositController::class, 'success'])->name('wallet.deposit.success');
     Route::get('/wallet/withdrawals', [UserWithdrawalController::class, 'index'])->name('wallet.withdrawals');
     Route::get('/reserve', [UserReserveController::class, 'index'])->name('reserve.index');
     Route::post('/reserve/confirm', [UserReserveController::class, 'confirm'])->name('reserve.confirm');

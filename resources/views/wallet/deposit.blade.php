@@ -10,6 +10,8 @@
 @php
     $pendingCount = $history->where('status', 'pending')->count();
     $approvedCount = $history->where('status', 'approved')->count();
+    $activeAmount = $activeDeposit?->pay_amount ?: $activeDeposit?->amount;
+    $activeCurrency = $activeDeposit?->pay_currency ?: $activeDeposit?->currency;
 @endphp
 
 <section class="transaction-shell" aria-label="Deposit page">
@@ -35,7 +37,7 @@
 
                     @if (empty($address))
                         <div class="transaction-empty">
-                            Deposit is temporarily unavailable because no active deposit address is configured. Please contact support.
+                            Enter an amount below to create a fresh OxaPay deposit address.
                         </div>
                     @else
                         <div class="transaction-toggle-group">
@@ -44,7 +46,22 @@
                         </div>
 
                         <div id="qr-box" class="transaction-surface transaction-qr-card">
-                            {!! QrCode::size(220)->margin(1)->generate($qrPayload ?? $address) !!}
+                            @if (!empty($activeDeposit->gateway_qr_code))
+                                <img src="{{ $activeDeposit->gateway_qr_code }}" alt="OxaPay deposit QR">
+                            @else
+                                {!! QrCode::size(220)->margin(1)->generate($qrPayload ?? $address) !!}
+                            @endif
+                        </div>
+
+                        <div class="transaction-summary-grid mt-3">
+                            <div class="transaction-summary-card">
+                                <div class="transaction-meta-label">Deposit Amount</div>
+                                <p class="transaction-summary-value">{{ number_format((float) $activeDeposit->amount, 4) }} USDT</p>
+                            </div>
+                            <div class="transaction-summary-card">
+                                <div class="transaction-meta-label">Send Exactly</div>
+                                <p class="transaction-summary-value">{{ number_format((float) $activeAmount, 8) }} {{ $activeCurrency }}</p>
+                            </div>
                         </div>
 
                         <div id="address-box" class="transaction-surface" style="display:none;">
@@ -54,7 +71,7 @@
                                 <button type="button" id="copy-address" class="btn-main btn-light">Copy</button>
                             </div>
                             <div id="copy-toast" class="transaction-helper mt-3" style="display:none;">Address copied.</div>
-                            <div class="transaction-subcopy mt-3">Double-check the network in your exchange wallet before you confirm the transfer.</div>
+                            <div class="transaction-subcopy mt-3">Send only {{ $activeCurrency }} on {{ $chain }}. This address expires {{ optional($activeDeposit->expires_at)->diffForHumans() }}.</div>
                         </div>
                     @endif
                 </div>
@@ -64,7 +81,7 @@
                         <div>
                             <div class="transaction-meta-label">Funding</div>
                             <h2 class="transaction-section-title">USDT Deposit</h2>
-                            <p class="transaction-section-copy">Send {{ $currency }} through the {{ $chain }} network, then submit the transaction hash for review from this page.</p>
+                            <p class="transaction-section-copy">Create an OxaPay address for the amount you want to deposit, then send the exact payment before it expires.</p>
                         </div>
                         <span class="transaction-icon" aria-hidden="true"><i class="fa fa-arrow-circle-down"></i></span>
                     </div>
@@ -81,13 +98,13 @@
                             <div class="transaction-subcopy">Requests below this amount are not accepted.</div>
                         </div>
                         <div class="transaction-summary-card">
-                            <div class="transaction-meta-label">Deposit Chain</div>
-                            <p class="transaction-summary-value">{{ $currency }}-{{ $chain }}</p>
-                            <div class="transaction-subcopy">Use the exact network shown here before sending funds.</div>
+                            <div class="transaction-meta-label">Active Request</div>
+                            <p class="transaction-summary-value">{{ $activeDeposit ? number_format((float) $activeDeposit->amount, 4) . ' USDT' : 'None' }}</p>
+                            <div class="transaction-subcopy">{{ $activeDeposit ? 'Latest pending OxaPay deposit.' : 'Create one from the form below.' }}</div>
                         </div>
                         <div class="transaction-summary-card">
-                            <div class="transaction-meta-label">Review Window</div>
-                            <p class="transaction-summary-value">Within {{ $reviewHours }}h</p>
+                            <div class="transaction-meta-label">Payment Window</div>
+                            <p class="transaction-summary-value">{{ $activeDeposit?->expires_at ? $activeDeposit->expires_at->diffForHumans(null, true) : 'After Create' }}</p>
                             <div class="transaction-subcopy">{{ $pendingCount }} pending and {{ $approvedCount }} approved requests in your recent history.</div>
                         </div>
                     </div>
@@ -99,13 +116,13 @@
                     <div class="transaction-section-head">
                         <div>
                             <div class="transaction-meta-label">Confirmation</div>
-                            <h2 class="transaction-section-title">Submit Deposit</h2>
-                            <p class="transaction-section-copy">After sending funds, enter the transfer amount and blockchain transaction hash below.</p>
+                            <h2 class="transaction-section-title">Create Deposit</h2>
+                            <p class="transaction-section-copy">Enter the amount first. OxaPay will return a payment address and QR code for that exact deposit.</p>
                         </div>
                     </div>
 
-                    @if (empty($address))
-                        <div class="transaction-empty">The form is unavailable until an active deposit address is configured by admin.</div>
+                    @if (!$gatewayReady)
+                        <div class="transaction-empty">The OxaPay gateway is not active yet. Please contact support.</div>
                     @else
                         <form method="POST" action="{{ route('wallet.deposit.store') }}" class="transaction-form">
                             @csrf
@@ -117,19 +134,7 @@
                                 @enderror
                             </div>
 
-                            <div>
-                                <label for="txid">Transaction ID</label>
-                                <input id="txid" name="txid" type="text" class="form-control" placeholder="Paste your 64 character TxID" value="{{ old('txid') }}" required>
-                                @error('txid')
-                                    <div class="text-danger mt-2">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            @error('address')
-                                <div class="text-danger">{{ $message }}</div>
-                            @enderror
-
-                            <button type="submit" class="btn-main">Submit Deposit</button>
+                            <button type="submit" class="btn-main">Create OxaPay Deposit</button>
                         </form>
                     @endif
                 </div>
@@ -139,22 +144,22 @@
                         <div>
                             <div class="transaction-meta-label">Guide</div>
                             <h2 class="transaction-section-title">How To Deposit</h2>
-                            <p class="transaction-section-copy">Follow the same steps each time so your transfer gets matched quickly during manual review.</p>
+                            <p class="transaction-section-copy">Follow the same steps each time so your transfer can be matched automatically by OxaPay.</p>
                         </div>
                     </div>
 
                     <ol class="transaction-step-list">
+                        <li>Enter the amount you want to deposit and create an OxaPay request.</li>
                         <li>Copy the address or scan the QR code from this page.</li>
-                        <li>Open your exchange or wallet app and choose {{ $currency }} on the {{ $chain }} network.</li>
-                        <li>Send the amount you want to fund into your PidayGo account.</li>
-                        <li>Copy the blockchain TxID after the transfer is confirmed.</li>
-                        <li>Submit the amount and TxID here to place the request into review.</li>
+                        <li>Open your exchange or wallet app and choose {{ $currency }} on {{ $chain }}.</li>
+                        <li>Send the exact amount shown before the address expires.</li>
+                        <li>Wait for OxaPay confirmation; your balance updates automatically after payment is marked paid.</li>
                     </ol>
 
                     <ul class="transaction-note-list">
                         <li>Only send {{ $currency }} on {{ $chain }} to this address.</li>
-                        <li>Deposit review usually finishes within {{ $reviewHours }} hours.</li>
-                        <li>Each TxID can be submitted only once.</li>
+                        <li>OxaPay callbacks cannot reach localhost; use a public HTTPS URL in production.</li>
+                        <li>Expired payments must be created again with a new address.</li>
                     </ul>
                 </div>
             </div>
@@ -176,7 +181,7 @@
                             <thead>
                                 <tr>
                                     <th>Amount</th>
-                                    <th>TxID</th>
+                                    <th>Reference</th>
                                     <th>Status</th>
                                     <th>Submitted</th>
                                 </tr>
@@ -192,12 +197,13 @@
                                             'expired' => 'is-expired',
                                             default => 'is-default',
                                         };
+                                        $reference = $item->txid ?: ($item->gateway_track_id ?: $item->gateway_order_id);
                                     @endphp
                                     <tr>
                                         <td><span class="transaction-ledger-amount is-credit">{{ number_format((float) $item->amount, 4) }} USDT</span></td>
                                         <td>
-                                            <span class="transaction-table-title">{{ \Illuminate\Support\Str::limit($item->txid, 24, '...') }}</span>
-                                            <div class="transaction-ledger-subtext">{{ $item->txid }}</div>
+                                            <span class="transaction-table-title">{{ $reference ? \Illuminate\Support\Str::limit($reference, 24, '...') : '-' }}</span>
+                                            <div class="transaction-ledger-subtext">{{ $item->gateway ? strtoupper($item->gateway) : 'Manual' }}</div>
                                         </td>
                                         <td><span class="transaction-status-badge {{ $statusClass }}">{{ ucfirst($status) }}</span></td>
                                         <td><span class="transaction-ledger-subtext">{{ optional($item->created_at)->format('M d, Y h:i A') }}</span></td>
@@ -218,6 +224,7 @@
                                     'expired' => 'is-expired',
                                     default => 'is-default',
                                 };
+                                $reference = $item->txid ?: ($item->gateway_track_id ?: $item->gateway_order_id);
                             @endphp
                             <div class="transaction-ledger-mobile-card">
                                 <div class="transaction-mobile-top">
@@ -228,8 +235,8 @@
                                     <span class="transaction-status-badge {{ $statusClass }}">{{ ucfirst($status) }}</span>
                                 </div>
                                 <div class="transaction-mobile-meta">
-                                    <span>TxID</span>
-                                    <strong>{{ \Illuminate\Support\Str::limit($item->txid, 24, '...') }}</strong>
+                                    <span>Reference</span>
+                                    <strong>{{ $reference ? \Illuminate\Support\Str::limit($reference, 24, '...') : '-' }}</strong>
                                 </div>
                                 <div class="transaction-mobile-meta">
                                     <span>Submitted</span>

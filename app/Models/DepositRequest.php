@@ -22,12 +22,22 @@ class DepositRequest extends Model
         'reviewed_at',
         'admin_note',
         'credited_ledger_id',
+        'gateway',
+        'gateway_order_id',
+        'gateway_track_id',
+        'gateway_payment_url',
+        'gateway_qr_code',
+        'pay_amount',
+        'pay_currency',
+        'gateway_payload',
     ];
 
     protected $casts = [
         'amount' => 'decimal:8',
+        'pay_amount' => 'decimal:8',
         'expires_at' => 'datetime',
         'reviewed_at' => 'datetime',
+        'gateway_payload' => 'array',
     ];
 
     public function user()

@@ -184,7 +184,8 @@
         justify-content: center;
         min-height: 278px;
     }
-    .transaction-qr-card svg {
+    .transaction-qr-card svg,
+    .transaction-qr-card img {
         width: min(100%, 220px);
         height: auto;
     }

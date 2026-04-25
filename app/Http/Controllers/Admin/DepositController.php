@@ -65,6 +65,11 @@ class DepositController extends Controller
                 return;
             }
 
+            if ($locked->gateway === 'oxapay' && !$locked->txid) {
+                $error = 'OxaPay payment is not confirmed yet.';
+                return;
+            }
+
             $ledger = $walletService->credit(
                 $locked->user,
                 'deposit',

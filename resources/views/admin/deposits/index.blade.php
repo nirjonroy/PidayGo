@@ -30,7 +30,8 @@
               <th>#</th>
               <th>User</th>
               <th>Amount</th>
-              <th>TxID</th>
+              <th>Reference</th>
+              <th>Gateway</th>
               <th>Status</th>
               <th>Submitted</th>
               <th></th>
@@ -42,7 +43,8 @@
                 <td>{{ $deposit->id }}</td>
                 <td>{{ $deposit->user->email ?? '-' }}</td>
                 <td>{{ $deposit->amount }}</td>
-                <td style="max-width:180px; word-break:break-all;">{{ $deposit->txid }}</td>
+                <td style="max-width:180px; word-break:break-all;">{{ $deposit->txid ?: ($deposit->gateway_track_id ?: '-') }}</td>
+                <td>{{ $deposit->gateway ? strtoupper($deposit->gateway) : 'Manual' }}</td>
                 <td>{{ ucfirst($deposit->status) }}</td>
                 <td>{{ $deposit->created_at }}</td>
                 <td>
@@ -51,7 +53,7 @@
               </tr>
             @empty
               <tr>
-                <td colspan="7" class="text-center text-muted">No deposits found.</td>
+                <td colspan="8" class="text-center text-muted">No deposits found.</td>
               </tr>
             @endforelse
           </tbody>

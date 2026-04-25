@@ -1,0 +1,156 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\GatewaySetting;
+use App\Models\User;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
+use RuntimeException;
+
+class OxaPayService
+{
+    private const GATEWAY_NAME = 'oxapay';
+
+    public function hasActiveMerchantKey(): bool
+    {
+        return filled($this->merchantApiKey());
+    }
+
+    public function createWhiteLabelPayment(
+        User $user,
+        string $orderId,
+        float|string $amount,
+        string $callbackUrl,
+        string $returnUrl,
+        string $currency = 'USDT',
+        string $payCurrency = 'USDT',
+        string $network = 'TRC20',
+        int $lifetime = 60
+    ): array {
+        $apiKey = $this->merchantApiKey();
+
+        if (!$apiKey) {
+            throw new RuntimeException('OxaPay merchant API key is not configured.');
+        }
+
+        $payload = [
+            'amount' => (float) $amount,
+            'currency' => strtoupper($currency),
+            'pay_currency' => strtoupper($payCurrency),
+            'network' => strtoupper($network),
+            'lifetime' => max(15, min(2880, $lifetime)),
+            'to_currency' => 'USDT',
+            'auto_withdrawal' => false,
+            'callback_url' => $callbackUrl,
+            'return_url' => $returnUrl,
+            'email' => $user->email,
+            'order_id' => $orderId,
+            'description' => 'PidayGo deposit ' . $orderId,
+        ];
+
+        $result = $this->post(config('oxapay.white_label_url'), $apiKey, $payload);
+
+        if (!$this->isSuccessful($result) && $this->looksLikeUnsupportedReturnUrl($result)) {
+            $fallbackPayload = $payload;
+            unset($fallbackPayload['return_url']);
+            $result = $this->post(config('oxapay.white_label_url'), $apiKey, $fallbackPayload);
+            $payload = $fallbackPayload;
+        }
+
+        if (!$this->isSuccessful($result)) {
+            throw new RuntimeException($this->errorMessage($result));
+        }
+
+        $data = $result['data'] ?? [];
+
+        if (empty($data['address'])) {
+            throw new RuntimeException('OxaPay did not return a payment address.');
+        }
+
+        return [
+            'data' => $data,
+            'request' => $payload,
+            'response' => $result,
+        ];
+    }
+
+    public function verifyWebhookSignature(string $rawPayload, ?string $hmac): bool
+    {
+        $apiKey = $this->merchantApiKey();
+
+        if (!$apiKey || !$hmac) {
+            return false;
+        }
+
+        return hash_equals(
+            hash_hmac('sha512', $rawPayload, $apiKey),
+            $hmac
+        );
+    }
+
+    private function merchantApiKey(): ?string
+    {
+        if (!Schema::hasTable('gateway_settings')) {
+            return null;
+        }
+
+        $settings = GatewaySetting::query()
+            ->where('gateway_name', self::GATEWAY_NAME)
+            ->where('is_active', true)
+            ->first();
+
+        return $settings?->api_key;
+    }
+
+    private function post(string $url, string $apiKey, array $payload): array
+    {
+        $response = Http::timeout(25)
+            ->acceptJson()
+            ->asJson()
+            ->withHeaders([
+                'merchant_api_key' => $apiKey,
+            ])
+            ->post($url, $payload);
+
+        $json = $response->json();
+
+        if (!is_array($json)) {
+            return [
+                'status' => $response->status(),
+                'message' => 'OxaPay returned an invalid response.',
+                'error' => [],
+            ];
+        }
+
+        $json['http_status'] = $response->status();
+
+        return $json;
+    }
+
+    private function isSuccessful(array $result): bool
+    {
+        return (int) ($result['status'] ?? 0) === 200
+            && empty(array_filter((array) ($result['error'] ?? [])))
+            && !empty($result['data']);
+    }
+
+    private function looksLikeUnsupportedReturnUrl(array $result): bool
+    {
+        $message = Str::lower($this->errorMessage($result));
+
+        return str_contains($message, 'return_url') || str_contains($message, 'return url');
+    }
+
+    private function errorMessage(array $result): string
+    {
+        $error = $result['error'] ?? null;
+
+        if (is_array($error)) {
+            $error = collect($error)->flatten()->filter()->first();
+        }
+
+        return (string) ($error ?: ($result['message'] ?? 'Unable to create OxaPay payment.'));
+    }
+}
