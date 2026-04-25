@@ -26,40 +26,6 @@
                 <div class="transaction-panel">
                     <div class="transaction-section-head">
                         <div>
-                            <div class="transaction-meta-label">Funding</div>
-                            <h2 class="transaction-section-title">USDT Deposit</h2>
-                            <p class="transaction-section-copy">Send {{ $currency }} through the {{ $chain }} network, then submit the transaction hash for review from this page.</p>
-                        </div>
-                        <span class="transaction-icon" aria-hidden="true"><i class="fa fa-arrow-circle-down"></i></span>
-                    </div>
-
-                    <div class="transaction-summary-grid">
-                        <div class="transaction-summary-card">
-                            <div class="transaction-meta-label">Wallet Balance</div>
-                            <p class="transaction-summary-value">{{ number_format($walletBalance, 4) }} USDT</p>
-                            <div class="transaction-subcopy">Current available amount in your main wallet.</div>
-                        </div>
-                        <div class="transaction-summary-card">
-                            <div class="transaction-meta-label">Minimum Deposit</div>
-                            <p class="transaction-summary-value">{{ number_format($minDeposit, 4) }} USDT</p>
-                            <div class="transaction-subcopy">Requests below this amount are not accepted.</div>
-                        </div>
-                        <div class="transaction-summary-card">
-                            <div class="transaction-meta-label">Deposit Chain</div>
-                            <p class="transaction-summary-value">{{ $currency }}-{{ $chain }}</p>
-                            <div class="transaction-subcopy">Use the exact network shown here before sending funds.</div>
-                        </div>
-                        <div class="transaction-summary-card">
-                            <div class="transaction-meta-label">Review Window</div>
-                            <p class="transaction-summary-value">Within {{ $reviewHours }}h</p>
-                            <div class="transaction-subcopy">{{ $pendingCount }} pending and {{ $approvedCount }} approved requests in your recent history.</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="transaction-panel">
-                    <div class="transaction-section-head">
-                        <div>
                             <div class="transaction-meta-label">Deposit Address</div>
                             <h2 class="transaction-section-title">Scan Or Copy</h2>
                             <p class="transaction-section-copy">Choose the view that is easier for you on mobile or desktop before sending the transfer.</p>
@@ -91,6 +57,40 @@
                             <div class="transaction-subcopy mt-3">Double-check the network in your exchange wallet before you confirm the transfer.</div>
                         </div>
                     @endif
+                </div>
+
+                <div class="transaction-panel">
+                    <div class="transaction-section-head">
+                        <div>
+                            <div class="transaction-meta-label">Funding</div>
+                            <h2 class="transaction-section-title">USDT Deposit</h2>
+                            <p class="transaction-section-copy">Send {{ $currency }} through the {{ $chain }} network, then submit the transaction hash for review from this page.</p>
+                        </div>
+                        <span class="transaction-icon" aria-hidden="true"><i class="fa fa-arrow-circle-down"></i></span>
+                    </div>
+
+                    <div class="transaction-summary-grid">
+                        <div class="transaction-summary-card">
+                            <div class="transaction-meta-label">Wallet Balance</div>
+                            <p class="transaction-summary-value">{{ number_format($walletBalance, 4) }} USDT</p>
+                            <div class="transaction-subcopy">Current available amount in your main wallet.</div>
+                        </div>
+                        <div class="transaction-summary-card">
+                            <div class="transaction-meta-label">Minimum Deposit</div>
+                            <p class="transaction-summary-value">{{ number_format($minDeposit, 4) }} USDT</p>
+                            <div class="transaction-subcopy">Requests below this amount are not accepted.</div>
+                        </div>
+                        <div class="transaction-summary-card">
+                            <div class="transaction-meta-label">Deposit Chain</div>
+                            <p class="transaction-summary-value">{{ $currency }}-{{ $chain }}</p>
+                            <div class="transaction-subcopy">Use the exact network shown here before sending funds.</div>
+                        </div>
+                        <div class="transaction-summary-card">
+                            <div class="transaction-meta-label">Review Window</div>
+                            <p class="transaction-summary-value">Within {{ $reviewHours }}h</p>
+                            <div class="transaction-subcopy">{{ $pendingCount }} pending and {{ $approvedCount }} approved requests in your recent history.</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
