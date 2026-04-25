@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\GatewaySetting;
+use App\Models\DepositRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schema;
@@ -16,6 +17,89 @@ class OxaPayService
     public function hasActiveMerchantKey(): bool
     {
         return filled($this->merchantApiKey());
+    }
+
+    public function connectionStatus(): array
+    {
+        $apiKey = $this->merchantApiKey();
+
+        if (!$apiKey) {
+            return [
+                'connected' => false,
+                'message' => 'OxaPay API key is not configured.',
+            ];
+        }
+
+        try {
+            $response = Http::timeout(8)
+                ->acceptJson()
+                ->withHeaders([
+                    'merchant_api_key' => $apiKey,
+                ])
+                ->get(config('oxapay.accepted_currencies_url'));
+
+            $json = $response->json();
+            $connected = $response->ok() && is_array($json) && (int) ($json['status'] ?? 0) === 200;
+
+            return [
+                'connected' => $connected,
+                'message' => $connected
+                    ? 'Connected'
+                    : (string) data_get($json, 'error.message', $json['message'] ?? 'OxaPay API check failed.'),
+                'response' => is_array($json) ? $json : null,
+            ];
+        } catch (\Throwable $e) {
+            return [
+                'connected' => false,
+                'message' => 'OxaPay API is unreachable.',
+            ];
+        }
+    }
+
+    public function paymentStatus(DepositRequest $deposit): array
+    {
+        $apiKey = $this->merchantApiKey();
+
+        if (!$apiKey) {
+            throw new RuntimeException('OxaPay merchant API key is not configured.');
+        }
+
+        if (empty($deposit->gateway_track_id)) {
+            throw new RuntimeException('This deposit does not have an OxaPay track ID.');
+        }
+
+        $url = (string) config('oxapay.payment_status_url');
+        $query = [];
+
+        if (str_contains($url, '{track_id}')) {
+            $url = str_replace('{track_id}', rawurlencode($deposit->gateway_track_id), $url);
+        } else {
+            $query = [
+                'track_id' => $deposit->gateway_track_id,
+                'trackId' => $deposit->gateway_track_id,
+            ];
+        }
+
+        $response = Http::timeout(20)
+            ->acceptJson()
+            ->withHeaders([
+                'merchant_api_key' => $apiKey,
+            ])
+            ->get($url, $query);
+
+        $json = $response->json();
+
+        if (!is_array($json)) {
+            throw new RuntimeException('OxaPay returned an invalid status response.');
+        }
+
+        $json['http_status'] = $response->status();
+
+        if (!$response->successful() || (int) ($json['status'] ?? 0) !== 200) {
+            throw new RuntimeException($this->errorMessage($json));
+        }
+
+        return $json;
     }
 
     public function createWhiteLabelPayment(

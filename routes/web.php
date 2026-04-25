@@ -306,6 +306,7 @@ Route::prefix('admin')->name('admin.')->middleware('admin.ip')->group(function (
         Route::middleware('permission:deposit.review')->group(function () {
             Route::get('/deposits', [AdminDepositController::class, 'index'])->name('deposits.index');
             Route::get('/deposits/{deposit}', [AdminDepositController::class, 'show'])->name('deposits.show');
+            Route::post('/deposits/{deposit}/sync-oxapay', [AdminDepositController::class, 'syncOxaPay'])->name('deposits.sync-oxapay');
             Route::post('/deposits/{deposit}/approve', [AdminDepositController::class, 'approve'])->name('deposits.approve');
             Route::post('/deposits/{deposit}/reject', [AdminDepositController::class, 'reject'])->name('deposits.reject');
             Route::post('/deposits/{deposit}/expire', [AdminDepositController::class, 'expire'])->name('deposits.expire');

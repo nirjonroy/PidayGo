@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\DepositRequest;
 use App\Services\NotificationService;
+use App\Services\OxaPayService;
 use App\Services\WalletService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class DepositController extends Controller
@@ -26,6 +28,7 @@ class DepositController extends Controller
         return view('admin.deposits.index', [
             'requests' => $query->paginate(20)->withQueryString(),
             'status' => $status,
+            'oxapayConnection' => app(OxaPayService::class)->connectionStatus(),
         ]);
     }
 
@@ -34,6 +37,130 @@ class DepositController extends Controller
         return view('admin.deposits.show', [
             'deposit' => $deposit->load(['user', 'reviewedBy', 'creditedLedger']),
         ]);
+    }
+
+    public function syncOxaPay(
+        Request $request,
+        DepositRequest $deposit,
+        OxaPayService $oxaPay,
+        WalletService $walletService,
+        NotificationService $notifications
+    ): RedirectResponse {
+        if ($deposit->gateway !== 'oxapay' || empty($deposit->gateway_track_id)) {
+            return back()->withErrors(['deposit' => 'This deposit does not have an OxaPay track ID.']);
+        }
+
+        try {
+            $response = $oxaPay->paymentStatus($deposit);
+        } catch (\Throwable $e) {
+            return back()->withErrors(['deposit' => $e->getMessage()]);
+        }
+
+        $data = (array) ($response['data'] ?? []);
+        $gatewayStatus = Str::lower((string) ($data['status'] ?? ''));
+        $admin = $request->user('admin');
+        $credited = false;
+        $expired = false;
+        $message = 'OxaPay status synced: ' . ($data['status'] ?? 'unknown') . '.';
+
+        DB::transaction(function () use ($deposit, $data, $response, $gatewayStatus, $walletService, $admin, &$credited, &$expired) {
+            $locked = DepositRequest::query()
+                ->whereKey($deposit->id)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$locked) {
+                return;
+            }
+
+            $txid = $this->extractTxid($data);
+            $gatewayPayload = (array) ($locked->gateway_payload ?? []);
+            $gatewayPayload['manual_status_syncs'][] = [
+                'synced_at' => now()->toIso8601String(),
+                'admin_id' => $admin?->id,
+                'response' => $response,
+            ];
+
+            $locked->gateway_payload = $gatewayPayload;
+
+            if ($txid && !$locked->txid) {
+                $locked->txid = $txid;
+            }
+
+            if ($gatewayStatus === 'paid') {
+                if (!$locked->credited_ledger_id) {
+                    $ledger = $walletService->credit(
+                        $locked->user,
+                        'deposit',
+                        $locked->amount,
+                        [
+                            'source' => 'oxapay_manual_sync',
+                            'gateway_track_id' => $locked->gateway_track_id,
+                            'gateway_order_id' => $locked->gateway_order_id,
+                            'txid' => $txid,
+                            'chain' => $locked->chain,
+                            'currency' => $locked->currency,
+                            'to_address' => $locked->to_address,
+                            'deposit_request_id' => $locked->id,
+                        ],
+                        $locked,
+                        $admin
+                    );
+
+                    $locked->credited_ledger_id = $ledger->id;
+                    $credited = true;
+                }
+
+                $locked->status = 'Completed';
+                $locked->reviewed_by = $admin?->id;
+                $locked->reviewed_at = now();
+            }
+
+            if (in_array($gatewayStatus, ['expired', 'failed'], true) && $locked->status === 'pending') {
+                $locked->status = 'expired';
+                $locked->reviewed_by = $admin?->id;
+                $locked->reviewed_at = now();
+                $locked->admin_note = 'Marked ' . $gatewayStatus . ' by OxaPay manual status sync.';
+                $expired = true;
+            }
+
+            $locked->save();
+
+            ActivityLog::record('deposit.oxapay.status_synced', $admin, $locked, [
+                'gateway_status' => $gatewayStatus,
+                'gateway_track_id' => $locked->gateway_track_id,
+                'credited' => $credited,
+            ]);
+        });
+
+        if ($credited) {
+            $notifications->notifyUser(
+                $deposit->user_id,
+                'deposit_approved',
+                'Deposit completed',
+                'Your OxaPay deposit has been confirmed and credited.',
+                'success',
+                ['deposit_request_id' => $deposit->id, 'gateway_track_id' => $deposit->gateway_track_id],
+                true
+            );
+
+            $message = 'OxaPay payment is paid. Deposit completed and wallet credited.';
+        }
+
+        if ($expired) {
+            $notifications->notifyUser(
+                $deposit->user_id,
+                'deposit_rejected',
+                'Deposit expired',
+                'Your OxaPay deposit expired before it was confirmed.',
+                'warning',
+                ['deposit_request_id' => $deposit->id, 'gateway_track_id' => $deposit->gateway_track_id]
+            );
+
+            $message = 'OxaPay payment is ' . ($data['status'] ?? 'expired') . '. Deposit marked expired.';
+        }
+
+        return back()->with('status', $message);
     }
 
     public function approve(Request $request, DepositRequest $deposit, WalletService $walletService, NotificationService $notifications): RedirectResponse
@@ -165,5 +292,15 @@ class DepositController extends Controller
         ActivityLog::record('deposit.expired', $request->user('admin'), $deposit);
 
         return back()->with('status', 'Deposit marked as expired.');
+    }
+
+    private function extractTxid(array $payload): ?string
+    {
+        $txid = $payload['txID']
+            ?? $payload['txid']
+            ?? $payload['tx_hash']
+            ?? data_get($payload, 'txs.0.tx_hash');
+
+        return $txid ? (string) $txid : null;
     }
 }
