@@ -28,22 +28,24 @@
         <div class="row">
           <div class="col-lg-6">
             <div class="mb-3">
-              <label class="form-label" for="api_key">API Key</label>
+              <label class="form-label" for="api_key">Merchant API Key</label>
               <input id="api_key" name="api_key" type="password" class="form-control" autocomplete="new-password" placeholder="{{ $hasApiKey ? 'Saved - leave blank to keep current key' : 'Enter API key' }}">
               @error('api_key') <div class="text-danger">{{ $message }}</div> @enderror
               @if ($hasApiKey)
-                <div class="form-text">An API key is saved and encrypted.</div>
+                <div class="form-text">A Merchant API Key is saved and encrypted.</div>
               @endif
             </div>
           </div>
 
           <div class="col-lg-6">
             <div class="mb-3">
-              <label class="form-label" for="secret_key">Secret Key</label>
-              <input id="secret_key" name="secret_key" type="password" class="form-control" autocomplete="new-password" placeholder="{{ $hasSecretKey ? 'Saved - leave blank to keep current key' : 'Enter secret key' }}">
+              <label class="form-label" for="secret_key">Webhook Secret Key <span class="text-muted">(optional)</span></label>
+              <input id="secret_key" name="secret_key" type="password" class="form-control" autocomplete="new-password" placeholder="{{ $hasSecretKey ? 'Saved - leave blank to keep current key' : 'Optional webhook secret' }}">
               @error('secret_key') <div class="text-danger">{{ $message }}</div> @enderror
               @if ($hasSecretKey)
                 <div class="form-text">A secret key is saved and encrypted.</div>
+              @else
+                <div class="form-text">OxaPay merchant webhooks can be validated with the Merchant API Key when no separate webhook secret is configured.</div>
               @endif
             </div>
           </div>

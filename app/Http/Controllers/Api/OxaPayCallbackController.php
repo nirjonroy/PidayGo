@@ -39,11 +39,11 @@ class OxaPayCallbackController extends Controller
             'message' => 'Received callback.',
         ]);
 
-        $secretKey = $this->secretKey();
+        $secretKey = $this->webhookSigningKey();
 
         if (!$secretKey) {
-            $this->finishLog($log, 400, 'OxaPay secret key is not configured.');
-            return response('Secret key not configured', 400);
+            $this->finishLog($log, 400, 'OxaPay Merchant API Key is not configured.');
+            return response('OxaPay Merchant API Key not configured', 400);
         }
 
         if (!$this->signatureIsValid($rawBody, $signature, $secretKey)) {
@@ -139,17 +139,18 @@ class OxaPayCallbackController extends Controller
         return response('ok');
     }
 
-    private function secretKey(): ?string
+    private function webhookSigningKey(): ?string
     {
         if (!Schema::hasTable('gateway_settings')) {
             return null;
         }
 
-        return GatewaySetting::query()
+        $settings = GatewaySetting::query()
             ->where('gateway_name', 'oxapay')
             ->where('is_active', true)
-            ->first()
-            ?->secret_key;
+            ->first();
+
+        return $settings?->secret_key ?: $settings?->api_key;
     }
 
     private function signatureIsValid(string $rawBody, string $signature, string $secretKey): bool

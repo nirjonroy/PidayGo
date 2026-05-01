@@ -26,6 +26,29 @@
                 <div class="transaction-panel">
                     <div class="transaction-section-head">
                         <div>
+                            <div class="transaction-meta-label">Request Form</div>
+                            <h2 class="transaction-section-title">Submit Withdrawal</h2>
+                            <p class="transaction-section-copy">Enter the amount you want to move out from your wallet. The amount is reserved immediately while the request is under review.</p>
+                        </div>
+                    </div>
+
+                    <form method="POST" action="{{ route('withdrawals.store') }}" class="transaction-form">
+                        @csrf
+                        <div>
+                            <label for="withdraw_amount">Amount (USDT)</label>
+                            <input id="withdraw_amount" name="amount" type="number" step="0.0001" min="0.0001" class="form-control" placeholder="Enter withdrawal amount" value="{{ old('amount') }}" required>
+                            @error('amount')
+                                <div class="text-danger mt-2">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <button type="submit" class="btn-main">Submit Withdrawal</button>
+                    </form>
+                </div>
+
+                <div class="transaction-panel">
+                    <div class="transaction-section-head">
+                        <div>
                             <div class="transaction-meta-label">Payouts</div>
                             <h2 class="transaction-section-title">Withdraw From Wallet</h2>
                             <p class="transaction-section-copy">Request a withdrawal from your available balance. Submitted requests go into manual review before approval.</p>
@@ -55,29 +78,6 @@
                             <div class="transaction-subcopy">Approved requests from your recent withdrawal history.</div>
                         </div>
                     </div>
-                </div>
-
-                <div class="transaction-panel">
-                    <div class="transaction-section-head">
-                        <div>
-                            <div class="transaction-meta-label">Request Form</div>
-                            <h2 class="transaction-section-title">Submit Withdrawal</h2>
-                            <p class="transaction-section-copy">Enter the amount you want to move out from your wallet. The amount is reserved immediately while the request is under review.</p>
-                        </div>
-                    </div>
-
-                    <form method="POST" action="{{ route('withdrawals.store') }}" class="transaction-form">
-                        @csrf
-                        <div>
-                            <label for="withdraw_amount">Amount (USDT)</label>
-                            <input id="withdraw_amount" name="amount" type="number" step="0.0001" min="0.0001" class="form-control" placeholder="Enter withdrawal amount" value="{{ old('amount') }}" required>
-                            @error('amount')
-                                <div class="text-danger mt-2">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <button type="submit" class="btn-main">Submit Withdrawal</button>
-                    </form>
                 </div>
             </div>
 

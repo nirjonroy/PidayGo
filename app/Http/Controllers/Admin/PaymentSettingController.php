@@ -41,11 +41,10 @@ class PaymentSettingController extends Controller
         ]);
 
         $willHaveApiKey = $request->filled('api_key') || filled($settings->getRawOriginal('api_key'));
-        $willHaveSecretKey = $request->filled('secret_key') || filled($settings->getRawOriginal('secret_key'));
 
-        if ($request->boolean('is_active') && (!$willHaveApiKey || !$willHaveSecretKey)) {
+        if ($request->boolean('is_active') && !$willHaveApiKey) {
             throw ValidationException::withMessages([
-                'api_key' => 'API key and secret key are required before activating OxaPay.',
+                'api_key' => 'Merchant API key is required before activating OxaPay.',
             ]);
         }
 

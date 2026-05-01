@@ -162,7 +162,7 @@ class OxaPayService
 
     public function verifyWebhookSignature(string $rawPayload, ?string $hmac): bool
     {
-        $secretKey = $this->webhookSecretKey();
+        $secretKey = $this->webhookSigningKey();
 
         if (!$secretKey || !$hmac) {
             return false;
@@ -188,7 +188,7 @@ class OxaPayService
         return $settings?->api_key;
     }
 
-    private function webhookSecretKey(): ?string
+    private function webhookSigningKey(): ?string
     {
         if (!Schema::hasTable('gateway_settings')) {
             return null;
@@ -199,7 +199,7 @@ class OxaPayService
             ->where('is_active', true)
             ->first();
 
-        return $settings?->secret_key;
+        return $settings?->secret_key ?: $settings?->api_key;
     }
 
     private function post(string $url, string $apiKey, array $payload): array
