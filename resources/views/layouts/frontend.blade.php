@@ -271,6 +271,26 @@
             font: inherit;
             cursor: pointer;
         }
+        .ripple-surface {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            vertical-align: bottom;
+        }
+        .ripple-wave {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            transform: scale(0);
+            opacity: 0.35;
+            background-image: radial-gradient(circle, rgba(255, 255, 255, 0.35) 0, rgba(255, 255, 255, 0.18) 45%, rgba(255, 255, 255, 0) 70%);
+            transition-property: transform, opacity;
+            transition-timing-function: ease-out;
+        }
+        .ripple-wave.active {
+            transform: scale(1);
+            opacity: 0;
+        }
         .password-input {
             position: relative;
         }
