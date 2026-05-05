@@ -258,8 +258,10 @@
         <button type="button" class="transaction-guide-close" data-deposit-guide-close aria-label="Close deposit guide">
             <i class="fa fa-times" aria-hidden="true"></i>
         </button>
-        <div class="transaction-meta-label">Guide</div>
-        <h2 id="deposit-guide-title" class="transaction-section-title">How To Deposit</h2>
+        <div class="transaction-guide-head">
+            <div class="transaction-meta-label">Guide</div>
+            <h2 id="deposit-guide-title" class="transaction-section-title">How To Deposit</h2>
+        </div>
         <p class="transaction-section-copy">Follow these steps before creating or paying a deposit request.</p>
 
         <ol class="transaction-step-list">

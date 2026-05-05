@@ -286,9 +286,25 @@
         box-shadow: 0 28px 70px rgba(0, 0, 0, 0.42);
         color: #f8fafc;
     }
+    .transaction-guide-head {
+        margin: -28px -28px 20px;
+        padding: 26px 78px 20px 28px;
+        border-radius: 24px 24px 0 0;
+        background: #ffffff;
+        color: #0f172a;
+    }
+    .transaction-guide-head .transaction-meta-label {
+        color: #475569;
+    }
+    .transaction-guide-head .transaction-section-title {
+        color: #0f172a;
+    }
     .transaction-guide-dialog .transaction-section-title,
     .transaction-guide-dialog .transaction-summary-value {
         color: #f8fafc;
+    }
+    .transaction-guide-dialog .transaction-guide-head .transaction-section-title {
+        color: #0f172a;
     }
     .transaction-guide-dialog .transaction-section-copy,
     .transaction-guide-dialog .transaction-step-list li,
@@ -306,12 +322,14 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        color: #f8fafc;
-        background: rgba(255, 255, 255, 0.08);
+        color: #7f1d1d;
+        background: #fee2e2;
+        box-shadow: 0 10px 24px rgba(127, 29, 29, 0.16);
     }
     .transaction-guide-close:hover,
     .transaction-guide-close:focus {
-        background: rgba(255, 255, 255, 0.14);
+        color: #ffffff;
+        background: #7f1d1d;
     }
     .transaction-guide-actions {
         display: flex;
@@ -453,6 +471,12 @@
         color: #cbd5e1;
         background: rgba(148, 163, 184, 0.18);
     }
+    .dark-scheme .transaction-guide-head .transaction-meta-label {
+        color: #475569;
+    }
+    .dark-scheme .transaction-guide-head .transaction-section-title {
+        color: #0f172a;
+    }
     @media (max-width: 991.98px) {
         .transaction-overview,
         .transaction-form-grid {
@@ -485,6 +509,10 @@
         .transaction-guide-dialog {
             padding: 24px 20px;
         }
+        .transaction-guide-head {
+            margin: -24px -20px 18px;
+            padding: 24px 70px 18px 20px;
+        }
     }
     @media (max-width: 575.98px) {
         .transaction-panel,
@@ -501,6 +529,9 @@
         }
         .transaction-guide-dialog {
             border-radius: 20px;
+        }
+        .transaction-guide-head {
+            border-radius: 20px 20px 0 0;
         }
         .transaction-guide-actions {
             display: grid;
