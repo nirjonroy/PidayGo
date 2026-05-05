@@ -37,7 +37,7 @@
 
                     @if (empty($address))
                         <div class="transaction-empty">
-                            Enter an amount below to create a fresh OxaPay deposit address.
+                            Enter an amount below to create a fresh deposit address.
                         </div>
                     @else
                         <div class="transaction-toggle-group">
@@ -47,7 +47,7 @@
 
                         <div id="qr-box" class="transaction-surface transaction-qr-card">
                             @if (!empty($activeDeposit->gateway_qr_code))
-                                <img src="{{ $activeDeposit->gateway_qr_code }}" alt="OxaPay deposit QR">
+                                <img src="{{ $activeDeposit->gateway_qr_code }}" alt="Deposit QR code">
                             @else
                                 {!! QrCode::size(220)->margin(1)->generate($qrPayload ?? $address) !!}
                             @endif
@@ -81,12 +81,12 @@
                         <div>
                             <div class="transaction-meta-label">Confirmation</div>
                             <h2 class="transaction-section-title">Create Deposit</h2>
-                            <p class="transaction-section-copy">Enter the amount first. OxaPay will return a payment address and QR code for that exact deposit.</p>
+                            <p class="transaction-section-copy">Enter the amount first. A payment address and QR code will be created for that exact deposit.</p>
                         </div>
                     </div>
 
                     @if (!$gatewayReady)
-                        <div class="transaction-empty">The OxaPay gateway is not active yet. Please contact support.</div>
+                        <div class="transaction-empty">The deposit gateway is not active yet. Please contact support.</div>
                     @else
                         <form method="POST" action="{{ route('wallet.deposit.store') }}" class="transaction-form">
                             @csrf
@@ -98,19 +98,43 @@
                                 @enderror
                             </div>
 
-                            <button type="submit" class="btn-main">Create OxaPay Deposit</button>
+                            <button type="submit" class="btn-main">Create Deposit</button>
                         </form>
                     @endif
                 </div>
             </div>
 
             <div class="transaction-form-grid">
-                <div class="transaction-panel">
+                <div id="deposit-guide-section" class="transaction-panel transaction-panel--compact">
+                    <div class="transaction-section-head">
+                        <div>
+                            <div class="transaction-meta-label">Guide</div>
+                            <h2 class="transaction-section-title">How To Deposit</h2>
+                            <p class="transaction-section-copy">Follow the same steps each time so your transfer can be matched automatically.</p>
+                        </div>
+                    </div>
+
+                    <ol class="transaction-step-list">
+                        <li>Enter the amount you want to deposit and create a payment request.</li>
+                        <li>Copy the address or scan the QR code from this page.</li>
+                        <li>Open your exchange or wallet app and choose {{ $currency }} on {{ $chain }}.</li>
+                        <li>Send the exact amount shown before the address expires.</li>
+                        <li>Wait for confirmation; your balance updates automatically after payment is marked paid.</li>
+                    </ol>
+
+                    <ul class="transaction-note-list">
+                        <li>Only send {{ $currency }} on {{ $chain }} to this address.</li>
+                        <li>Payment callbacks cannot reach localhost; use a public HTTPS URL in production.</li>
+                        <li>Expired payments must be created again with a new address.</li>
+                    </ul>
+                </div>
+
+                <div id="deposit-funding-section" class="transaction-panel">
                     <div class="transaction-section-head">
                         <div>
                             <div class="transaction-meta-label">Funding</div>
                             <h2 class="transaction-section-title">USDT Deposit</h2>
-                            <p class="transaction-section-copy">Create an OxaPay address for the amount you want to deposit, then send the exact payment before it expires.</p>
+                            <p class="transaction-section-copy">Create a payment address for the amount you want to deposit, then send the exact payment before it expires.</p>
                         </div>
                         <span class="transaction-icon" aria-hidden="true"><i class="fa fa-arrow-circle-down"></i></span>
                     </div>
@@ -129,7 +153,7 @@
                         <div class="transaction-summary-card">
                             <div class="transaction-meta-label">Active Request</div>
                             <p class="transaction-summary-value">{{ $activeDeposit ? number_format((float) $activeDeposit->amount, 4) . ' USDT' : 'None' }}</p>
-                            <div class="transaction-subcopy">{{ $activeDeposit ? 'Latest pending OxaPay deposit.' : 'Create one from the form below.' }}</div>
+                            <div class="transaction-subcopy">{{ $activeDeposit ? 'Latest pending deposit.' : 'Create one from the form below.' }}</div>
                         </div>
                         <div class="transaction-summary-card">
                             <div class="transaction-meta-label">Payment Window</div>
@@ -137,30 +161,6 @@
                             <div class="transaction-subcopy">{{ $pendingCount }} pending and {{ $approvedCount }} approved requests in your recent history.</div>
                         </div>
                     </div>
-                </div>
-
-                <div class="transaction-panel transaction-panel--compact">
-                    <div class="transaction-section-head">
-                        <div>
-                            <div class="transaction-meta-label">Guide</div>
-                            <h2 class="transaction-section-title">How To Deposit</h2>
-                            <p class="transaction-section-copy">Follow the same steps each time so your transfer can be matched automatically by OxaPay.</p>
-                        </div>
-                    </div>
-
-                    <ol class="transaction-step-list">
-                        <li>Enter the amount you want to deposit and create an OxaPay request.</li>
-                        <li>Copy the address or scan the QR code from this page.</li>
-                        <li>Open your exchange or wallet app and choose {{ $currency }} on {{ $chain }}.</li>
-                        <li>Send the exact amount shown before the address expires.</li>
-                        <li>Wait for OxaPay confirmation; your balance updates automatically after payment is marked paid.</li>
-                    </ol>
-
-                    <ul class="transaction-note-list">
-                        <li>Only send {{ $currency }} on {{ $chain }} to this address.</li>
-                        <li>OxaPay callbacks cannot reach localhost; use a public HTTPS URL in production.</li>
-                        <li>Expired payments must be created again with a new address.</li>
-                    </ul>
                 </div>
             </div>
 
@@ -253,6 +253,35 @@
     </div>
 </section>
 
+<div id="deposit-guide-modal" class="transaction-guide-modal" role="dialog" aria-modal="true" aria-labelledby="deposit-guide-title" aria-hidden="true">
+    <div class="transaction-guide-dialog">
+        <button type="button" class="transaction-guide-close" data-deposit-guide-close aria-label="Close deposit guide">
+            <i class="fa fa-times" aria-hidden="true"></i>
+        </button>
+        <div class="transaction-meta-label">Guide</div>
+        <h2 id="deposit-guide-title" class="transaction-section-title">How To Deposit</h2>
+        <p class="transaction-section-copy">Follow these steps before creating or paying a deposit request.</p>
+
+        <ol class="transaction-step-list">
+            <li>Enter the amount you want to deposit and create a payment request.</li>
+            <li>Copy the address or scan the QR code from this page.</li>
+            <li>Open your exchange or wallet app and choose {{ $currency }} on {{ $chain }}.</li>
+            <li>Send the exact amount shown before the address expires.</li>
+            <li>Wait for confirmation; your balance updates automatically after payment is marked paid.</li>
+        </ol>
+
+        <ul class="transaction-note-list">
+            <li>Only send {{ $currency }} on {{ $chain }} to this address.</li>
+            <li>Expired payments must be created again with a new address.</li>
+        </ul>
+
+        <div class="transaction-guide-actions">
+            <button type="button" class="btn-main" data-deposit-guide-funding>Go To Funding</button>
+            <button type="button" class="btn-main btn-light" data-deposit-guide-close>Close Guide</button>
+        </div>
+    </div>
+</div>
+
 <script>
     const qrBox = document.getElementById('qr-box');
     const addressBox = document.getElementById('address-box');
@@ -260,6 +289,51 @@
     const btnShowAddress = document.getElementById('btn-show-address');
     const copyBtn = document.getElementById('copy-address');
     const toast = document.getElementById('copy-toast');
+    const guideModal = document.getElementById('deposit-guide-modal');
+    const fundingSection = document.getElementById('deposit-funding-section');
+    const guideCloseButtons = document.querySelectorAll('[data-deposit-guide-close]');
+    const guideFundingButton = document.querySelector('[data-deposit-guide-funding]');
+
+    const closeDepositGuide = () => {
+        if (!guideModal) {
+            return;
+        }
+
+        guideModal.classList.remove('is-open');
+        guideModal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+    };
+
+    if (guideModal) {
+        window.addEventListener('load', () => {
+            guideModal.classList.add('is-open');
+            guideModal.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+        });
+
+        guideModal.addEventListener('click', (event) => {
+            if (event.target === guideModal) {
+                closeDepositGuide();
+            }
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                closeDepositGuide();
+            }
+        });
+    }
+
+    guideCloseButtons.forEach((button) => {
+        button.addEventListener('click', closeDepositGuide);
+    });
+
+    if (guideFundingButton && fundingSection) {
+        guideFundingButton.addEventListener('click', () => {
+            closeDepositGuide();
+            fundingSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    }
 
     if (btnShowQr && btnShowAddress && qrBox && addressBox) {
         btnShowQr.addEventListener('click', () => {

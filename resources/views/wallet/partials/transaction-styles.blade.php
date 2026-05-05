@@ -260,6 +260,70 @@
         background: rgba(148, 163, 184, 0.16);
         color: #475569;
     }
+    .transaction-guide-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 1055;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: rgba(2, 6, 23, 0.72);
+        backdrop-filter: blur(8px);
+    }
+    .transaction-guide-modal.is-open {
+        display: flex;
+    }
+    .transaction-guide-dialog {
+        position: relative;
+        width: min(100%, 680px);
+        max-height: min(86vh, 760px);
+        overflow-y: auto;
+        padding: 28px;
+        border-radius: 24px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: #101116;
+        box-shadow: 0 28px 70px rgba(0, 0, 0, 0.42);
+        color: #f8fafc;
+    }
+    .transaction-guide-dialog .transaction-section-title,
+    .transaction-guide-dialog .transaction-summary-value {
+        color: #f8fafc;
+    }
+    .transaction-guide-dialog .transaction-section-copy,
+    .transaction-guide-dialog .transaction-step-list li,
+    .transaction-guide-dialog .transaction-note-list li {
+        color: #bfdbfe;
+    }
+    .transaction-guide-close {
+        position: absolute;
+        top: 18px;
+        right: 18px;
+        width: 38px;
+        height: 38px;
+        border: 0;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #f8fafc;
+        background: rgba(255, 255, 255, 0.08);
+    }
+    .transaction-guide-close:hover,
+    .transaction-guide-close:focus {
+        background: rgba(255, 255, 255, 0.14);
+    }
+    .transaction-guide-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 22px;
+    }
+    .transaction-guide-actions .btn-main,
+    .transaction-guide-actions .btn-light {
+        min-height: 46px;
+        border-radius: 14px;
+    }
     .transaction-ledger-wrap {
         padding: 0;
     }
@@ -418,6 +482,9 @@
         .transaction-ledger-mobile {
             display: grid;
         }
+        .transaction-guide-dialog {
+            padding: 24px 20px;
+        }
     }
     @media (max-width: 575.98px) {
         .transaction-panel,
@@ -428,6 +495,15 @@
         .transaction-mobile-top,
         .transaction-mobile-meta {
             flex-direction: column;
+        }
+        .transaction-guide-modal {
+            padding: 14px;
+        }
+        .transaction-guide-dialog {
+            border-radius: 20px;
+        }
+        .transaction-guide-actions {
+            display: grid;
         }
     }
 </style>
