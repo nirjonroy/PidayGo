@@ -1153,32 +1153,38 @@
 
         @auth
             @php
-                $menuLabel = function (string $field, string $default) use ($settings) {
-                    $value = $settings?->{$field};
+                $mobileMenuLabel = function (string $mobileField, string $mainField, string $default) use ($settings) {
+                    $mobileValue = $settings?->{$mobileField};
 
-                    return filled($value) ? $value : $default;
+                    if (filled($mobileValue)) {
+                        return $mobileValue;
+                    }
+
+                    $mainValue = $settings?->{$mainField};
+
+                    return filled($mainValue) ? $mainValue : $default;
                 };
             @endphp
             <div class="mobile-quick-actions" role="navigation" aria-label="Quick actions">
                 <a href="{{ route('dashboard') }}" class="mobile-quick-actions__item {{ request()->routeIs('dashboard') ? 'is-active' : '' }}">
                     <i class="fa fa-th-large" aria-hidden="true"></i>
-                    <span>{{ $menuLabel('nav_mobile_dashboard_label', 'PI') }}</span>
+                    <span>{{ $mobileMenuLabel('nav_mobile_dashboard_label', 'nav_dashboard_label', 'PI') }}</span>
                 </a>
                 <a href="{{ route('marketplace') }}" class="mobile-quick-actions__item {{ request()->routeIs('marketplace') ? 'is-active' : '' }}">
                     <i class="fa fa-shopping-bag" aria-hidden="true"></i>
-                    <span>{{ $menuLabel('nav_mobile_marketplace_label', 'Market') }}</span>
+                    <span>{{ $mobileMenuLabel('nav_mobile_marketplace_label', 'nav_marketplace_label', 'Market') }}</span>
                 </a>
                 <a href="{{ route('reserve.index') }}" class="mobile-quick-actions__item {{ request()->routeIs('reserve.*') ? 'is-active' : '' }}">
                     <i class="fa fa-lock" aria-hidden="true"></i>
-                    <span>{{ $menuLabel('nav_mobile_reserve_label', 'Reserve') }}</span>
+                    <span>{{ $mobileMenuLabel('nav_mobile_reserve_label', 'nav_reserve_label', 'Reserve') }}</span>
                 </a>
                 <a href="{{ route('stake.index') }}" class="mobile-quick-actions__item {{ request()->routeIs('stake.*', 'staking.*') ? 'is-active' : '' }}">
                     <i class="fa fa-line-chart" aria-hidden="true"></i>
-                    <span>{{ $menuLabel('nav_mobile_stake_label', 'Stake') }}</span>
+                    <span>{{ $mobileMenuLabel('nav_mobile_stake_label', 'nav_stake_label', 'Stake') }}</span>
                 </a>
                 <a href="{{ route('wallet.index') }}" class="mobile-quick-actions__item {{ request()->routeIs('wallet.*') && !request()->routeIs('wallet.deposit*', 'wallet.withdrawals*') ? 'is-active' : '' }}">
                     <i class="fa fa-wallet" aria-hidden="true"></i>
-                    <span>{{ $menuLabel('nav_mobile_wallet_label', 'Wallet') }}</span>
+                    <span>{{ $mobileMenuLabel('nav_mobile_wallet_label', 'nav_wallet_label', 'Wallet') }}</span>
                 </a>
             </div>
         @endauth
