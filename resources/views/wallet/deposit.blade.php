@@ -79,6 +79,35 @@
                 <div class="transaction-panel">
                     <div class="transaction-section-head">
                         <div>
+                            <div class="transaction-meta-label">Confirmation</div>
+                            <h2 class="transaction-section-title">Create Deposit</h2>
+                            <p class="transaction-section-copy">Enter the amount first. OxaPay will return a payment address and QR code for that exact deposit.</p>
+                        </div>
+                    </div>
+
+                    @if (!$gatewayReady)
+                        <div class="transaction-empty">The OxaPay gateway is not active yet. Please contact support.</div>
+                    @else
+                        <form method="POST" action="{{ route('wallet.deposit.store') }}" class="transaction-form">
+                            @csrf
+                            <div>
+                                <label for="amount">Amount (USDT)</label>
+                                <input id="amount" name="amount" type="number" step="0.0001" min="{{ $minDeposit }}" class="form-control" placeholder="Enter deposit amount" value="{{ old('amount') }}" required>
+                                @error('amount')
+                                    <div class="text-danger mt-2">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <button type="submit" class="btn-main">Create OxaPay Deposit</button>
+                        </form>
+                    @endif
+                </div>
+            </div>
+
+            <div class="transaction-form-grid">
+                <div class="transaction-panel">
+                    <div class="transaction-section-head">
+                        <div>
                             <div class="transaction-meta-label">Funding</div>
                             <h2 class="transaction-section-title">USDT Deposit</h2>
                             <p class="transaction-section-copy">Create an OxaPay address for the amount you want to deposit, then send the exact payment before it expires.</p>
@@ -108,35 +137,6 @@
                             <div class="transaction-subcopy">{{ $pendingCount }} pending and {{ $approvedCount }} approved requests in your recent history.</div>
                         </div>
                     </div>
-                </div>
-            </div>
-
-            <div class="transaction-form-grid">
-                <div class="transaction-panel">
-                    <div class="transaction-section-head">
-                        <div>
-                            <div class="transaction-meta-label">Confirmation</div>
-                            <h2 class="transaction-section-title">Create Deposit</h2>
-                            <p class="transaction-section-copy">Enter the amount first. OxaPay will return a payment address and QR code for that exact deposit.</p>
-                        </div>
-                    </div>
-
-                    @if (!$gatewayReady)
-                        <div class="transaction-empty">The OxaPay gateway is not active yet. Please contact support.</div>
-                    @else
-                        <form method="POST" action="{{ route('wallet.deposit.store') }}" class="transaction-form">
-                            @csrf
-                            <div>
-                                <label for="amount">Amount (USDT)</label>
-                                <input id="amount" name="amount" type="number" step="0.0001" min="{{ $minDeposit }}" class="form-control" placeholder="Enter deposit amount" value="{{ old('amount') }}" required>
-                                @error('amount')
-                                    <div class="text-danger mt-2">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <button type="submit" class="btn-main">Create OxaPay Deposit</button>
-                        </form>
-                    @endif
                 </div>
 
                 <div class="transaction-panel transaction-panel--compact">
